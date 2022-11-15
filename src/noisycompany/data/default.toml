@@ -1,0 +1,101 @@
+# noisycompany default configuration.
+# Copy it with `noisycompany config --print-default > noisycompany.toml` and adjust.
+# Every value here is a safe default: a few MB per day, polite, no ads clicked.
+
+[general]
+# Preset applied before this file's own values: "eco", "balanced" or "max".
+preset = "balanced"
+# Lower the process CPU priority (POSIX nice value, 0-19).
+nice = 10
+log_level = "INFO"
+
+[budget]
+# Hard cap on downloaded bytes per calendar day (MB). The process sleeps once reached.
+daily_mb = 15
+# Each HTTP response is truncated after this many KB: we never download heavy media.
+max_response_kb = 192
+# Hard cap on actions (DNS lookups + HTTP requests) per hour.
+max_actions_per_hour = 90
+
+[schedule]
+# Only make noise when a human plausibly would. Several ranges allowed.
+active_hours = ["07:30-12:30", "13:30-23:30"]
+# Mean pause between two sessions, seconds (exponential distribution).
+mean_session_gap_s = 240
+# Pages read per browsing session (min, max).
+pages_per_session = [1, 5]
+# Simulated reading time on a page, seconds (min, max).
+dwell_s = [8, 70]
+
+[dns]
+enabled = true
+# Share of sessions that are pure DNS lookups (cheapest kind of noise: ~200 bytes).
+weight = 0.45
+lookups_per_session = [1, 4]
+
+[http]
+enabled = true
+weight = 0.55
+timeout_s = 8
+# One realistic, current UA kept for the whole run. Rotating the UA on each request
+# is itself a fingerprint: real browsers do not do that.
+user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
+respect_robots_txt = true
+# Minimum seconds between two requests to the same host.
+per_host_delay_s = 20
+# Follow links only within the persona's allowed domains.
+stay_on_persona_domains = true
+
+[personas]
+# Coherent decoy interest profiles. Pure random noise is easy to filter out;
+# a few stable, plausible interests are not.
+enabled = ["gardening", "astronomy", "cooking", "cycling", "chess", "birdwatching",
+           "woodworking", "jazz", "history", "hiking"]
+# How many personas are active at once, and how often the active set changes.
+active_count = 3
+rotate_days = 10
+# Optional file with extra personas (same format as data/personas.toml).
+extra_file = ""
+
+[netwatch]
+# Linux only: pause while the user's own traffic is high (video call, download...).
+enabled = true
+interface = "auto"
+pause_above_kbps = 400
+sample_s = 2
+
+[safety]
+# Never visit URLs containing these fragments (ads, trackers, login, payment, sensitive).
+blocked_fragments = [
+  "doubleclick", "googlesyndication", "adservice", "/ads", "adclick", "/aclk",
+  "login", "signin", "signup", "logout", "account", "cart", "checkout", "payment",
+  "donate", "subscribe", "mailto:", "javascript:", "tel:",
+  ".pdf", ".zip", ".exe", ".dmg", ".iso", ".mp4", ".mp3", ".webm", ".jpg", ".png", ".gif",
+]
+# Sensitive topics that could hurt the user if an observer believed them
+# (health, sexuality, religion, politics, crime) are excluded by design.
+
+[features]
+# Every roadmap item has a switch, off by default. Also switchable at runtime with
+# `noisycompany features on|off <id>` or the dashboard buttons. List: `noisycompany features`.
+persona_drift = false
+locale_packs = false
+metered_guard = false
+doh_sink = false
+metrics = false
+dashboard = false
+labelled_log = false
+
+[features.options]
+# persona_drift: how long the main hobby lasts, days.
+drift_main_days = 120
+# locale_packs: packs to add (files data/personas_<lang>.toml).
+locale_packs = ["fr"]
+# Share of sessions using locale personas when locale_packs is on.
+locale_share = 0.6
+# doh_sink: RFC 8484 endpoint. Use the resolver your browser is configured with.
+doh_url = "https://cloudflare-dns.com/dns-query"
+metrics_port = 9789
+dashboard_port = 9788
+# labelled_log: JSONL path, empty = <state_dir>/labelled.jsonl
+labelled_log_path = ""
