@@ -1,0 +1,160 @@
+"""Polite, size-capped HTTP fetching and link extraction (stdlib only)."""
+
+from __future__ import annotations
+
+import gzip
+import logging
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import urllib.robotparser
+import zlib
+from dataclasses import dataclass, field
+from html.parser import HTMLParser
+
+log = logging.getLogger(__name__)
+
+# Approximate request + TLS handshake + headers overhead, in bytes.
+REQUEST_OVERHEAD = 6_000
+
+
+class _LinkParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.links: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "a":
+            return
+        for name, value in attrs:
+            if name == "href" and value and not value.startswith("#"):
+                self.links.append(value)
+
+
+def extract_links(html: str, base_url: str) -> list[str]:
+    parser = _LinkParser()
+    try:
+        parser.feed(html)
+    except Exception:  # noqa: BLE001 - truncated or broken HTML is expected
+        log.debug("html parse error on %s", base_url)
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in parser.links:
+        try:
+            absolute = urllib.parse.urljoin(base_url, raw.strip())
+            parsed = urllib.parse.urlsplit(absolute)
+        except ValueError:
+            continue
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            continue
+        clean = urllib.parse.urlunsplit(
+            (parsed.scheme, parsed.netloc, parsed.path, parsed.query, ""))
+        if clean not in seen:
+            seen.add(clean)
+            out.append(clean)
+    return out
+
+
+def host_allowed(url: str, domains: list[str]) -> bool:
+    host = (urllib.parse.urlsplit(url).hostname or "").lower()
+    return any(host == d or host.endswith("." + d) for d in domains)
+
+
+def is_blocked(url: str, fragments: list[str]) -> bool:
+    low = url.lower()
+    return any(f in low for f in fragments)
+
+
+@dataclass
+class FetchResult:
+    url: str
+    status: int
+    wire_bytes: int
+    html: str = ""
+
+
+@dataclass
+class Fetcher:
+    user_agent: str
+    timeout_s: float
+    max_response_bytes: int
+    respect_robots: bool = True
+    per_host_delay_s: float = 20.0
+    _robots: dict[str, urllib.robotparser.RobotFileParser | None] = field(default_factory=dict)
+    _last_hit: dict[str, float] = field(default_factory=dict)
+
+    def _headers(self) -> dict[str, str]:
+        return {
+            "User-Agent": self.user_agent,
+            "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
+            "Accept-Language": "en-US,en;q=0.7",
+            "Accept-Encoding": "gzip, deflate",
+            "DNT": "1",
+            "Sec-GPC": "1",
+        }
+
+    def host_ready_in(self, url: str, now: float | None = None) -> float:
+        host = urllib.parse.urlsplit(url).hostname or ""
+        now = time.monotonic() if now is None else now
+        last = self._last_hit.get(host)
+        return 0.0 if last is None else max(0.0, last + self.per_host_delay_s - now)
+
+    def allowed_by_robots(self, url: str) -> tuple[bool, int]:
+        """Return (allowed, bytes spent fetching robots.txt)."""
+        if not self.respect_robots:
+            return True, 0
+        parts = urllib.parse.urlsplit(url)
+        origin = f"{parts.scheme}://{parts.netloc}"
+        spent = 0
+        if origin not in self._robots:
+            rp = urllib.robotparser.RobotFileParser()
+            res = self._get(origin + "/robots.txt", decode=True, cap=64_000)
+            spent = res.wire_bytes if res else REQUEST_OVERHEAD
+            if res and res.status < 400:
+                rp.parse(res.html.splitlines())
+                self._robots[origin] = rp
+            else:
+                self._robots[origin] = None  # no robots.txt: allowed
+        rp = self._robots[origin]
+        allowed = True if rp is None else rp.can_fetch(self.user_agent, url)
+        return allowed, spent
+
+    def _get(self, url: str, decode: bool, cap: int) -> FetchResult | None:
+        req = urllib.request.Request(url, headers=self._headers(), method="GET")  # noqa: S310
+        host = urllib.parse.urlsplit(url).hostname or ""
+        self._last_hit[host] = time.monotonic()
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:  # noqa: S310
+                ctype = resp.headers.get("Content-Type", "")
+                if "html" not in ctype and "text/plain" not in ctype:
+                    return FetchResult(url, resp.status, REQUEST_OVERHEAD)
+                raw = resp.read(cap)  # stop reading at the cap, then close the socket
+                status = resp.status
+                encoding = resp.headers.get("Content-Encoding", "")
+                charset = resp.headers.get_content_charset() or "utf-8"
+        except urllib.error.HTTPError as exc:
+            return FetchResult(url, exc.code, REQUEST_OVERHEAD)
+        except (urllib.error.URLError, OSError, ValueError) as exc:
+            log.debug("fetch %s failed: %s", url, exc)
+            return None
+        wire = REQUEST_OVERHEAD + len(raw)
+        text = ""
+        if decode:
+            text = _decode(raw, encoding, charset)
+        return FetchResult(url, status, wire, text)
+
+    def fetch(self, url: str) -> FetchResult | None:
+        return self._get(url, decode=True, cap=self.max_response_bytes)
+
+
+def _decode(raw: bytes, encoding: str, charset: str) -> str:
+    try:
+        if "gzip" in encoding:
+            # Truncated stream: decompress what we have.
+            raw = zlib.decompressobj(16 + zlib.MAX_WBITS).decompress(raw)
+        elif "deflate" in encoding:
+            raw = zlib.decompressobj().decompress(raw)
+    except (zlib.error, gzip.BadGzipFile):
+        return ""
+    return raw.decode(charset, errors="replace")
