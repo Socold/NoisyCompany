@@ -1,0 +1,67 @@
+# Decoy personas: plausible, harmless, stable interests.
+# Each persona has:
+#   seeds   : entry pages for browsing sessions
+#   domains : hosts it may follow links on and resolve in DNS sessions
+#   queries : terms used for on-site searches (Wikipedia search, never ad-funded engines)
+# Contributions welcome. Rules: no sensitive category (health, sexuality, religion,
+# politics, crime, finance hardship), no login-only site, lightweight pages preferred.
+
+[gardening]
+seeds = ["https://en.wikipedia.org/wiki/Gardening", "https://en.wikipedia.org/wiki/Permaculture",
+         "https://en.wikipedia.org/wiki/Companion_planting"]
+domains = ["en.wikipedia.org", "www.rhs.org.uk", "extension.umn.edu", "www.gardenersworld.com"]
+queries = ["tomato pruning", "compost ratio", "raised bed soil", "heirloom seeds", "mulching"]
+
+[astronomy]
+seeds = ["https://en.wikipedia.org/wiki/Amateur_astronomy", "https://en.wikipedia.org/wiki/Messier_object",
+         "https://en.wikipedia.org/wiki/Dobsonian_telescope"]
+domains = ["en.wikipedia.org", "science.nasa.gov", "www.esa.int", "skyandtelescope.org"]
+queries = ["andromeda galaxy", "meteor shower", "light pollution", "planetary nebula", "jupiter moons"]
+
+[cooking]
+seeds = ["https://en.wikipedia.org/wiki/Sourdough", "https://en.wikipedia.org/wiki/French_cuisine",
+         "https://en.wikipedia.org/wiki/Fermentation_in_food_processing"]
+domains = ["en.wikipedia.org", "www.seriouseats.com", "www.bbcgoodfood.com", "cooking.nytimes.com"]
+queries = ["bechamel", "ramen broth", "cast iron seasoning", "kimchi", "croissant lamination"]
+
+[cycling]
+seeds = ["https://en.wikipedia.org/wiki/Bicycle_touring", "https://en.wikipedia.org/wiki/Gravel_bike",
+         "https://en.wikipedia.org/wiki/Tour_de_France"]
+domains = ["en.wikipedia.org", "www.cyclingweekly.com", "www.sheldonbrown.com", "bikepacking.com"]
+queries = ["derailleur adjustment", "tubeless tyres", "bike fitting", "randonneuring", "chain wear"]
+
+[chess]
+seeds = ["https://en.wikipedia.org/wiki/Chess_opening", "https://en.wikipedia.org/wiki/Sicilian_Defence",
+         "https://en.wikipedia.org/wiki/Endgame_tablebase"]
+domains = ["en.wikipedia.org", "lichess.org", "www.chess.com", "www.chessprogramming.org"]
+queries = ["queen's gambit", "zugzwang", "rook endgame", "elo rating", "caro-kann"]
+
+[birdwatching]
+seeds = ["https://en.wikipedia.org/wiki/Birdwatching", "https://en.wikipedia.org/wiki/Bird_migration",
+         "https://en.wikipedia.org/wiki/Common_kingfisher"]
+domains = ["en.wikipedia.org", "www.allaboutbirds.org", "www.audubon.org", "www.rspb.org.uk"]
+queries = ["bird song identification", "warbler", "binoculars 8x42", "heron", "swift migration"]
+
+[woodworking]
+seeds = ["https://en.wikipedia.org/wiki/Woodworking", "https://en.wikipedia.org/wiki/Dovetail_joint",
+         "https://en.wikipedia.org/wiki/Hand_plane"]
+domains = ["en.wikipedia.org", "www.finewoodworking.com", "www.popularwoodworking.com"]
+queries = ["mortise and tenon", "wood finish oil", "chisel sharpening", "white oak", "workbench"]
+
+[jazz]
+seeds = ["https://en.wikipedia.org/wiki/Bebop", "https://en.wikipedia.org/wiki/Modal_jazz",
+         "https://en.wikipedia.org/wiki/Blue_Note_Records"]
+domains = ["en.wikipedia.org", "www.allmusic.com", "www.jazzwise.com"]
+queries = ["kind of blue", "hard bop", "walking bass", "thelonious monk", "big band"]
+
+[history]
+seeds = ["https://en.wikipedia.org/wiki/Roman_Empire", "https://en.wikipedia.org/wiki/Silk_Road",
+         "https://en.wikipedia.org/wiki/Industrial_Revolution"]
+domains = ["en.wikipedia.org", "www.britannica.com", "www.worldhistory.org"]
+queries = ["byzantine empire", "hanseatic league", "printing press", "viking age", "medieval castles"]
+
+[hiking]
+seeds = ["https://en.wikipedia.org/wiki/Hiking", "https://en.wikipedia.org/wiki/GR_20",
+         "https://en.wikipedia.org/wiki/Leave_No_Trace"]
+domains = ["en.wikipedia.org", "www.alltrails.com", "www.rei.com", "www.nps.gov"]
+queries = ["ultralight backpacking", "trekking poles", "via ferrata", "mountain hut", "trail running"]
