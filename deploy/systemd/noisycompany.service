@@ -1,0 +1,28 @@
+# User service: install with
+#   mkdir -p ~/.config/systemd/user && cp noisycompany.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now noisycompany
+[Unit]
+Description=noisycompany - lightweight network noise generator
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=%h/.local/bin/noisycompany run
+Restart=on-failure
+RestartSec=60
+Nice=10
+IOSchedulingClass=idle
+CPUQuota=5%
+MemoryMax=64M
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/state/noisycompany
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=yes
+RestrictRealtime=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=default.target
