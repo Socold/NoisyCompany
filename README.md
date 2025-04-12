@@ -1,0 +1,110 @@
+# NoisyCompany
+
+**A lightweight, bandwidth-aware network noise generator with coherent decoy personas.**
+
+noisycompany runs quietly in the background and adds plausible, low-volume browsing and DNS
+activity to your connection, so that what a network observer (ISP, public Wi-Fi operator,
+DNS resolver, router vendor) sees about you is diluted by interests that are not yours.
+
+It is a ground-up rewrite of the idea behind [1tayH/noisy](https://github.com/1tayH/noisy)
+(GPL-3.0), designed around three constraints the original did not have:
+
+1. **Be honest about what noise can and cannot do** (see [threat model](docs/THREAT_MODEL.md)).
+2. **Be featherweight**: a few MB per day by default, hard caps, pauses when you use your
+   bandwidth, sleeps at night (see [impact](docs/IMPACT.md)).
+3. **Be hard to filter out**: stable personas instead of uniform randomness, one consistent
+   user agent, human-like pacing.
+
+> NoisyCompany is a complement, not a replacement, for blocking. To stop targeted advertising,
+> first use a content blocker (uBlock Origin), encrypted DNS and a browser that resists
+> fingerprinting. NoisyCompany then lowers the value of what still leaks at network level.
+> Read [what NoisyCompany does not do](docs/THREAT_MODEL.md#what-noisy-does-not-protect-against).
+
+## Features
+
+- **Personas**: 10 built-in harmless interest profiles (gardening, astronomy, chess...),
+  3 active at a time, rotated every 10 days from a local secret salt.
+- **DNS noise** through your system resolver (~300 bytes per lookup).
+- **Polite HTTP browsing**: robots.txt honoured, per-host delay, responses truncated at
+  192 KB, text/HTML only (no images, video, scripts), no ad, login or payment URL ever.
+- **Hard budget**: daily MB cap, actions per hour cap, budget spread over the day.
+- **Netwatch** (Linux): backs off while your own traffic exceeds 400 kbit/s.
+- **Human schedule**: active hours, exponential gaps between sessions, reading time.
+- **`noisycompany estimate`**: data, energy and CO2e per month before you run anything.
+- **Zero runtime dependency**: Python standard library only, ~1000 lines with comments, easy to audit.
+- **On/off switches for every roadmap item** (`noisycompany features`, or buttons in the
+  local dashboard): persona drift, French persona pack, metered-link guard, DNS over
+  HTTPS, Prometheus metrics, labelled ground-truth log for SOC testing, and more planned.
+- `--dry-run` mode, hardened systemd user unit, non-root Docker image.
+
+## Quick start
+
+```bash
+pipx install git+https://github.com/Socold/NoisyCompany   # or: pip install .
+noisycompany estimate                # what will it cost?
+noisycompany run --dry-run --once    # what would it do? (no network)
+noisycompany run                     # go
+```
+
+Default (`balanced`) estimate:
+
+```
+Data/day (expected)      : ~15 MB (hard cap 15 MB)
+Average rate when active : ~2.2 kbit/s
+Equivalent HD video/day  : ~18 s
+Network energy/month     : 2.3 to 27 Wh
+```
+
+Presets: `eco` (~2 MB/day, DNS-heavy), `balanced` (~15 MB/day), `max` (~60 MB/day).
+
+```bash
+noisycompany config --print-default > noisycompany.toml   # edit, then
+noisycompany run -c noisycompany.toml
+```
+
+### Switches and dashboard
+
+```bash
+noisycompany features                   # every roadmap item, with its state
+noisycompany features on dashboard      # then open http://127.0.0.1:9788
+noisycompany features on locale_packs   # add the French persona pack
+```
+
+### As a service
+
+```bash
+cp deploy/systemd/noisycompany.service ~/.config/systemd/user/
+systemctl --user enable --now noisycompany
+```
+
+### Docker
+
+```bash
+docker build -t noisycompany .
+docker run -d --network host --read-only -v noisycompany-state:/state noisycompany
+```
+
+`--network host` lets netwatch see your real traffic; without it, only the budget applies.
+
+## Documentation
+
+| Document | Content |
+|---|---|
+| [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md) | Who sees what, what noise changes, and what it does not |
+| [docs/STATE_OF_THE_ART.md](docs/STATE_OF_THE_ART.md) | Existing tools and research, and why this design |
+| [docs/IMPACT.md](docs/IMPACT.md) | Bandwidth, browsing and ecological impact |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Every feature with its on/off switch, available and planned |
+| [docs/OPPORTUNITIES.md](docs/OPPORTUNITIES.md) | Use cases, product ideas |
+| [docs/fr/README.md](docs/fr/README.md) | Résumé en français |
+
+## Responsible use
+
+noisycompany only reads public pages, at human pace, and honours robots.txt. It never clicks
+ads (that would be click fraud in many jurisdictions), never submits forms, never logs in.
+Do not raise the limits to levels that put load on small sites. On a shared or employer
+network, the generated traffic is visible and attributable to you: check the rules first.
+
+## License
+
+GPL-3.0-or-later, see [LICENSE](LICENSE). Inspired by 1tayH/noisy (GPL-3.0); no code
+was reused.
