@@ -1,0 +1,50 @@
+# French locale pack (feature `locale_packs`). Same rules as personas.toml:
+# harmless interests only, text-light pages, sites that allow crawling.
+
+[jardinage]
+seeds = ["https://fr.wikipedia.org/wiki/Jardinage", "https://fr.wikipedia.org/wiki/Potager",
+         "https://fr.wikipedia.org/wiki/Permaculture"]
+domains = ["fr.wikipedia.org", "www.rustica.fr", "www.jardiner-malin.fr"]
+queries = ["taille des tomates", "paillage", "compost", "semis de printemps", "purin d'ortie"]
+
+[randonnee]
+seeds = ["https://fr.wikipedia.org/wiki/Randonn%C3%A9e", "https://fr.wikipedia.org/wiki/GR_20",
+         "https://fr.wikipedia.org/wiki/Sentier_de_grande_randonn%C3%A9e"]
+domains = ["fr.wikipedia.org", "www.ffrandonnee.fr", "www.visorando.com"]
+queries = ["refuge de montagne", "bâtons de marche", "chemin de compostelle", "bivouac", "gr10"]
+
+[cuisine]
+seeds = ["https://fr.wikipedia.org/wiki/Cuisine_fran%C3%A7aise", "https://fr.wikipedia.org/wiki/Pain_au_levain",
+         "https://fr.wikipedia.org/wiki/Fromage_fran%C3%A7ais"]
+domains = ["fr.wikipedia.org", "www.marmiton.org", "cuisine.journaldesfemmes.fr"]
+queries = ["blanquette de veau", "pâte feuilletée", "levain", "ratatouille", "tarte tatin"]
+
+[astronomie]
+seeds = ["https://fr.wikipedia.org/wiki/Astronomie_amateur", "https://fr.wikipedia.org/wiki/Galaxie_d%27Androm%C3%A8de",
+         "https://fr.wikipedia.org/wiki/Pluie_de_m%C3%A9t%C3%A9ores"]
+domains = ["fr.wikipedia.org", "www.cieletespace.fr", "www.afastronomie.fr"]
+queries = ["perséides", "télescope dobson", "nébuleuse", "pollution lumineuse", "lune rousse"]
+
+[histoire]
+seeds = ["https://fr.wikipedia.org/wiki/Moyen_%C3%82ge", "https://fr.wikipedia.org/wiki/Ch%C3%A2teau_fort",
+         "https://fr.wikipedia.org/wiki/Empire_romain"]
+domains = ["fr.wikipedia.org", "www.herodote.net", "www.histoire-pour-tous.fr"]
+queries = ["cathédrale gothique", "guerre de cent ans", "vikings", "renaissance", "imprimerie"]
+
+[velo]
+seeds = ["https://fr.wikipedia.org/wiki/Cyclotourisme", "https://fr.wikipedia.org/wiki/Tour_de_France",
+         "https://fr.wikipedia.org/wiki/V%C3%A9lo_tout_chemin"]
+domains = ["fr.wikipedia.org", "www.velo101.com", "www.francevelotourisme.com"]
+queries = ["véloroute", "dérailleur", "pneus tubeless", "la loire à vélo", "bikepacking"]
+
+[bricolage]
+seeds = ["https://fr.wikipedia.org/wiki/Menuiserie", "https://fr.wikipedia.org/wiki/Assemblage_(menuiserie)",
+         "https://fr.wikipedia.org/wiki/Rabot"]
+domains = ["fr.wikipedia.org", "www.bricoleurdudimanche.com", "www.systemed.fr"]
+queries = ["tenon mortaise", "huile de lin", "affûtage ciseau", "chêne massif", "établi"]
+
+[ornithologie]
+seeds = ["https://fr.wikipedia.org/wiki/Ornithologie", "https://fr.wikipedia.org/wiki/Migration_des_oiseaux",
+         "https://fr.wikipedia.org/wiki/Martin-p%C3%AAcheur_d%27Europe"]
+domains = ["fr.wikipedia.org", "www.lpo.fr", "www.oiseaux.net"]
+queries = ["chant du merle", "mésange charbonnière", "jumelles 8x42", "héron cendré", "hirondelles"]
