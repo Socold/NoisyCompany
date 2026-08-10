@@ -1,0 +1,10 @@
+{
+  "name": "noisycompany-companion",
+  "private": true,
+  "description": "NoisyCompany browser companion (Firefox WebExtension). No runtime dependency.",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/background.js && node --check src/popup.js && node --check src/lib.js && node --check src/personas.js"
+  }
+}
