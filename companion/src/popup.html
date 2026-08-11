@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><link rel="stylesheet" href="popup.css"><title>NoisyCompany</title></head>
+<body>
+  <h1>NoisyCompany</h1>
+  <label class="row"><span>Companion</span>
+    <button id="enabled" class="sw" role="switch" aria-checked="false">Off</button></label>
+  <label class="row"><span>Mode</span>
+    <select id="mode">
+      <option value="fetch">Light: background request, no cookie</option>
+      <option value="tab">Tab: hidden muted tab, own container</option>
+    </select></label>
+  <p id="modehelp" class="help"></p>
+  <label class="row"><span>Daily budget (KB)</span><input id="dailyKB" type="number" min="256" max="20480" step="256"></label>
+  <label class="row"><span>Mean gap (min)</span><input id="meanGapMin" type="number" min="5" max="240"></label>
+  <p id="usage" class="help"></p>
+  <p id="personas" class="help"></p>
+  <button id="now" class="secondary">Visit one page now</button>
+  <ul id="log"></ul>
+  <script src="popup.js"></script>
+</body>
+</html>

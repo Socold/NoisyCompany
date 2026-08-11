@@ -12,7 +12,7 @@ import time
 import tomllib
 from pathlib import Path
 
-from noisycompany import __version__, config, impact, packs, privacy
+from noisycompany import __version__, companion, config, impact, packs, privacy
 from noisycompany.engine import Engine
 from noisycompany.features import FEATURES, FeatureSet, NotAvailable, UnknownFeature
 
@@ -141,6 +141,23 @@ def cmd_packs(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_companion(args: argparse.Namespace) -> int:
+    target = Path(args.dir)
+    if not target.is_dir():
+        print(f"{target} is not a directory", file=sys.stderr)
+        return 2
+    stale = companion.export(target, check=args.check)
+    if args.check:
+        if stale:
+            print("stale companion files: " + ", ".join(stale)
+                  + " (run `noisycompany companion export`)", file=sys.stderr)
+            return 1
+        print("companion files up to date")
+        return 0
+    print("written: " + (", ".join(stale) if stale else "nothing (already up to date)"))
+    return 0
+
+
 def cmd_config(args: argparse.Namespace) -> int:
     if args.print_default:
         sys.stdout.write(config.default_text())
@@ -189,6 +206,12 @@ def build_parser() -> argparse.ArgumentParser:
     pk.add_argument("names", nargs="*")
     pk.add_argument("--no-meta", action="store_true", help="check: allow files without [meta]")
     pk.set_defaults(func=cmd_packs)
+
+    co = sub.add_parser("companion", help="generate the browser companion's personas/manifest")
+    co.add_argument("action", choices=["export"])
+    co.add_argument("--dir", default="companion/src")
+    co.add_argument("--check", action="store_true", help="fail if files are stale")
+    co.set_defaults(func=cmd_companion)
 
     c = sub.add_parser("config", parents=[common], help="show effective config")
     c.add_argument("--print-default", action="store_true")
