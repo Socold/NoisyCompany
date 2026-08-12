@@ -1,0 +1,11 @@
+[meta]
+title = "Retail"
+lang = "en"
+description = "Shop staff: suppliers, logistics, point of sale, merchandising."
+version = 1
+
+[retail_logistics]
+seeds = ["https://en.wikipedia.org/wiki/Supply_chain", "https://en.wikipedia.org/wiki/Inventory_management_software",
+         "https://en.wikipedia.org/wiki/Point_of_sale"]
+domains = ["en.wikipedia.org", "www.gs1.org", "www.dhl.com"]
+queries = ["barcode standard", "stock rotation", "pallet sizes", "shipping tracking", "visual merchandising"]

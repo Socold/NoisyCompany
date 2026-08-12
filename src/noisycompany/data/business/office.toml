@@ -1,0 +1,17 @@
+[meta]
+title = "Office"
+lang = "en"
+description = "Office workers: productivity suites documentation, spreadsheets, meetings."
+version = 1
+
+[office_docs]
+seeds = ["https://en.wikipedia.org/wiki/Spreadsheet", "https://en.wikipedia.org/wiki/Pivot_table",
+         "https://en.wikipedia.org/wiki/Office_suite"]
+domains = ["en.wikipedia.org", "support.microsoft.com", "support.google.com", "help.libreoffice.org"]
+queries = ["vlookup", "mail merge", "shared calendar", "slide template", "conditional formatting"]
+
+[office_travel]
+seeds = ["https://en.wikipedia.org/wiki/Business_travel", "https://en.wikipedia.org/wiki/Rail_transport_in_Europe",
+         "https://en.wikipedia.org/wiki/Videotelephony"]
+domains = ["en.wikipedia.org", "www.sncf-connect.com", "www.thetrainline.com"]
+queries = ["train timetable", "meeting room booking", "time zones", "expense report", "video call etiquette"]

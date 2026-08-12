@@ -153,5 +153,27 @@ def installed_personas(state_dir: Path | None) -> dict[str, dict[str, list[str]]
     return out
 
 
+def business_profiles() -> dict[str, dict[str, Any]]:
+    """Bundled business traffic profiles (feature `business_profiles`)."""
+    base = resources.files("noisycompany.data").joinpath("business")
+    out = {}
+    for entry in base.iterdir():
+        if entry.name.endswith(".toml"):
+            out[entry.name[:-5]] = tomllib.loads(entry.read_text("utf-8"))
+    return dict(sorted(out.items()))
+
+
+def business_personas(profile: str) -> dict[str, dict[str, list[str]]]:
+    profiles = business_profiles()
+    if profile not in profiles:
+        raise ConfigError(f"unknown business profile {profile!r}; available: "
+                          + ", ".join(profiles))
+    data = profiles[profile]
+    problems = validate(data)
+    if problems:
+        raise ConfigError(f"business profile {profile!r} is invalid: {problems[0]}")
+    return {k: v for k, v in data.items() if k != "meta"}
+
+
 def signature(state_dir: Path | None) -> tuple[str, ...]:
     return tuple(installed(state_dir))

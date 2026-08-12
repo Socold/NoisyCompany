@@ -85,6 +85,9 @@ doh_sink = false
 metrics = false
 dashboard = false
 labelled_log = false
+business_profiles = false
+request_trees = false
+browser_companion = false
 
 [features.options]
 # persona_drift: how long the main hobby lasts, days.
@@ -99,3 +102,5 @@ metrics_port = 9789
 dashboard_port = 9788
 # labelled_log: JSONL path, empty = <state_dir>/labelled.jsonl
 labelled_log_path = ""
+# business_profiles: one of office, dev_team, retail (data/business/).
+business_profile = "office"

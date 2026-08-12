@@ -1,0 +1,17 @@
+[meta]
+title = "Dev team"
+lang = "en"
+description = "Software developers: language docs, package indexes, standards."
+version = 1
+
+[dev_python]
+seeds = ["https://docs.python.org/3/library/asyncio.html", "https://docs.python.org/3/tutorial/index.html",
+         "https://peps.python.org/pep-0008/"]
+domains = ["docs.python.org", "peps.python.org", "pypi.org"]
+queries = ["asyncio gather", "dataclasses", "typing protocol", "pathlib", "f-strings"]
+
+[dev_web]
+seeds = ["https://developer.mozilla.org/en-US/docs/Web/HTTP", "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout",
+         "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide"]
+domains = ["developer.mozilla.org", "www.rfc-editor.org", "html.spec.whatwg.org"]
+queries = ["fetch api", "css grid", "http caching", "web components", "content security policy"]
