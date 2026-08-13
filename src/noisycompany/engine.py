@@ -107,15 +107,29 @@ class Engine:
         self.budget.daily_bytes = self.eco_cap if self.metered else self.base_cap
         for name, srv in self.servers.items():
             srv.sync(self.features.enabled(name))
-        sig = packs.signature(self.state_dir) if self.features.enabled("persona_marketplace") \
-            else ()
+        profile = self.business_profile()
+        if profile:
+            sig: tuple[str, ...] = ("business:" + profile,)
+        elif self.features.enabled("persona_marketplace"):
+            sig = packs.signature(self.state_dir)
+        else:
+            sig = ()
         if sig != self._packs_sig:
-            merged = self.base_personas | packs.installed_personas(self.state_dir) if sig \
-                else self.base_personas
+            if profile:
+                merged = packs.business_personas(profile)
+            elif sig:
+                merged = self.base_personas | packs.installed_personas(self.state_dir)
+            else:
+                merged = self.base_personas
             self.rotator = PersonaRotator(merged, self.cfg["personas"]["active_count"],
                                           self.cfg["personas"]["rotate_days"], self.state_dir)
             self._packs_sig = sig
             log.info("personas reloaded: %d available", len(merged))
+
+    def business_profile(self) -> str:
+        if not self.features.enabled("business_profiles"):
+            return ""
+        return str(self.options.get("business_profile", "office"))
 
     def privacy_report(self) -> dict[str, Any] | None:
         """Cached 10 minutes: the checks read browser profiles from disk."""
@@ -152,7 +166,7 @@ class Engine:
         rec = {"ts": self._now().astimezone().isoformat(timespec="seconds"),
                "label": "benign-noise", "generator": "noisycompany", "kind": kind,
                "target": target, "ok": ok, "bytes": nbytes, "persona": persona,
-               "dry_run": self.dry_run}
+               "profile": self.business_profile(), "dry_run": self.dry_run}
         try:
             self.labelled_path.parent.mkdir(parents=True, exist_ok=True)
             with self.labelled_path.open("a", encoding="utf-8") as fh:
@@ -305,6 +319,8 @@ class Engine:
                 self.label("http", url, True, res.wire_bytes, name)
                 log.debug("GET %s %s %dB", url, res.status, res.wire_bytes)
                 links = extract_links(res.html, url)
+                if self.features.enabled("request_trees"):
+                    self.fetch_tree(res.html, url, name)
             candidates = [
                 link for link in links
                 if not is_blocked(link, safety["blocked_fragments"])
@@ -314,9 +330,26 @@ class Engine:
             if not self._sleep(self._uniform(sched["dwell_s"])):
                 return
 
+    def fetch_tree(self, html: str, url: str, persona: str) -> None:
+        """Same-origin CSS/JS of the page, once per URL (feature request_trees)."""
+        for asset in self.fetcher.subresources(html, url):
+            cost = REQUEST_OVERHEAD + self.fetcher.asset_cap
+            if not self.budget.can_act(cost):
+                return
+            allowed, robots_cost = self.fetcher.allowed_by_robots(asset)
+            self._spend(robots_cost)
+            if not allowed:
+                self.stats.robots_denied += 1
+                continue
+            self.budget.record_action()
+            spent = self.fetcher.fetch_asset(asset)
+            self._spend(spent)
+            self.label("subresource", asset, spent > REQUEST_OVERHEAD, spent, persona)
+
     def run_session(self) -> None:
         rotator = self.rotator
         if (self.locale_rotator and self.features.enabled("locale_packs")
+                and not self.business_profile()
                 and self.rng.random() < float(self.options.get("locale_share", 0.6))):
             rotator = self.locale_rotator
         name, persona = rotator.pick(self.rng, self.drift_days())

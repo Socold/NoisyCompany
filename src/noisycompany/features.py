@@ -53,22 +53,24 @@ FEATURES: tuple[Feature, ...] = (
             "coherence) combined into a score, shown in the dashboard. Nothing is sent.",
             "2.3", True),
     Feature("browser_companion", "Browser companion",
-            "WebExtension making occasional persona visits inside the real browser, isolated "
-            "container, never ads, never clicks.",
-            "2.3", False),
+            "Firefox WebExtension (companion/): rare persona visits from the real browser. "
+            "Its switch lives in the extension popup; this one only records your choice.",
+            "2.3", True),
     Feature("persona_marketplace", "Persona marketplace",
             "Reviewed persona packs shipped with the code, installable by name "
             "(`noisycompany packs`), validated in CI against sensitive topics.",
             "2.3", True),
     Feature("business_profiles", "Business traffic profiles",
-            "Persona packs per business profile (office, dev team, retail) for SOC labs.",
-            "2.4", False),
+            "Replace personas with a business profile (office, dev_team, retail) for SOC labs; "
+            "the profile is written in the labelled log.",
+            "2.4", True),
     Feature("appliance_packages", "Appliance packages",
             "Raspberry Pi image, OpenWrt package, Home Assistant add-on, Pi-hole companion.",
             "2.4", False),
     Feature("request_trees", "Realistic request trees",
-            "Fetch a page's same-origin CSS/JS once (cached) to look less like a bot.",
-            "3.0", False),
+            "Also fetch up to 3 same-origin CSS/JS files per page, once per URL like a browser "
+            "cache, to look less like a bot. About +60 % bandwidth.",
+            "3.0", True),
     Feature("collective_noise", "Collective noise",
             "Households share persona sets so decoy profiles are indistinguishable "
             "across users, without a central server.",

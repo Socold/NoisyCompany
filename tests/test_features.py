@@ -35,10 +35,10 @@ def test_switch_persists_and_planned_items_refuse(tmp_path):
     fs.set("doh_sink", True)
     assert FeatureSet(config.load(), tmp_path).enabled("doh_sink")
     with pytest.raises(NotAvailable):
-        fs.set("browser_companion", True)
+        fs.set("collective_noise", True)
     with pytest.raises(UnknownFeature):
         fs.set("nope", True)
-    fs.set("browser_companion", False)  # switching a planned item off is harmless
+    fs.set("collective_noise", False)  # switching a planned item off is harmless
 
 
 def test_switch_from_another_process_is_seen_on_reload(tmp_path):
