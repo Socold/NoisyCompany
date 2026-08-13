@@ -87,6 +87,10 @@ def estimate(cfg: dict[str, Any], grid_gco2_per_kwh: float = 50.0) -> Estimate:
     page_bytes = REQUEST_OVERHEAD + budget["max_response_kb"] * 1024 * PAGE_FILL
     dns_cost = (DOH_BYTES_ESTIMATE if cfg.get("features", {}).get("doh_sink")
                 else DNS_BYTES_ESTIMATE)
+    if cfg.get("features", {}).get("request_trees"):
+        # Up to 3 same-origin assets at half the page cap, first visit per URL only:
+        # empirically about +60 % on persona sites.
+        page_bytes *= 1.6
     expected = lookups * dns_cost + pages * page_bytes
     # robots.txt is fetched once per origin; small, counted as 5% overhead.
     expected *= 1.05

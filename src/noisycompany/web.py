@@ -23,13 +23,40 @@ class _LinkParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.links: list[str] = []
+        self.assets: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag != "a":
-            return
-        for name, value in attrs:
-            if name == "href" and value and not value.startswith("#"):
-                self.links.append(value)
+        a = dict(attrs)
+        if tag == "a":
+            href = a.get("href")
+            if href and not href.startswith("#"):
+                self.links.append(href)
+        elif tag == "link" and "stylesheet" in (a.get("rel") or "").lower() and a.get("href"):
+            self.assets.append(a["href"] or "")
+        elif tag == "script" and a.get("src"):
+            self.assets.append(a["src"] or "")
+
+
+def extract_assets(html: str, base_url: str) -> list[str]:
+    """Same-origin stylesheet and script URLs of a page, in document order."""
+    parser = _LinkParser()
+    try:
+        parser.feed(html)
+    except Exception:  # noqa: BLE001 - truncated or broken HTML is expected
+        log.debug("html parse error on %s", base_url)
+    origin = urllib.parse.urlsplit(base_url)
+    out: list[str] = []
+    for raw in parser.assets:
+        try:
+            u = urllib.parse.urlsplit(urllib.parse.urljoin(base_url, raw.strip()))
+        except ValueError:
+            continue
+        if (u.scheme, u.netloc) != (origin.scheme, origin.netloc):
+            continue
+        clean = urllib.parse.urlunsplit((u.scheme, u.netloc, u.path, u.query, ""))
+        if clean not in out:
+            out.append(clean)
+    return out
 
 
 def extract_links(html: str, base_url: str) -> list[str]:
@@ -81,7 +108,9 @@ class Fetcher:
     max_response_bytes: int
     respect_robots: bool = True
     per_host_delay_s: float = 20.0
+    max_assets_per_page: int = 3
     _robots: dict[str, urllib.robotparser.RobotFileParser | None] = field(default_factory=dict)
+    _assets_seen: set[str] = field(default_factory=set)
     _last_hit: dict[str, float] = field(default_factory=dict)
 
     def _headers(self) -> dict[str, str]:
@@ -143,6 +172,34 @@ class Fetcher:
         if decode:
             text = _decode(raw, encoding, charset)
         return FetchResult(url, status, wire, text)
+
+    @property
+    def asset_cap(self) -> int:
+        return self.max_response_bytes // 2
+
+    def subresources(self, html: str, page_url: str) -> list[str]:
+        """Assets not fetched yet (a browser cache would hold them). Robots checked by caller."""
+        out = []
+        for asset in extract_assets(html, page_url):
+            if len(out) >= self.max_assets_per_page:
+                break
+            if asset in self._assets_seen:
+                continue
+            if len(self._assets_seen) > 2000:
+                self._assets_seen.clear()
+            self._assets_seen.add(asset)
+            out.append(asset)
+        return out
+
+    def fetch_asset(self, url: str) -> int:
+        """Download up to asset_cap bytes and discard them. Returns wire bytes."""
+        headers = self._headers() | {"Accept": "*/*"}
+        req = urllib.request.Request(url, headers=headers)  # noqa: S310
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:  # noqa: S310
+                return REQUEST_OVERHEAD + len(resp.read(self.asset_cap))
+        except (urllib.error.URLError, OSError, ValueError):
+            return REQUEST_OVERHEAD
 
     def fetch(self, url: str) -> FetchResult | None:
         return self._get(url, decode=True, cap=self.max_response_bytes)
