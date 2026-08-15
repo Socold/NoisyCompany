@@ -22,5 +22,23 @@ jobs:
       - run: ruff check .
       - run: pytest -q
       - run: noisycompany estimate
+      - run: noisycompany companion export --check
       - name: validate persona packs
         run: noisycompany packs check src/noisycompany/data/packs/*.toml && noisycompany packs check src/noisycompany/data/personas*.toml --no-meta
+
+  companion:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: companion
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm test
+      - run: npm run check
+      - name: Mozilla add-on linter
+        run: npx --yes web-ext@8.3.0 lint --source-dir src --self-hosted
