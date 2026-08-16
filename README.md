@@ -35,7 +35,10 @@ It is a ground-up rewrite of the idea behind [1tayH/noisy](https://github.com/1t
 - **On/off switches for every roadmap item** (`noisycompany features`, or buttons in the
   local dashboard): persona drift, French persona pack, metered-link guard, DNS over
   HTTPS, Prometheus metrics, labelled ground-truth log for SOC testing, household privacy
-  report, reviewed persona packs, and more planned.
+  report, reviewed persona packs, business traffic profiles for SOC labs, realistic
+  request trees, and more planned.
+- **Firefox companion** ([companion/](companion/README.md)): the same rare decoy visits
+  made by your real browser, so they share its network fingerprint. Off by default.
 - **`noisycompany privacy`**: local score of what really protects you (blocker, encrypted
   DNS, fingerprinting protection...), with advice. Nothing is sent.
 - `--dry-run` mode, hardened systemd user unit, non-root Docker image.

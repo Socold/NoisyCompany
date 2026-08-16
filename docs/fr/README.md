@@ -44,7 +44,13 @@ Disponibles : dérive des personas, pack de personas français, garde connexion 
 DNS sur HTTPS, métriques Prometheus, journal étiqueté pour tester un SOC, rapport de
 confidentialité (`noisycompany privacy` : bloqueur, DNS chiffré, anti-empreinte, GPC,
 IPv6, cohérence du bruit, score sur 100, rien n'est envoyé) et packs de personas relus
-(`noisycompany packs install <nom>`). Le reste est
+(`noisycompany packs install <nom>`), profils métier pour labos SOC (`business_profiles` :
+bureau, équipe de dev, commerce) et arbres de requêtes réalistes (`request_trees`, CSS/JS
+du même site une seule fois, environ +60 % de données).
+
+Extension Firefox ([companion/](../../companion/README.md)) : les mêmes visites rares, faites
+par votre vrai navigateur, donc avec la même empreinte réseau. Désactivée par défaut, mode
+léger sans cookie ou mode onglet caché dans un conteneur dédié. Le reste est
 listé « planned » : voir la [feuille de route](../ROADMAP.md).
 
 Voir aussi : [état de l'art](../STATE_OF_THE_ART.md), [opportunités](../OPPORTUNITIES.md).

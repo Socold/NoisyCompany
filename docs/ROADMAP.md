@@ -25,15 +25,15 @@ Defaults can also be set in the `[features]` table of the config file.
 | `labelled_log` | 2.2 | JSONL ground truth of every action (`label: benign-noise`) for SOC / IDS / NDR testing | disk only |
 | `privacy_report` | 2.3 | `noisycompany privacy` and a dashboard card: content blocker, encrypted DNS (browser DoH or systemd-resolved DoT), fingerprinting protection, GPC, IPv6 temporary addresses, noise running, noise DNS coherent with browser DNS. Score out of 100, advice for each gap. Read-only, local, no path or browsing data in the output | none |
 | `persona_marketplace` | 2.3 | `noisycompany packs [list\|install\|remove\|check]`: reviewed packs shipped in `data/packs/` (photography, board games, knitting, aquariophilie FR), installed by copy, re-validated at load (a tampered pack is ignored). CI rejects packs with sensitive topics, non-HTTPS seeds, seeds outside their domains, login/ads URLs | none |
+| `browser_companion` | 2.3 | Firefox WebExtension in `companion/`: rare persona visits from the real browser. Light mode (no cookie, ~100 KB) or tab mode (hidden muted tab in a dedicated container, ~2 MB). Only while the user is active, 2 MB/day cap, host access limited to persona domains. Switched from its own popup. See [companion/README.md](../companion/README.md) | ~2 MB/day max |
+| `business_profiles` | 2.4 | Replaces personas with a business profile (`office`, `dev_team`, `retail`), profile written in every labelled-log record: benign traffic with ground truth for SOC labs | none |
+| `request_trees` | 3.0 | Fetches up to 3 same-origin CSS/JS per page, once per URL (like a cache), robots.txt checked, half the page cap each | ~+60 % |
 
 ## Planned
 
 | Switch | Milestone | Plan |
 |---|---|---|
-| `browser_companion` | 2.3 | WebExtension (Firefox first): rare persona visits inside the real browser, in a dedicated container, no ads, no clicks, same budget rules. The only way to act on browser-level ad profiling |
-| `business_profiles` | 2.4 | Persona packs per business profile (office, dev team, retail, hospital admin) for SOC labs, with labelled output |
 | `appliance_packages` | 2.4 | Raspberry Pi image, OpenWrt package, Home Assistant add-on, Pi-hole / AdGuard Home companion, Umbrel / CasaOS / TrueNAS apps |
-| `request_trees` | 3.0 | Fetch a page's same-origin CSS/JS once (cached) so request trees look less bot-like; doubles bandwidth, hence opt-in |
 | `collective_noise` | 3.0 | Households share persona sets (signed, peer-to-peer or static files) so decoy profiles are indistinguishable across users; no central server |
 | `separability_study` | research | Capture + classifier kit to measure how well an observer can filter noise out; results published |
 
