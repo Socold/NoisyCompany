@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="nc-token" content="__TOKEN__">
+<title>NoisyCompany</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header>
+  <h1>NoisyCompany</h1>
+  <p class="sub">Local dashboard. Only reachable from this machine.</p>
+</header>
+<main>
+  <section class="card" aria-labelledby="today">
+    <h2 id="today">Today</h2>
+    <div class="meter" role="meter" aria-labelledby="today" aria-valuemin="0" aria-valuemax="100" id="meter">
+      <div class="fill" id="fill"></div>
+    </div>
+    <p id="budget">…</p>
+    <dl class="kpis" id="kpis"></dl>
+    <p id="state" class="state"></p>
+  </section>
+  <section class="card" aria-labelledby="personas-h">
+    <h2 id="personas-h">Active decoy personas</h2>
+    <ul id="personas" class="chips"></ul>
+  </section>
+  <section class="card" aria-labelledby="features-h">
+    <h2 id="features-h">Features</h2>
+    <p class="sub">Switches apply at the next session, no restart needed.</p>
+    <ul id="features" class="features"></ul>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

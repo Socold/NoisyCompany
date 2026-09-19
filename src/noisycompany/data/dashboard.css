@@ -1,0 +1,38 @@
+:root { --bg:#f7f7f5; --card:#fff; --fg:#1d1d1b; --muted:#6b6b66; --line:#e3e3de;
+        --accent:#2f6f5e; --accent-fg:#fff; --off:#d6d6d0; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#161716; --card:#202120; --fg:#ececea; --muted:#9a9a94; --line:#333431;
+          --accent:#5fb39a; --accent-fg:#0f1a17; --off:#44453f; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg);
+       font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header, main { max-width:860px; margin:0 auto; padding:16px; }
+h1 { margin:8px 0 0; font-size:24px; }
+h2 { margin:0 0 12px; font-size:17px; }
+.sub { color:var(--muted); margin:4px 0 12px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+        padding:16px; margin-bottom:16px; }
+.meter { height:10px; background:var(--off); border-radius:5px; overflow:hidden; }
+.fill { height:100%; width:0; background:var(--accent); transition:width .4s; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:12px 0 0; }
+.kpis div { border-left:3px solid var(--line); padding-left:8px; }
+.kpis dt { color:var(--muted); font-size:13px; }
+.kpis dd { margin:0; font-size:20px; font-variant-numeric:tabular-nums; }
+.state { color:var(--muted); margin:12px 0 0; }
+.chips { list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px; }
+.chips li { border:1px solid var(--line); border-radius:999px; padding:2px 12px; }
+.features { list-style:none; padding:0; margin:0; }
+.features li { display:flex; gap:12px; align-items:flex-start; padding:12px 0;
+               border-top:1px solid var(--line); }
+.features li:first-child { border-top:0; }
+.features .txt { flex:1; min-width:0; }
+.features .t { font-weight:600; }
+.features .d { color:var(--muted); font-size:14px; }
+.tag { font-size:12px; color:var(--muted); border:1px solid var(--line); border-radius:4px;
+       padding:0 6px; margin-left:6px; font-weight:400; }
+button.sw { flex:none; width:64px; height:32px; border-radius:16px; border:0; cursor:pointer;
+            background:var(--off); color:var(--fg); font-weight:600; }
+button.sw[aria-checked="true"] { background:var(--accent); color:var(--accent-fg); }
+button.sw:disabled { cursor:not-allowed; opacity:.55; }
+button.sw:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
