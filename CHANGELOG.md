@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.0.1
+
+Security and data-privacy audit fixes ([report](docs/SECURITY_AUDIT_2026-11.md)):
+
+- Redirects and URLs must stay in the persona's domains and resolve to public IPs only
+  (no LAN, loopback or metadata address): SSRF and DNS rebinding.
+- Decompressed HTML capped at 2 MB; unknown charsets no longer stop the daemon.
+- Companion no longer follows redirects.
+- umask 077 and state directory 0700.
+- `doh_url` must be https.
+- Labelled log rotated at 10 MB.
+- Dashboard rejects negative `Content-Length`.
+- `Accept-Language` follows the persona's locale.
+- CI actions pinned by commit SHA.
+- `collective create` caps `active_count` to the persona count.
+- New docs: PRIVACY, SECURITY_AUDIT_2026-11, ARCHITECTURE. Roadmap: next evolutions.
+
 ## 2.0.0 (2026-11-01)
 
 First stable release of the rewrite. Every roadmap item is implemented, each behind an
