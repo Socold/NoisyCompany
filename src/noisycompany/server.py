@@ -128,7 +128,7 @@ class _Handler(BaseHTTPRequestHandler):
             self._send(404, b"not found", "text/plain")
             return
         try:
-            length = min(int(self.headers.get("Content-Length", "0")), 1024)
+            length = max(0, min(int(self.headers.get("Content-Length", "0")), 1024))
             body = json.loads(self.rfile.read(length) or b"{}")
             on = body["on"]
             if not isinstance(on, bool):

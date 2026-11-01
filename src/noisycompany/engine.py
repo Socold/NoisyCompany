@@ -39,6 +39,22 @@ class Stats:
     bytes: int = 0
 
 
+LANGUAGES = {
+    "fr": "fr-FR,fr;q=0.9,en-US;q=0.6,en;q=0.5",
+    "de": "de-DE,de;q=0.9,en;q=0.6",
+    "es": "es-ES,es;q=0.9,en;q=0.6",
+}
+
+
+def accept_language(domains: list[str]) -> str:
+    """Match Accept-Language to the persona's sites: English headers on French pages
+    would be an easy tell (and a fingerprint)."""
+    for lang, header in LANGUAGES.items():
+        if any(d.startswith(lang + ".") or d.endswith("." + lang) for d in domains):
+            return header
+    return "en-US,en;q=0.7"
+
+
 class Engine:
     def __init__(
         self,
@@ -56,6 +72,8 @@ class Engine:
         self.rng = rng or random.SystemRandom()
         self.stop = stop or threading.Event()
         self.state_dir = state_dir
+        if state_dir and state_dir.is_dir():
+            state_dir.chmod(0o700)  # also fixes directories created by older versions
         self.base_personas = personas
         self._packs_sig: tuple[str, ...] = ()
         self._privacy: tuple[float, dict[str, Any]] | None = None
@@ -194,6 +212,9 @@ class Engine:
                "profile": self.business_profile(), "dry_run": self.dry_run}
         try:
             self.labelled_path.parent.mkdir(parents=True, exist_ok=True)
+            # Bounded on disk: one rotation at 10 MB (about 40 000 records).
+            if self.labelled_path.exists() and self.labelled_path.stat().st_size > 10_000_000:
+                self.labelled_path.replace(self.labelled_path.with_suffix(".jsonl.1"))
             with self.labelled_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps(rec) + "\n")
         except OSError as exc:
@@ -318,6 +339,9 @@ class Engine:
     def http_session(self, persona: dict[str, list[str]], name: str = "") -> None:
         sched, http, safety = self.cfg["schedule"], self.cfg["http"], self.cfg["safety"]
         url: str | None = self._entry_url(persona)
+        # Redirects and fetches stay inside the persona's domains (see Fetcher.url_allowed).
+        self.fetcher.scope = persona["domains"] if http["stay_on_persona_domains"] else None
+        self.fetcher.accept_language = accept_language(persona["domains"])
         for _ in range(self._randint(sched["pages_per_session"])):
             if url is None or self.stop.is_set():
                 return

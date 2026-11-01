@@ -190,7 +190,7 @@ def cmd_collective(args: argparse.Namespace) -> int:
         cfg = config.load(args.config, args.preset)
         names = args.personas.split(",") if args.personas else cfg["personas"]["enabled"]
         group = collective.create(args.name or "household", names, args.rotate_days,
-                                  args.active_count)
+                                  min(args.active_count, len(set(names))))
         code = collective.encode(group)
         print(code)
         print("\nShare this code with the other members (it contains the shared secret).\n"
@@ -329,6 +329,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    # State (salt, collective secret, stats, labelled log) is private to the user.
+    os.umask(0o077)
     try:
         return args.func(args)
     except config.ConfigError as exc:
