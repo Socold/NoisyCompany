@@ -122,6 +122,9 @@ def validate(cfg: dict[str, Any]) -> None:
         raise ConfigError("[http] per_host_delay_s must be >= 1")
     if not 0 <= cfg["general"]["nice"] <= 19:
         raise ConfigError("[general] nice must be in [0, 19]")
+    doh_url = cfg.get("features", {}).get("options", {}).get("doh_url", "")
+    if doh_url and not str(doh_url).startswith("https://"):
+        raise ConfigError("[features.options] doh_url must be an https:// URL")
     if cfg["personas"]["active_count"] < 1:
         raise ConfigError("[personas] active_count must be >= 1")
 

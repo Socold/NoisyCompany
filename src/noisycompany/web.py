@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import gzip
+import ipaddress
 import logging
+import socket
 import time
 import urllib.error
 import urllib.parse
@@ -17,6 +19,51 @@ log = logging.getLogger(__name__)
 
 # Approximate request + TLS handshake + headers overhead, in bytes.
 REQUEST_OVERHEAD = 6_000
+# Decompressed HTML is capped too: a 192 KB gzip body could otherwise inflate ~1000x.
+MAX_DECODED_BYTES = 2_000_000
+_PUBLIC_CACHE: dict[str, tuple[float, bool]] = {}
+
+
+def is_public_host(host: str, resolver=socket.getaddrinfo, ttl_s: float = 600) -> bool:
+    """True only if every address the host resolves to is globally routable.
+
+    Blocks loopback, RFC 1918, link-local, CGNAT, ULA... so that a compromised or
+    rebinding persona domain cannot turn noise into requests against the LAN (router
+    admin pages, NAS, Home Assistant) or the machine itself.
+    """
+    host = host.strip("[]").lower()
+    now = time.monotonic()
+    cached = _PUBLIC_CACHE.get(host)
+    if cached and now - cached[0] < ttl_s:
+        return cached[1]
+    try:
+        literal = ipaddress.ip_address(host)
+        addrs = [literal]
+    except ValueError:
+        try:
+            infos = resolver(host, 443, proto=socket.IPPROTO_TCP)
+        except (OSError, UnicodeError):
+            return False
+        addrs = [ipaddress.ip_address(i[4][0].split("%")[0]) for i in infos]
+    ok = bool(addrs) and all(a.is_global for a in addrs)
+    if len(_PUBLIC_CACHE) > 4096:
+        _PUBLIC_CACHE.clear()
+    _PUBLIC_CACHE[host] = (now, ok)
+    return ok
+
+
+class _ScopedRedirects(urllib.request.HTTPRedirectHandler):
+    """Follow a redirect only to http(s), to a public host, within the persona scope."""
+
+    def __init__(self, fetcher: Fetcher) -> None:
+        super().__init__()
+        self.fetcher = fetcher
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+        if not self.fetcher.url_allowed(newurl):
+            log.debug("redirect to %s refused", newurl)
+            return None  # urllib then raises HTTPError(code): counted as a failed page
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 class _LinkParser(HTMLParser):
@@ -111,13 +158,33 @@ class Fetcher:
     max_assets_per_page: int = 3
     _robots: dict[str, urllib.robotparser.RobotFileParser | None] = field(default_factory=dict)
     _assets_seen: set[str] = field(default_factory=set)
+    # Persona scope: redirects may only land on these domains (None = any public host).
+    scope: list[str] | None = None
+    accept_language: str = "en-US,en;q=0.7"
+    _opener: urllib.request.OpenerDirector | None = None
+
+    def url_allowed(self, url: str) -> bool:
+        try:
+            parts = urllib.parse.urlsplit(url)
+        except ValueError:
+            return False
+        if parts.scheme not in ("http", "https") or not parts.hostname:
+            return False
+        if self.scope is not None and not host_allowed(url, self.scope):
+            return False
+        return is_public_host(parts.hostname)
+
+    def _open(self, req: urllib.request.Request):
+        if self._opener is None:
+            self._opener = urllib.request.build_opener(_ScopedRedirects(self))
+        return self._opener.open(req, timeout=self.timeout_s)
     _last_hit: dict[str, float] = field(default_factory=dict)
 
     def _headers(self) -> dict[str, str]:
         return {
             "User-Agent": self.user_agent,
             "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
-            "Accept-Language": "en-US,en;q=0.7",
+            "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate",
             "DNT": "1",
             "Sec-GPC": "1",
@@ -150,11 +217,14 @@ class Fetcher:
         return allowed, spent
 
     def _get(self, url: str, decode: bool, cap: int) -> FetchResult | None:
+        if not self.url_allowed(url):
+            log.debug("refused %s (non-public or out of scope)", url)
+            return None
         req = urllib.request.Request(url, headers=self._headers(), method="GET")  # noqa: S310
         host = urllib.parse.urlsplit(url).hostname or ""
         self._last_hit[host] = time.monotonic()
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:  # noqa: S310
+            with self._open(req) as resp:
                 ctype = resp.headers.get("Content-Type", "")
                 if "html" not in ctype and "text/plain" not in ctype:
                     return FetchResult(url, resp.status, REQUEST_OVERHEAD)
@@ -193,10 +263,12 @@ class Fetcher:
 
     def fetch_asset(self, url: str) -> int:
         """Download up to asset_cap bytes and discard them. Returns wire bytes."""
+        if not self.url_allowed(url):
+            return 0
         headers = self._headers() | {"Accept": "*/*"}
         req = urllib.request.Request(url, headers=headers)  # noqa: S310
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout_s) as resp:  # noqa: S310
+            with self._open(req) as resp:
                 return REQUEST_OVERHEAD + len(resp.read(self.asset_cap))
         except (urllib.error.URLError, OSError, ValueError):
             return REQUEST_OVERHEAD
@@ -208,10 +280,13 @@ class Fetcher:
 def _decode(raw: bytes, encoding: str, charset: str) -> str:
     try:
         if "gzip" in encoding:
-            # Truncated stream: decompress what we have.
-            raw = zlib.decompressobj(16 + zlib.MAX_WBITS).decompress(raw)
+            # Truncated stream: decompress what we have, never more than the cap.
+            raw = zlib.decompressobj(16 + zlib.MAX_WBITS).decompress(raw, MAX_DECODED_BYTES)
         elif "deflate" in encoding:
-            raw = zlib.decompressobj().decompress(raw)
+            raw = zlib.decompressobj().decompress(raw, MAX_DECODED_BYTES)
     except (zlib.error, gzip.BadGzipFile):
         return ""
-    return raw.decode(charset, errors="replace")
+    try:
+        return raw[:MAX_DECODED_BYTES].decode(charset, errors="replace")
+    except LookupError:  # unknown charset announced by the server
+        return raw[:MAX_DECODED_BYTES].decode("utf-8", errors="replace")
