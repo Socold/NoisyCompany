@@ -49,8 +49,12 @@ disturbance, harder to filter, anti-profiling):
   with a different scope and a legal grey zone.
 - **noisy forks** keep the original's design flaws.
 
-Decision: **new code base**, keeping NoisyCompany's idea (background DNS + HTTP noise) and
-adding personas, budget, netwatch, scheduling, politeness and impact estimation. An
-optional, lightweight browser companion (in-browser noise with your real fingerprint, no
-ad clicks) is the logical next step to act on ad profiling: see
-[OPPORTUNITIES.md](OPPORTUNITIES.md).
+Decision: **new code base**, keeping noisy's idea (background DNS + HTTP noise) and
+adding personas, budget, netwatch, scheduling, politeness and impact estimation.
+
+Since then (v2.0.0, November 2026), NoisyCompany also covers what no other tool combines:
+- a Firefox companion that makes the noise with the real browser's fingerprint, never
+  clicking ads;
+- collective noise without a server;
+- a local privacy report;
+- a separability study that measures its own weaknesses.

@@ -2,8 +2,19 @@
 
 ## Roadmap
 
-Every opportunity below is tracked in [ROADMAP.md](ROADMAP.md) with an on/off switch
-(`noisycompany features`, or the dashboard buttons).
+Status in v2.0.0: every product idea and use case below has shipped in a first version,
+each behind an on/off switch (`noisycompany features`, or the dashboard buttons). Next
+steps are in [ROADMAP.md](ROADMAP.md#next-evolutions).
+
+| Idea | Shipped as |
+|---|---|
+| Home privacy box, appliances | `appliance_packages`: Home Assistant add-on, compose, Pi, OpenWrt, GHCR image |
+| Privacy score dashboard | `privacy_report` + dashboard card |
+| B2B benign traffic for SOC testing | `labelled_log` + `business_profiles` + `metrics` |
+| Persona API / marketplace | `persona_marketplace` (`noisycompany packs`) |
+| Collective noise | `collective_noise` (share codes, no server) |
+| Research on separability | `separability_study` (`noisycompany study`) |
+| Acting on browser-level profiling | `browser_companion` (Firefox) |
 
 ## Use cases
 

@@ -22,6 +22,19 @@ How the footprint is kept small:
 - daily hard cap, hourly action cap, and the budget is spread over active hours;
 - no activity outside active hours (night by default).
 
+### Switches that change the footprint
+
+| Switch | Effect on data |
+|---|---|
+| `doh_sink` | DNS lookups cost ~5 KB instead of ~300 B (TLS to the resolver) |
+| `request_trees` | About +60 % on HTTP noise (up to 3 same-origin CSS/JS per page, once per URL) |
+| `metered_guard` | On a metered link, the daily cap drops to 3 MB |
+| `browser_companion` (Firefox) | Up to 2 MB/day, light mode ~100 KB per visit, tab mode ~2 MB per visit |
+| others | No traffic change |
+
+`noisycompany estimate` accounts for `doh_sink` and `request_trees` when they are on in
+the config file.
+
 ## Effect on your browsing
 
 - **Throughput**: a few kbit/s on average, peaks of one page download (~0.1-0.5 s of a

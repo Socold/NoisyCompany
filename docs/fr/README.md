@@ -60,4 +60,26 @@ par votre vrai navigateur, donc avec la même empreinte réseau. Désactivée pa
 léger sans cookie ou mode onglet caché dans un conteneur dédié. Le reste est
 listé « planned » : voir la [feuille de route](../ROADMAP.md).
 
-Voir aussi : [état de l'art](../STATE_OF_THE_ART.md), [opportunités](../OPPORTUNITIES.md).
+## Sécurité et confidentialité
+
+Audit de novembre 2026 ([rapport](../SECURITY_AUDIT_2026-11.md)) : 12 points corrigés en
+2.0.1. Les plus importants :
+- aucune redirection ni adresse du réseau local (box, NAS) n'est suivie ;
+- la décompression est plafonnée ;
+- les fichiers d'état sont privés ;
+- l'en-tête de langue correspond à la persona.
+
+Aucune télémétrie, aucun compte, aucun serveur. Ce qui est envoyé, stocké et lu est listé
+dans [PRIVACY.md](../PRIVACY.md).
+
+## Prochaines évolutions
+
+Durcissement (connexion à l'IP vérifiée, signature des images, fuzzing, PyPI), réalisme
+guidé par l'étude (cohérence DNS/HTTP, rythmes hebdomadaires, plus de langues, rafales de
+domaines tiers), extension signée sur addons.mozilla.org et portage Chromium, intégration
+Pi-hole / AdGuard Home, applications Umbrel / TrueNAS, paquet OpenWrt, tableau Grafana,
+interface en français, codes de collectif en QR, banc d'essai public de détectabilité,
+mesure réelle de l'énergie. Détail : [ROADMAP.md](../ROADMAP.md#next-evolutions).
+
+Voir aussi : [état de l'art](../STATE_OF_THE_ART.md), [opportunités](../OPPORTUNITIES.md),
+[architecture](../ARCHITECTURE.md), [étude](../STUDY.md).

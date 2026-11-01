@@ -32,7 +32,59 @@ Defaults can also be set in the `[features]` table of the config file.
 | `collective_noise` | 3.0 | `noisycompany collective create\|join\|leave\|show`: a short share code (`nc1:...`, ~320 chars) carries a shared salt and a list of **already reviewed** personas, with a SHA-256 digest. Members rotate the same decoys at the same time. No server; a code cannot add domains, so a malicious member cannot steer your traffic to their server | none |
 | `separability_study` | research | `noisycompany study --noise labelled.jsonl --human trace.csv`: windows + logistic regression (pure Python), k-fold ROC AUC and the most telling features. See [STUDY.md](STUDY.md) | none |
 
-All roadmap items are implemented. Next ideas are tracked in GitHub issues.
+All items above are implemented (v2.0.0).
+
+## Next evolutions
+
+Each will get its own switch, off by default, like the items above.
+
+### 2.1: hardening and trust (from the November 2026 audit)
+
+| Item | Why |
+|---|---|
+| Connect to the vetted IP address (custom `HTTPSConnection` with SNI) | Removes the residual check-then-connect window of the public-IP check |
+| Keyless cosign signatures + SLSA provenance check documented for GHCR images | Users can verify the image before running it on a home appliance |
+| Fuzzing of the link parser and share-code decoder (atheris) in CI | Both parse untrusted input |
+| Home Assistant add-on as non-root, AppArmor profile | Least privilege on the always-on box |
+| Publish on PyPI (trusted publishing) | `pipx install noisycompany` without git |
+
+### 2.2: realism (driven by `noisycompany study` results)
+
+| Item | Why |
+|---|---|
+| Interest coherence across DNS and HTTP: lookups follow the pages actually read | Today DNS sessions and page reads are independent |
+| Seasonal / weekly rhythm per persona (weekends, holidays, evenings) | Hour and weekday are telling features |
+| `Accept-Language` / UA per persona pack, more locales (de, es, it) | Locale mismatch is a tell |
+| Third-party host bursts in request trees (opt-in, still capped) | Real page loads resolve dozens of hosts; the study shows it is the main giveaway |
+| Study: packet sizes / TLS fingerprint features, Pi-hole direct import | A stronger observer model |
+
+### 2.3: browser companion
+
+| Item | Why |
+|---|---|
+| Signed build on addons.mozilla.org | Normal install, automatic updates |
+| Chromium MV3 port (Chrome, Brave, Edge) | Most users |
+| Companion reads the daemon's dashboard switches (opt-in localhost link) | One place to control everything |
+| Optional "default container" tab mode with explicit warning | Dilutes the user's own cookie profile, for those who want it |
+
+### 2.4: appliances and integrations
+
+| Item | Why |
+|---|---|
+| Pi-hole / AdGuard Home plugin (noise from the resolver box, study from its log) | Best place for DNS noise and for measurement |
+| Umbrel / CasaOS / TrueNAS / Unraid app templates | One-click installs |
+| OpenWrt `.ipk` package with LuCI page | Routers without manual copy |
+| Grafana dashboard JSON for the Prometheus metrics | Home-lab users |
+| Dashboard in French (i18n) and accessibility audit | Wider audience |
+
+### 3.x: research and collective
+
+| Item | Why |
+|---|---|
+| Collective share code as QR code, expiry and rotation of the shared salt | Easier and safer sharing |
+| Public separability benchmark (synthetic traces, published AUCs per release) | Measure progress honestly |
+| Real energy measurement (RAPL / smart plug) published in IMPACT.md | Replace estimates by measurements |
+| Business profiles for more sectors + scenario files for SOC exercises | Detection engineering market |
 
 ## Use cases enabled
 

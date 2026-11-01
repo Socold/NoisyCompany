@@ -112,7 +112,34 @@ Home Assistant: add this repository as an add-on repository, install *NoisyCompa
 | [docs/IMPACT.md](docs/IMPACT.md) | Bandwidth, browsing and ecological impact |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Every feature with its on/off switch, available and planned |
 | [docs/OPPORTUNITIES.md](docs/OPPORTUNITIES.md) | Use cases, product ideas |
+| [docs/STUDY.md](docs/STUDY.md) | Measuring how separable the noise is |
+| [docs/PRIVACY.md](docs/PRIVACY.md) | Everything NoisyCompany sends, stores and reads |
+| [docs/SECURITY_AUDIT_2026-11.md](docs/SECURITY_AUDIT_2026-11.md) | Security and data-privacy audit of v2.0.0 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Modules, data flow, design rules |
+| [companion/README.md](companion/README.md) | Firefox companion |
 | [docs/fr/README.md](docs/fr/README.md) | Résumé en français |
+
+## Commands
+
+| Command | Purpose |
+|---|---|
+| `noisycompany run [--dry-run] [--once]` | Generate noise |
+| `noisycompany estimate [-p preset]` | Data, energy, CO2e before running |
+| `noisycompany features [on\|off <id>]` | List or flip the switches |
+| `noisycompany privacy [--json]` | Local privacy report and score |
+| `noisycompany packs [list\|install\|remove\|check]` | Reviewed persona packs |
+| `noisycompany collective [show\|create\|join\|leave]` | Shared decoys across households |
+| `noisycompany study --noise ... --human ...` | Separability (ROC AUC) |
+| `noisycompany health` | Liveness for supervisors / Docker |
+| `noisycompany companion export [--check]` | Regenerate the Firefox companion files |
+| `noisycompany personas`, `noisycompany config` | Inspect personas and effective config |
+
+## Security and privacy
+
+No telemetry, no account, no server. Every URL and redirect must stay on the persona's
+domains and resolve to public IPs only, so a hostile site cannot aim your traffic at your
+LAN. State files are private (0700/0600). Details: [PRIVACY.md](docs/PRIVACY.md),
+[audit](docs/SECURITY_AUDIT_2026-11.md), [SECURITY.md](SECURITY.md).
 
 ## Responsible use
 
