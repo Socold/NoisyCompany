@@ -10,7 +10,7 @@ itself**, so at network level they are indistinguishable from your own browsing.
 
 | Mode | What happens | Cost per visit | Acts on |
 |---|---|---|---|
-| Light (`fetch`, default) | Background request with Firefox's network stack, **no cookie**, page cut at 192 KB, only links on persona domains are followed | ~100 KB | ISP, Wi-Fi, DNS resolver (same TLS fingerprint as you) |
+| Light (`fetch`, default) | Background request with Firefox's network stack, **no cookie**, redirects not followed, page cut at 192 KB, only links on persona domains are followed | ~100 KB | ISP, Wi-Fi, DNS resolver (same TLS fingerprint as you) |
 | Tab | Hidden, muted tab in a dedicated **NoisyCompany container**, closed after 20-60 s | ~2 MB | Trackers on the visited page build a *separate* decoy profile; your own cookies are not touched |
 
 Neither mode clicks anything, loads ads on purpose, fills forms or logs in. Your content

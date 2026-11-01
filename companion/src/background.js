@@ -37,7 +37,9 @@ async function fetchCapped(url, maxBytes) {
   const timer = setTimeout(() => ctrl.abort(), 10000);
   try {
     const r = await fetch(url, { credentials: "omit", referrerPolicy: "no-referrer",
-                                 signal: ctrl.signal, redirect: "follow" });
+                                 signal: ctrl.signal, redirect: "manual" });
+    // A redirect is not followed: it could point outside the persona domains, or to a
+    // LAN address (router, NAS) that the browser would happily request.
     const type = r.headers.get("content-type") || "";
     if (!r.ok || !type.includes("html")) { ctrl.abort(); return { kb: 6, html: "", ok: r.ok }; }
     const reader = r.body.getReader();
