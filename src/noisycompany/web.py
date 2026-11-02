@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import gzip
+import http.client
 import ipaddress
 import logging
 import socket
@@ -21,15 +22,17 @@ log = logging.getLogger(__name__)
 REQUEST_OVERHEAD = 6_000
 # Decompressed HTML is capped too: a 192 KB gzip body could otherwise inflate ~1000x.
 MAX_DECODED_BYTES = 2_000_000
-_PUBLIC_CACHE: dict[str, tuple[float, bool]] = {}
+_PUBLIC_CACHE: dict[str, tuple[float, tuple[str, ...]]] = {}
 
 
-def is_public_host(host: str, resolver=socket.getaddrinfo, ttl_s: float = 600) -> bool:
-    """True only if every address the host resolves to is globally routable.
+def public_addresses(host: str, resolver=socket.getaddrinfo, ttl_s: float = 600,
+                     port: int = 443) -> tuple[str, ...]:
+    """Addresses of host if every one is globally routable, else ().
 
     Blocks loopback, RFC 1918, link-local, CGNAT, ULA... so that a compromised or
     rebinding persona domain cannot turn noise into requests against the LAN (router
-    admin pages, NAS, Home Assistant) or the machine itself.
+    admin pages, NAS, Home Assistant) or the machine itself. The pinned connections
+    below connect to one of these very addresses, so there is no second lookup.
     """
     host = host.strip("[]").lower()
     now = time.monotonic()
@@ -37,19 +40,57 @@ def is_public_host(host: str, resolver=socket.getaddrinfo, ttl_s: float = 600) -
     if cached and now - cached[0] < ttl_s:
         return cached[1]
     try:
-        literal = ipaddress.ip_address(host)
-        addrs = [literal]
+        addrs = [ipaddress.ip_address(host)]
     except ValueError:
         try:
-            infos = resolver(host, 443, proto=socket.IPPROTO_TCP)
+            infos = resolver(host, port, proto=socket.IPPROTO_TCP)
         except (OSError, UnicodeError):
-            return False
+            return ()
         addrs = [ipaddress.ip_address(i[4][0].split("%")[0]) for i in infos]
-    ok = bool(addrs) and all(a.is_global for a in addrs)
+    ok = tuple(dict.fromkeys(str(a) for a in addrs)) if addrs and all(
+        a.is_global for a in addrs) else ()
     if len(_PUBLIC_CACHE) > 4096:
         _PUBLIC_CACHE.clear()
     _PUBLIC_CACHE[host] = (now, ok)
     return ok
+
+
+def is_public_host(host: str, resolver=socket.getaddrinfo, ttl_s: float = 600) -> bool:
+    """True only if every address the host resolves to is globally routable."""
+    return bool(public_addresses(host, resolver, ttl_s))
+
+
+def _pinned_socket(host: str, port: int, timeout, source_address=None) -> socket.socket:
+    """Connect to an address that passed the public check, never to a fresh lookup."""
+    last: OSError = OSError(f"{host} does not resolve to public addresses only")
+    for ip in public_addresses(host, port=port):
+        try:
+            return socket.create_connection((ip, port), timeout, source_address)
+        except OSError as exc:
+            last = exc
+    raise last
+
+
+class _PinnedHTTPConnection(http.client.HTTPConnection):
+    def connect(self) -> None:
+        self.sock = _pinned_socket(self.host, self.port, self.timeout, self.source_address)
+
+
+class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+    def connect(self) -> None:
+        sock = _pinned_socket(self.host, self.port, self.timeout, self.source_address)
+        # SNI and certificate checks still use the hostname, only the IP is pinned.
+        self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
+
+
+class _PinnedHTTPHandler(urllib.request.HTTPHandler):
+    def http_open(self, req):  # type: ignore[override]
+        return self.do_open(_PinnedHTTPConnection, req)
+
+
+class _PinnedHTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self, req):  # type: ignore[override]
+        return self.do_open(_PinnedHTTPSConnection, req, context=self._context)
 
 
 class _ScopedRedirects(urllib.request.HTTPRedirectHandler):
@@ -176,7 +217,10 @@ class Fetcher:
 
     def _open(self, req: urllib.request.Request):
         if self._opener is None:
-            self._opener = urllib.request.build_opener(_ScopedRedirects(self))
+            handlers: list[urllib.request.BaseHandler] = [_ScopedRedirects(self)]
+            if not urllib.request.getproxies():  # behind a proxy, the proxy resolves
+                handlers += [_PinnedHTTPHandler(), _PinnedHTTPSHandler()]
+            self._opener = urllib.request.build_opener(*handlers)
         return self._opener.open(req, timeout=self.timeout_s)
     _last_hit: dict[str, float] = field(default_factory=dict)
 

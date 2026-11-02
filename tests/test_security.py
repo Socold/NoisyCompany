@@ -141,3 +141,35 @@ def test_labelled_log_is_rotated(tmp_path):
     eng.label("dns", "example.org", True, 300, "chess")
     assert (tmp_path / "labelled.jsonl.1").stat().st_size == 10_000_001
     assert (tmp_path / "labelled.jsonl").stat().st_size < 1000
+
+
+def test_connection_is_pinned_to_the_vetted_address(monkeypatch):
+    # The check resolved a public address; a later rebinding to the LAN must not matter.
+    web._PUBLIC_CACHE["pinned.example"] = (web.time.monotonic(), ("93.184.216.34",))
+    seen = []
+    monkeypatch.setattr(web.socket, "create_connection",
+                        lambda addr, *a, **k: seen.append(addr) or object())
+    conn = web._PinnedHTTPConnection("pinned.example", 80)
+    conn.connect()
+    assert seen == [("93.184.216.34", 80)]
+
+
+def test_pinned_connection_refuses_private_hosts(monkeypatch):
+    web._PUBLIC_CACHE["lan.example"] = (web.time.monotonic(), ())
+    monkeypatch.setattr(web.socket, "create_connection",
+                        lambda *a, **k: pytest.fail("must not connect"))
+    with pytest.raises(OSError):
+        web._PinnedHTTPConnection("lan.example", 80).connect()
+
+
+def test_opener_pins_unless_a_proxy_is_set(monkeypatch):
+    monkeypatch.setattr(web.urllib.request, "getproxies", lambda: {})
+    f = Fetcher("UA", 5, 1000)
+    f._opener = None
+    handlers = []
+    monkeypatch.setattr(web.urllib.request, "build_opener", lambda *h: handlers.extend(h) or h)
+    try:
+        f._open(web.urllib.request.Request("https://example.org/"))
+    except AttributeError:
+        pass
+    assert any(isinstance(h, web._PinnedHTTPSHandler) for h in handlers)
