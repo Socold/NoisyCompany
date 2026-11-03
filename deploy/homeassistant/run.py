@@ -8,8 +8,9 @@ import json
 import os
 import sys
 
-OPTIONS = "/data/options.json"
-STATE = "/data/state"
+DATA = "/data"
+OPTIONS = DATA + "/options.json"
+STATE = DATA + "/state"
 CONFIG = STATE + "/noisycompany.toml"
 UID = GID = 10001  # the image's noisycompany user
 # Files of add-on versions <= 2.0.1, which kept the state directly in /data.
@@ -24,7 +25,7 @@ def toml_list(values):
 def prepare_state() -> None:
     os.makedirs(STATE, mode=0o700, exist_ok=True)
     for name in LEGACY:
-        old, new = os.path.join("/data", name), os.path.join(STATE, name)
+        old, new = os.path.join(DATA, name), os.path.join(STATE, name)
         if os.path.exists(old) and not os.path.exists(new):
             os.rename(old, new)
 

@@ -58,13 +58,18 @@ def test_ha_addon_entrypoint_writes_valid_config(tmp_path, monkeypatch):
             "locale_packs": True, "doh_sink": False, "privacy_report": True}
     (tmp_path / "options.json").write_text(json.dumps(opts))
     monkeypatch.setattr(mod, "OPTIONS", str(tmp_path / "options.json"))
-    monkeypatch.setattr(mod, "CONFIG", str(tmp_path / "nc.toml"))
+    (tmp_path / "salt").write_text("legacy")  # state of an add-on <= 2.0.1
+    state = tmp_path / "state"
+    monkeypatch.setattr(mod, "DATA", str(tmp_path))
+    monkeypatch.setattr(mod, "STATE", str(state))
+    monkeypatch.setattr(mod, "CONFIG", str(state / "nc.toml"))
     calls = []
     monkeypatch.setattr(mod.os, "execvp", lambda *a: calls.append(a))
     mod.main()
-    cfg = config.load(tmp_path / "nc.toml")
+    cfg = config.load(state / "nc.toml")
     assert cfg["budget"]["daily_mb"] == 2.5 and cfg["features"]["appliance_packages"]
     assert calls and calls[0][1][:2] == ["noisycompany", "run"]
+    assert calls[0][1][-1] == str(state) and (state / "salt").read_text() == "legacy"
 
 
 # ---------------------------------------------------------------- collective
