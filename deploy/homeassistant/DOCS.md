@@ -6,6 +6,8 @@ ISP or DNS resolver sees about the household is diluted with harmless decoy inte
 - Eco preset by default: about 2-3 MB per day, nothing at night.
 - Pauses while the network is busy (host network mode).
 - Health is reported to the Supervisor (`noisycompany health`).
+- Runs as an unprivileged user (uid 10001): the entrypoint only reads the options and
+  prepares `/data/state` as root. State of older versions is moved there on first start.
 
 Options: `preset` (eco, balanced, max), `daily_mb` hard cap, `active_hours`,
 `locale_packs` (French personas), `doh_sink`, `privacy_report`.
