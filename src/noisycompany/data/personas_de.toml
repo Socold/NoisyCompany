@@ -1,0 +1,26 @@
+# German locale pack (feature `locale_packs`, add "de" to locale_packs). Same rules as
+# personas.toml: harmless interests only, text-light pages, sites that allow crawling.
+
+[gartenarbeit]
+seeds = ["https://de.wikipedia.org/wiki/Gartenbau", "https://de.wikipedia.org/wiki/Gem%C3%BCsegarten",
+         "https://de.wikipedia.org/wiki/Kompostierung"]
+domains = ["de.wikipedia.org", "de.wikibooks.org"]
+queries = ["hochbeet anlegen", "tomaten ausgeizen", "kompost", "mulchen", "obstbaumschnitt"]
+
+[wandern]
+seeds = ["https://de.wikipedia.org/wiki/Wandern", "https://de.wikipedia.org/wiki/Rennsteig",
+         "https://de.wikipedia.org/wiki/Fernwanderweg"]
+domains = ["de.wikipedia.org", "de.wikivoyage.org"]
+queries = ["hüttenwanderung", "wanderschuhe", "schwarzwald", "fernwanderweg", "alpenüberquerung"]
+
+[backen]
+seeds = ["https://de.wikipedia.org/wiki/Brot", "https://de.wikipedia.org/wiki/Sauerteig",
+         "https://de.wikibooks.org/wiki/Kochbuch"]
+domains = ["de.wikipedia.org", "de.wikibooks.org"]
+queries = ["sauerteig ansetzen", "dinkelbrot", "brezel", "streuselkuchen", "roggenmehl"]
+
+[eisenbahn]
+seeds = ["https://de.wikipedia.org/wiki/Modelleisenbahn", "https://de.wikipedia.org/wiki/Dampflokomotive",
+         "https://de.wikipedia.org/wiki/Nenngr%C3%B6%C3%9Fe"]
+domains = ["de.wikipedia.org"]
+queries = ["spur h0", "märklin", "dampflok baureihe 01", "gleisplan", "digitalsteuerung"]

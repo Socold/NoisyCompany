@@ -1,0 +1,26 @@
+# Spanish locale pack (feature `locale_packs`, add "es" to locale_packs). Same rules as
+# personas.toml: harmless interests only, text-light pages, sites that allow crawling.
+
+[cocina]
+seeds = ["https://es.wikipedia.org/wiki/Paella", "https://es.wikipedia.org/wiki/Tortilla_de_patatas",
+         "https://es.wikibooks.org/wiki/Artes_culinarias"]
+domains = ["es.wikipedia.org", "es.wikibooks.org"]
+queries = ["paella valenciana", "gazpacho", "croquetas", "sofrito", "aceite de oliva"]
+
+[senderismo]
+seeds = ["https://es.wikipedia.org/wiki/Senderismo", "https://es.wikipedia.org/wiki/Camino_de_Santiago",
+         "https://es.wikipedia.org/wiki/Picos_de_Europa"]
+domains = ["es.wikipedia.org", "es.wikivoyage.org"]
+queries = ["ruta de montaña", "camino de santiago", "botas de senderismo", "sierra nevada", "albergue"]
+
+[astronomia]
+seeds = ["https://es.wikipedia.org/wiki/Astronom%C3%ADa_amateur", "https://es.wikipedia.org/wiki/Telescopio",
+         "https://es.wikipedia.org/wiki/Nebulosa"]
+domains = ["es.wikipedia.org"]
+queries = ["telescopio reflector", "lluvia de perseidas", "luna llena", "nebulosa de orión", "saturno"]
+
+[guitarra]
+seeds = ["https://es.wikipedia.org/wiki/Guitarra_espa%C3%B1ola", "https://es.wikipedia.org/wiki/Flamenco",
+         "https://es.wikipedia.org/wiki/Acorde"]
+domains = ["es.wikipedia.org", "es.wikibooks.org"]
+queries = ["acordes de guitarra", "rasgueo", "cuerdas de nylon", "tablatura", "paco de lucía"]

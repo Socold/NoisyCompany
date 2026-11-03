@@ -43,6 +43,7 @@ LANGUAGES = {
     "fr": "fr-FR,fr;q=0.9,en-US;q=0.6,en;q=0.5",
     "de": "de-DE,de;q=0.9,en;q=0.6",
     "es": "es-ES,es;q=0.9,en;q=0.6",
+    "it": "it-IT,it;q=0.9,en;q=0.6",
 }
 
 

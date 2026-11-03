@@ -1,0 +1,26 @@
+# Italian locale pack (feature `locale_packs`, add "it" to locale_packs). Same rules as
+# personas.toml: harmless interests only, text-light pages, sites that allow crawling.
+
+[cucina]
+seeds = ["https://it.wikipedia.org/wiki/Pasta", "https://it.wikipedia.org/wiki/Risotto",
+         "https://it.wikibooks.org/wiki/Libro_di_cucina"]
+domains = ["it.wikipedia.org", "it.wikibooks.org"]
+queries = ["pasta fresca", "risotto alla milanese", "ragù", "pesto genovese", "tiramisù"]
+
+[ciclismo]
+seeds = ["https://it.wikipedia.org/wiki/Ciclismo", "https://it.wikipedia.org/wiki/Giro_d%27Italia",
+         "https://it.wikipedia.org/wiki/Bicicletta_da_corsa"]
+domains = ["it.wikipedia.org"]
+queries = ["bici da corsa", "passo dello stelvio", "giro d'italia", "cambio shimano", "cicloturismo"]
+
+[archeologia]
+seeds = ["https://it.wikipedia.org/wiki/Pompei", "https://it.wikipedia.org/wiki/Foro_Romano",
+         "https://it.wikipedia.org/wiki/Etruschi"]
+domains = ["it.wikipedia.org", "it.wikivoyage.org"]
+queries = ["scavi di pompei", "etruschi", "foro romano", "anfiteatro", "via appia"]
+
+[giardinaggio]
+seeds = ["https://it.wikipedia.org/wiki/Giardinaggio", "https://it.wikipedia.org/wiki/Orto",
+         "https://it.wikipedia.org/wiki/Potatura"]
+domains = ["it.wikipedia.org"]
+queries = ["orto sul balcone", "potatura degli ulivi", "pomodori", "compostaggio", "basilico"]

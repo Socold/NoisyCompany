@@ -92,7 +92,7 @@ browser_companion = false
 [features.options]
 # persona_drift: how long the main hobby lasts, days.
 drift_main_days = 120
-# locale_packs: packs to add (files data/personas_<lang>.toml).
+# locale_packs: packs to add (files data/personas_<lang>.toml): fr, de, es, it.
 locale_packs = ["fr"]
 # Share of sessions using locale personas when locale_packs is on.
 locale_share = 0.6

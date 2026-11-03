@@ -40,7 +40,9 @@ def reviewed_personas() -> dict[str, dict[str, list[str]]]:
     """Every persona that went through review: built-in, locale packs, bundled packs."""
     out: dict[str, dict[str, list[str]]] = {}
     data = resources.files("noisycompany.data")
-    for name in ("personas.toml", "personas_fr.toml"):
+    names = ["personas.toml"] + sorted(
+        p.name for p in data.iterdir() if p.name.startswith("personas_") and p.name.endswith(".toml"))
+    for name in names:
         out.update(tomllib.loads(data.joinpath(name).read_text("utf-8")))
     for pack in packs.bundled().values():
         out.update({k: v for k, v in pack.items() if k != "meta"})

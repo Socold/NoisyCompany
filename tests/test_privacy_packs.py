@@ -138,5 +138,7 @@ def test_cli_packs_check_and_privacy(tmp_path, capsys):
 def test_cli_packs_check_builtin_personas_without_meta():
     from importlib import resources
     base = resources.files("noisycompany.data")
-    files = [str(base.joinpath(n)) for n in ("personas.toml", "personas_fr.toml")]
+    files = [str(p) for p in base.iterdir()
+             if p.name.startswith("personas") and p.name.endswith(".toml")]
+    assert len(files) >= 5  # built-in + fr, de, es, it
     assert main(["packs", "check", *files, "--no-meta"]) == 0
