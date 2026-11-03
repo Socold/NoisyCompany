@@ -8,6 +8,7 @@ features.json -> | features    |-- personas / packs / collective (who)   |
                  |             |-- web.Fetcher          (HTTP noise)     |
                  |             |     url_allowed: scheme, scope, public IP|
                  |             |     scoped redirects, size + inflate caps|
+                 |             |     sockets pinned to the vetted IP     |
                  |             |-- netwatch / metered   (back-off)       |
                  |             |-- label()  -> labelled.jsonl            |
                  |             '-- server.LocalServer  127.0.0.1 only    |

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased (2.1)
+
+Hardening from the November 2026 audit:
+
+- Connections go to the address that passed the public-IP check (no DNS rebinding
+  window between check and connect).
+- Seeded fuzz tests of the link parser, body decoder and share-code decoder; optional
+  atheris harness in `fuzz/`.
+- Home Assistant add-on runs the daemon as uid 10001; state moves to `/data/state`.
+- Release images get a Sigstore-signed provenance attestation; PyPI trusted publishing
+  workflow (off until configured).
+
 ## 2.0.1
 
 Security and data-privacy audit fixes ([report](docs/SECURITY_AUDIT_2026-11.md)):

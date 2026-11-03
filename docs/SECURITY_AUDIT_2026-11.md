@@ -58,6 +58,10 @@ Residual: a TOCTOU window between the check and urllib's own resolution. It is
 acceptable here (the noise has no credentials and reads public pages only), and noted in
 the roadmap (connect to the checked address).
 
+Update (2.1): closed. Connections now go to one of the addresses that passed the check
+(`_PinnedHTTPSConnection`, SNI and certificate still on the hostname). Behind a
+configured proxy, the proxy resolves and pinning is skipped.
+
 ### 3. Decompression bomb (fixed)
 
 The decompressed output is capped at 2 MB (`MAX_DECODED_BYTES`). Share codes were
@@ -98,6 +102,10 @@ See [PRIVACY.md](PRIVACY.md) for the full inventory. Results:
 - **Logs**: URLs only at DEBUG level.
 
 ## Recommendations kept for the roadmap
+
+Status in 2.1: the first, second (as GitHub attestations, Sigstore keyless), third
+(non-root, AppArmor still open) and fourth (seeded fuzz tests in CI, atheris harness) are
+done.
 
 - Connect to the vetted IP (remove the TOCTOU window), for example with a custom
   `HTTPSConnection`.

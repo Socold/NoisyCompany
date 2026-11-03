@@ -26,3 +26,11 @@ NoisyCompany never executes fetched content.
 
 Past audits: [docs/SECURITY_AUDIT_2026-11.md](docs/SECURITY_AUDIT_2026-11.md).
 Data inventory: [docs/PRIVACY.md](docs/PRIVACY.md).
+
+## Verifying releases
+
+From 2.1, each image on GHCR carries a Sigstore-signed build provenance:
+
+```bash
+gh attestation verify oci://ghcr.io/socold/noisycompany:<tag> -R Socold/NoisyCompany
+```

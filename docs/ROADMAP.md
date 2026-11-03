@@ -40,13 +40,15 @@ Each will get its own switch, off by default, like the items above.
 
 ### 2.1: hardening and trust (from the November 2026 audit)
 
-| Item | Why |
-|---|---|
-| Connect to the vetted IP address (custom `HTTPSConnection` with SNI) | Removes the residual check-then-connect window of the public-IP check |
-| Keyless cosign signatures + SLSA provenance check documented for GHCR images | Users can verify the image before running it on a home appliance |
-| Fuzzing of the link parser and share-code decoder (atheris) in CI | Both parse untrusted input |
-| Home Assistant add-on as non-root, AppArmor profile | Least privilege on the always-on box |
-| Publish on PyPI (trusted publishing) | `pipx install noisycompany` without git |
+These are safety fixes, so they are always on (no switch).
+
+| Item | Why | Status |
+|---|---|---|
+| Connect to the vetted IP address (custom `HTTPSConnection` with SNI) | Removes the residual check-then-connect window of the public-IP check | Done |
+| Keyless signed provenance for GHCR images (Sigstore, GitHub attestations) | Users can verify the image before running it on a home appliance | Done, from the next tag |
+| Fuzzing of the link parser, body decoder and share-code decoder | All parse untrusted input | Done: seeded fuzz tests in CI, optional atheris harness in `fuzz/` |
+| Home Assistant add-on as non-root | Least privilege on the always-on box | Done (uid 10001). AppArmor profile still to do |
+| Publish on PyPI (trusted publishing) | `pipx install noisycompany` without git | Workflow ready, waits for the PyPI trusted publisher |
 
 ### 2.2: realism (driven by `noisycompany study` results)
 

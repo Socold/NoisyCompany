@@ -141,6 +141,12 @@ domains and resolve to public IPs only, so a hostile site cannot aim your traffi
 LAN. State files are private (0700/0600). Details: [PRIVACY.md](docs/PRIVACY.md),
 [audit](docs/SECURITY_AUDIT_2026-11.md), [SECURITY.md](SECURITY.md).
 
+Images from 2.1 on carry a signed build provenance. Check it before running:
+
+```bash
+gh attestation verify oci://ghcr.io/socold/noisycompany:v2.1.0 -R Socold/NoisyCompany
+```
+
 ## Responsible use
 
 noisycompany only reads public pages, at human pace, and honours robots.txt. It never clicks
