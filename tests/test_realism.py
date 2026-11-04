@@ -114,3 +114,46 @@ def test_benchmark_runs_the_real_engine_offline(monkeypatch):
     rows = list(benchmark.run(days=2, seed=1))
     assert [r.name for r in rows] == list(benchmark.CONFIGS)
     assert all(0.0 <= r.auc <= 1.0 for r in rows)
+
+
+def test_energy_measurement_with_fake_rapl(tmp_path):
+    from noisycompany import energy
+    zone = tmp_path / "intel-rapl:0"
+    sub = tmp_path / "intel-rapl:0:0"
+    zone.mkdir()
+    sub.mkdir()
+    (zone / "max_energy_range_uj").write_text("1000000000")
+    (sub / "energy_uj").write_text("999")  # sub-zone: must not be double counted
+    readings = iter([100_000_000, 130_000_000, 140_000_000])
+
+    def read():
+        (zone / "energy_uj").write_text(str(next(readings)))
+        return energy.read_rapl_uj(tmp_path)
+
+    calls = []
+    m = energy.measure(lambda: calls.append(1), 10, read=read, sleep=lambda s: None)
+    assert calls == [1] * 10 and m.joules_run == 30 and m.joules_idle == 10
+    assert m.joules_per_session == 2 and abs(m.wh_per_day(36) - 0.02) < 1e-9
+    assert energy._delta_uj(999_999_000, 1_000, tmp_path) == 2_000
+    assert energy.read_rapl_uj(tmp_path / "none") is None
+
+
+def test_scenarios_bundled_valid_and_runnable(tmp_path):
+    from noisycompany import packs, scenarios
+    from noisycompany.cli import main
+    assert {"office_week", "plant_night_shift", "school_term"} <= set(scenarios.available())
+    for name in scenarios.available():
+        assert scenarios.load(name)["profile"] in packs.business_profiles()
+    custom = tmp_path / "short.toml"
+    custom.write_text('[scenario]\ntitle = "t"\ndescription = "d"\nprofile = "logistics"\n'
+                      'preset = "eco"\ndays = 2\nswitches = { weekly_rhythm = true }\n')
+    out = tmp_path / "out.jsonl"
+    assert main(["scenario", "run", str(custom), "--out", str(out)]) == 0
+    recs = [json.loads(x) for x in out.read_text().splitlines()]
+    assert recs and {r["profile"] for r in recs} == {"logistics"}
+
+
+def test_new_business_profiles_pass_the_validator():
+    from noisycompany import packs
+    for name in ("logistics", "education", "manufacturing"):
+        assert packs.business_personas(name)

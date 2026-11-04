@@ -1,0 +1,17 @@
+[meta]
+title = "Logistics"
+lang = "en"
+description = "Warehouse and transport planners: freight, standards, route planning."
+version = 1
+
+[logistics_freight]
+seeds = ["https://en.wikipedia.org/wiki/Freight_transport", "https://en.wikipedia.org/wiki/Intermodal_container",
+         "https://en.wikipedia.org/wiki/Incoterms"]
+domains = ["en.wikipedia.org", "en.wikibooks.org"]
+queries = ["incoterms", "pallet dimensions", "container sizes", "cross docking", "bill of lading"]
+
+[logistics_warehouse]
+seeds = ["https://en.wikipedia.org/wiki/Warehouse_management_system", "https://en.wikipedia.org/wiki/Forklift",
+         "https://en.wikipedia.org/wiki/Order_picking"]
+domains = ["en.wikipedia.org"]
+queries = ["pick and pack", "barcode scanning", "slotting", "cycle count", "forklift safety"]

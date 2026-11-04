@@ -1,0 +1,7 @@
+[scenario]
+title = "Office week"
+description = "Five working days of an office profile: the benign baseline a NDR/SIEM must stay quiet on."
+profile = "office"
+preset = "balanced"
+days = 7
+switches = { weekly_rhythm = true, dns_coherence = true, third_party_bursts = true }

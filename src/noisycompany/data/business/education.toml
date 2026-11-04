@@ -1,0 +1,17 @@
+[meta]
+title = "Education"
+lang = "en"
+description = "School staff: course material, libraries, timetabling, open resources."
+version = 1
+
+[edu_courses]
+seeds = ["https://en.wikipedia.org/wiki/Lesson_plan", "https://en.wikibooks.org/wiki/Main_Page",
+         "https://en.wikipedia.org/wiki/Open_educational_resources"]
+domains = ["en.wikipedia.org", "en.wikibooks.org", "www.khanacademy.org"]
+queries = ["lesson plan template", "fractions exercises", "photosynthesis diagram", "reading list", "quiz ideas"]
+
+[edu_library]
+seeds = ["https://en.wikipedia.org/wiki/Library_catalog", "https://en.wikipedia.org/wiki/Dewey_Decimal_Classification",
+         "https://www.gutenberg.org/"]
+domains = ["en.wikipedia.org", "www.gutenberg.org", "openlibrary.org"]
+queries = ["public domain books", "dewey decimal", "citation style", "isbn lookup", "reading comprehension"]

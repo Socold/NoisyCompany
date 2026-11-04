@@ -258,6 +258,48 @@ def _print_qr(code: str, svg: str | None) -> None:
         print(q.to_text(), file=sys.stderr)
 
 
+def cmd_energy(args: argparse.Namespace) -> int:
+    from noisycompany import energy, impact
+    cfg = config.load(args.config, args.preset)
+    eng = Engine(cfg, config.load_personas(cfg), None, dry_run=args.dry_run)
+    eng.refresh_features()
+    eng._sleep = lambda s: not eng.stop.is_set()  # sessions back to back, no dwell
+    if energy.read_rapl_uj() is None:
+        print("RAPL energy counters not readable (run as root for joules); "
+              "CPU time only.", file=sys.stderr)
+    m = energy.measure(eng.run_session, args.sessions)
+    per_day = impact.estimate(cfg).sessions_per_day
+    print(f"Sessions measured   : {m.sessions} in {m.seconds:.0f} s"
+          + (" (dry run, no network)" if args.dry_run else ""))
+    print(f"CPU time            : {m.cpu_s:.2f} s, {m.cpu_s / max(m.sessions, 1) * 1000:.0f} ms"
+          " per session")
+    if m.joules_per_session is not None:
+        print(f"Package energy      : {m.joules_run:.1f} J run, {m.joules_idle:.1f} J idle "
+              f"-> {m.joules_per_session:.2f} J per session")
+        print(f"Per day ({per_day:.0f} sessions): {m.wh_per_day(per_day):.3f} Wh "
+              "(CPU package, above idle)")
+    return 0
+
+
+def cmd_scenario(args: argparse.Namespace) -> int:
+    from noisycompany import scenarios
+    if args.action == "list" or not args.name:
+        for name, sc in scenarios.available().items():
+            print(f"{name:20} {sc['profile']:14} {sc.get('days', 7):>3} d  {sc['description']}")
+        return 0
+    sc = scenarios.load(args.name)
+    out = Path(args.out)
+    result = scenarios.run(sc, out, args.seed)
+    print(f"{out}: {result['records']} labelled records, {result['hosts']} hosts")
+    ok = True
+    for key in ("no_beaconing", "hourly_cap_respected", "all_labelled"):
+        ok &= result[key]
+        print(f"  [{'ok' if result[key] else '!!'}] {key}")
+    print(f"  session gap CV {result['session_gap_cv']}, "
+          f"max {result['max_actions_in_an_hour']} actions in an hour")
+    return 0 if ok else 1
+
+
 def cmd_benchmark(args: argparse.Namespace) -> int:
     from noisycompany import __version__, benchmark
     rows = list(benchmark.run(args.days, args.seed))
@@ -358,6 +400,20 @@ def build_parser() -> argparse.ArgumentParser:
     cl.add_argument("--qr", action="store_true", help="create: also print a QR code")
     cl.add_argument("--svg", help="qr/rotate/create: write the QR code to this SVG file")
     cl.set_defaults(func=cmd_collective)
+
+    en = sub.add_parser("energy", parents=[common],
+                        help="measure CPU time and RAPL energy of real sessions")
+    en.add_argument("--sessions", type=int, default=20)
+    en.add_argument("--dry-run", action="store_true", help="no network (CPU cost only)")
+    en.set_defaults(func=cmd_energy)
+
+    sc = sub.add_parser("scenario", parents=[common],
+                        help="SOC test scenarios: labelled benign traffic, offline")
+    sc.add_argument("action", nargs="?", choices=["list", "run"], default="list")
+    sc.add_argument("name", nargs="?", help="run: scenario name or .toml file")
+    sc.add_argument("--out", default="scenario.jsonl", help="run: labelled JSONL output")
+    sc.add_argument("--seed", type=int, default=1)
+    sc.set_defaults(func=cmd_scenario)
 
     bm = sub.add_parser("benchmark", parents=[common],
                         help="offline separability benchmark on simulated days")

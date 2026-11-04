@@ -1,0 +1,7 @@
+[scenario]
+title = "School term"
+description = "Two weeks of school staff traffic with weekends and the weekly rhythm."
+profile = "education"
+preset = "eco"
+days = 14
+switches = { weekly_rhythm = true, third_party_bursts = true }

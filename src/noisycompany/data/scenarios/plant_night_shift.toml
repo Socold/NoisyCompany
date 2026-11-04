@@ -1,0 +1,8 @@
+[scenario]
+title = "Plant, long hours"
+description = "Manufacturing engineers browsing from 06:00 to 22:00: tests rules on off-hours activity."
+profile = "manufacturing"
+preset = "eco"
+days = 7
+active_hours = ["06:00-22:00"]
+switches = { dns_coherence = true }

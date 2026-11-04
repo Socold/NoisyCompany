@@ -87,13 +87,16 @@ class _FakeFetcher(Fetcher):
         return REQUEST_OVERHEAD + self.asset_cap // 2
 
 
-def simulate_noise(switches: dict[str, bool], days: int, seed: int) -> list[study.Event]:
+def simulate_noise(switches: dict[str, bool], days: int, seed: int,
+                   cfg: dict | None = None, options: dict | None = None,
+                   keep_log: Path | None = None) -> list[study.Event]:
+    """Run the real engine offline; optionally copy its labelled log to keep_log."""
     rng = random.Random(seed)
     clock = _SimClock(START)
     end = clock.t + days * 86400
     with TemporaryDirectory() as tmp:
         state = Path(tmp)
-        cfg = config.load(preset="eco")
+        cfg = cfg or config.load(preset="eco")
         cfg["netwatch"]["enabled"] = False
         stop = threading.Event()
         eng = Engine(cfg, config.load_personas(cfg), state, rng=rng, stop=stop, now=clock.now)
@@ -103,6 +106,7 @@ def simulate_noise(switches: dict[str, bool], days: int, seed: int) -> list[stud
         eng.fetcher = _FakeFetcher(eng.fetcher, rng)
         eng.lookup = lambda host: (True, 300, "dns")  # type: ignore[method-assign]
         eng.save_stats = lambda: None  # type: ignore[method-assign]
+        eng.options.update(options or {})
         eng.features.set("labelled_log", True)
         for fid, on in switches.items():
             eng.features.set(fid, on)
@@ -116,7 +120,10 @@ def simulate_noise(switches: dict[str, bool], days: int, seed: int) -> list[stud
 
         eng._sleep = sleep  # type: ignore[method-assign]
         eng.run()
-        return study.load_noise(state / "labelled.jsonl")
+        log = state / "labelled.jsonl"
+        if keep_log:
+            keep_log.write_text(log.read_text("utf-8") if log.exists() else "", "utf-8")
+        return study.load_noise(log) if log.exists() else []
 
 
 def _zipf(rng: random.Random, items: list[str], s: float = 1.2) -> str:

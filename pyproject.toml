@@ -34,7 +34,7 @@ noisycompany = "noisycompany.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-noisycompany = ["data/*.toml", "data/packs/*.toml", "data/business/*.toml", "data/*.html", "data/*.css", "data/*.js"]
+noisycompany = ["data/*.toml", "data/packs/*.toml", "data/business/*.toml", "data/scenarios/*.toml", "data/*.html", "data/*.css", "data/*.js"]
 
 [tool.ruff]
 line-length = 100

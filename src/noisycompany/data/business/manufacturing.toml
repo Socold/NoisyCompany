@@ -1,0 +1,17 @@
+[meta]
+title = "Manufacturing"
+lang = "en"
+description = "Plant engineers: machining, quality, standards, maintenance."
+version = 1
+
+[mfg_quality]
+seeds = ["https://en.wikipedia.org/wiki/Statistical_process_control", "https://en.wikipedia.org/wiki/Six_Sigma",
+         "https://en.wikipedia.org/wiki/ISO_9000"]
+domains = ["en.wikipedia.org", "en.wikibooks.org"]
+queries = ["control chart", "process capability", "root cause analysis", "iso 9001", "gauge r&r"]
+
+[mfg_machining]
+seeds = ["https://en.wikipedia.org/wiki/Computer_numerical_control", "https://en.wikipedia.org/wiki/Geometric_dimensioning_and_tolerancing",
+         "https://en.wikipedia.org/wiki/Total_productive_maintenance"]
+domains = ["en.wikipedia.org"]
+queries = ["g-code", "tolerance stack", "preventive maintenance", "surface finish", "lean manufacturing"]
