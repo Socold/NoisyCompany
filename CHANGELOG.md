@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased (2.1, 2.2, 2.3, 2.4)
+## Unreleased (2.1, 2.2, 2.3, 2.4, 3.x)
+
+Research and collective:
+
+- Collective share codes as QR codes (terminal or SVG), expiry dates, `collective rotate`
+  for a new shared salt. Expired codes cannot be joined; unknown fields are rejected.
+- `noisycompany benchmark`: the real engine on a simulated clock and a fake network,
+  scored against a synthetic household; published in each release summary and in
+  docs/BENCHMARK.md.
+- `noisycompany energy`: measured CPU time and RAPL energy per session.
+- Business profiles logistics, education, manufacturing; `noisycompany scenario` makes
+  labelled benign traffic for SOC tests offline, with no-beaconing and cap checks.
 
 Integrations:
 

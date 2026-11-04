@@ -51,6 +51,9 @@ All items above are implemented (v2.0.0).
 - **2.4 integrations**: Pi-hole / AdGuard Home box, Umbrel / CasaOS / TrueNAS / Unraid
   templates, OpenWrt package with a LuCI page, Grafana dashboard, French dashboard and
   accessibility fixes.
+- **3.x research**: QR share codes with expiry and salt rotation, offline separability
+  benchmark published per release, measured energy, three more business sectors and
+  SOC scenarios.
 
 ## Next evolutions
 
@@ -64,6 +67,8 @@ Each will get its own switch, off by default, like the items above.
 | PyPI publication | Needs the PyPI trusted publisher, then `PYPI_PUBLISH=true` |
 | Build the OpenWrt packages in CI (SDK container) and submit app templates to the Umbrel / CasaOS stores | Today they are checked by format only |
 | Accessibility review of the companion popup, French CLI output | Same standard as the dashboard |
+| Page-load-like bursts (5-25 hosts within a second) and noise interleaved with real browsing | The benchmark shows burst size and session shape are what give the noise away |
+| RAPL and smart-plug numbers from several machines in IMPACT.md | One CPU-time measurement so far |
 | Per-persona rhythm (a gardener on Sunday mornings, a gamer at night) | `weekly_rhythm` is household-wide today |
 | Study: packet sizes and TLS fingerprint features (from a pcap or NetFlow export) | DNS traces do not carry them |
 
@@ -89,12 +94,12 @@ Each will get its own switch, off by default, like the items above.
 
 ### 3.x: research and collective
 
-| Item | Why |
-|---|---|
-| Collective share code as QR code, expiry and rotation of the shared salt | Easier and safer sharing |
-| Public separability benchmark (synthetic traces, published AUCs per release) | Measure progress honestly |
-| Real energy measurement (RAPL / smart plug) published in IMPACT.md | Replace estimates by measurements |
-| Business profiles for more sectors + scenario files for SOC exercises | Detection engineering market |
+| Item | Why | Status |
+|---|---|---|
+| Collective share code as QR code, expiry and rotation of the shared salt | Easier and safer sharing | Done: `collective qr`, `--expires-days`, `collective rotate` (stdlib QR encoder) |
+| Public separability benchmark (synthetic traces, published AUCs per release) | Measure progress honestly | Done: `noisycompany benchmark`, release job summary, [BENCHMARK.md](BENCHMARK.md). Result: DNS noise still trivially separable by window features (AUC 0.98-1.00) |
+| Real energy measurement (RAPL / smart plug) published in IMPACT.md | Replace estimates by measurements | Done: `noisycompany energy`; CPU time measured (17 ms/session), RAPL joules need a root run |
+| Business profiles for more sectors + scenario files for SOC exercises | Detection engineering market | Done: logistics, education, manufacturing; `noisycompany scenario` with 3 scenarios |
 
 ## Use cases enabled
 

@@ -46,3 +46,8 @@ One observer model only: no TLS fingerprint, no packet sizes, no cross-household
 A high AUC is a real warning; a low AUC is not a proof of safety. Expect DNS-level noise
 from the daemon to be largely separable from a real DNS log (no third-party bursts): its
 value is in diluting the *interest categories* of hostnames, not in being invisible.
+
+## Benchmark
+
+Without a real trace, `noisycompany benchmark` runs the same study against a synthetic
+household, offline. Results per release: [BENCHMARK.md](BENCHMARK.md).

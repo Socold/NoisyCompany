@@ -58,6 +58,13 @@ même moment, sans serveur et sans pouvoir ajouter de domaine. Étude de détect
 `noisycompany study` mesure (AUC) si un observateur peut séparer le bruit de votre trafic
 réel, voir [STUDY.md](../STUDY.md).
 
+Recherche (3.x) : codes de collectif en QR code avec date d'expiration et `collective
+rotate` pour changer le secret ; banc d'essai hors ligne `noisycompany benchmark`, publié à
+chaque version ([BENCHMARK.md](../BENCHMARK.md) : le bruit DNS reste facile à séparer par
+fenêtres de temps, c'est dit franchement) ; mesure réelle `noisycompany energy` (17 ms de
+CPU par session) ; profils logistique, éducation, industrie et scénarios SOC hors ligne
+(`noisycompany scenario`).
+
 Extension Firefox ([companion/](../../companion/README.md)) : les mêmes visites rares, faites
 par votre vrai navigateur, donc avec la même empreinte réseau. Désactivée par défaut, mode
 léger sans cookie ou mode onglet caché dans un conteneur dédié. Le reste est

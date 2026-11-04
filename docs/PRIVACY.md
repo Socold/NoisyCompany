@@ -50,6 +50,8 @@ salt in the extension's local storage. Nothing is synchronised.
   `extensions.json` and Chromium-family `Local State` / extension IDs, `resolvectl status`,
   `/proc/sys/net/ipv6/conf/all/use_tempaddr`. The output contains booleans and the names
   of known blockers only. No path, no history, no other extension name.
+- **Energy** (`noisycompany energy`): `/sys/class/powercap/*/energy_uj` counters only.
+- **Benchmark and scenarios**: fully offline, nothing read but the bundled data.
 - **Study** (`noisycompany study`): the trace file you pass. It is processed in memory
   and not copied. Do not publish your trace.
 

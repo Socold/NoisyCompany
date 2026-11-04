@@ -23,7 +23,7 @@ companion/ (Firefox MV3): lib.js (pure logic) + background.js (alarms, idle, fet
 
 | Module | Role |
 |---|---|
-| `cli.py` | Commands: run, estimate, features, privacy, packs, collective, companion, study, health, personas, config |
+| `cli.py` | Commands: run, estimate, features, privacy, packs, collective, companion, study, benchmark, energy, scenario, health, personas, config |
 | `config.py` | Defaults, presets (eco/balanced/max), validation, persona loading |
 | `engine.py` | Main loop: active hours, exponential gaps, budget pacing, netwatch, sessions, labelled log, heartbeat, feature refresh between sessions |
 | `budget.py` | Daily byte cap, hourly action cap |
@@ -37,6 +37,10 @@ companion/ (Firefox MV3): lib.js (pure logic) + background.js (alarms, idle, fet
 | `netwatch.py` / `metered.py` | Back-off on user traffic / metered links |
 | `impact.py` | Bandwidth and energy estimate |
 | `privacy.py` | Local privacy report |
+| `qr.py` | Stdlib QR encoder for share codes (terminal, SVG) |
+| `benchmark.py` | Offline benchmark: real engine, simulated clock, fake network, synthetic household |
+| `energy.py` | CPU time and RAPL energy per session |
+| `scenarios.py` | SOC scenarios: labelled benign traffic offline, with checks |
 | `study.py` | Separability study (windows, logistic regression, ROC AUC) |
 | `companion.py` | Generates the extension's personas and manifest |
 | `server.py` | Localhost dashboard and Prometheus metrics |

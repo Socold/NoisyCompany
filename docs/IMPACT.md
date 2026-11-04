@@ -70,6 +70,24 @@ Network energy per GB is disputed. We give a range rather than a single number:
 
 For comparison, one hour of HD streaming is ~3 GB, i.e. 15-180 Wh by the same method.
 
+### Measured on the machine (`noisycompany energy`)
+
+`noisycompany energy --sessions 20` runs real sessions back to back, then stays idle as
+long, and reports CPU time and, when readable, the CPU package energy (RAPL counters;
+`sudo` on most kernels). First measurement, desktop x86 CPU, eco preset, real network:
+
+| What | Value |
+|---|---|
+| CPU time per session | 17 ms |
+| CPU time per day (eco, ~40 sessions) | under 1 s |
+| Package energy | not measured yet (RAPL needs root) |
+
+At a typical 15-30 W package power while busy, 1 s of CPU a day is about 0.01 Wh/day:
+the machine side is negligible next to the device staying on. Please share your
+`sudo noisycompany energy` output (it contains no personal data) to fill the table, or a
+smart-plug reading: plug the box, note the average watts over a day with the noise off,
+then on.
+
 **Device energy dominates.** Running NoisyCompany on an always-on box (router, NAS, Raspberry Pi
 at 2-3 W) adds almost nothing. Keeping a laptop awake for it would cost far more than the
 traffic: NoisyCompany never prevents sleep, and should not be the reason a machine stays on.

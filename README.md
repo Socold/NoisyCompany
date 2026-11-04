@@ -137,8 +137,11 @@ The dashboard is in English and French (browser language, or `?lang=fr`).
 | `noisycompany features [on\|off <id>]` | List or flip the switches |
 | `noisycompany privacy [--json]` | Local privacy report and score |
 | `noisycompany packs [list\|install\|remove\|check]` | Reviewed persona packs |
-| `noisycompany collective [show\|create\|join\|leave]` | Shared decoys across households |
+| `noisycompany collective [show\|create\|join\|leave\|qr\|rotate]` | Shared decoys across households, QR codes, expiry, new salt |
 | `noisycompany study --noise ... --human ...` | Separability (ROC AUC) |
+| `noisycompany benchmark [--days 14]` | Offline separability benchmark ([results](docs/BENCHMARK.md)) |
+| `noisycompany energy [--sessions 20]` | Measured CPU time and RAPL energy per session |
+| `noisycompany scenario [list\|run <name>]` | Labelled benign traffic for SOC tests, offline |
 | `noisycompany health` | Liveness for supervisors / Docker |
 | `noisycompany companion export [--check]` | Regenerate the Firefox companion files |
 | `noisycompany personas`, `noisycompany config` | Inspect personas and effective config |
