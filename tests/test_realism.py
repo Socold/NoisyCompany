@@ -82,3 +82,19 @@ def test_study_reads_pihole_ftl_db_and_adguard_querylog(tmp_path):
     log = tmp_path / "querylog.json"
     log.write_text('{"T":"2026-11-03T20:01:02.5+01:00","QH":"lichess.org","QT":"A"}\n')
     assert study.load_trace(log)[0].host == "lichess.org"
+
+
+def test_grafana_dashboard_only_uses_exported_metrics():
+    import re
+    from pathlib import Path
+
+    from noisycompany.server import render_metrics
+    status = {"stats": {k: 1 for k in ("sessions", "dns_ok", "dns_fail", "pages_ok",
+                                       "pages_fail", "robots_denied", "bytes", "paused_busy",
+                                       "paused_budget")},
+              "bytes_today": 1, "daily_cap_bytes": 2, "metered": False}
+    exported = set(re.findall(r"^(noisycompany_\w+)", render_metrics(status), re.M))
+    dash = json.loads(Path("deploy/grafana/noisycompany-dashboard.json").read_text())
+    used = {m for p in dash["panels"] for t in p["targets"]
+            for m in re.findall(r"noisycompany_\w+", t["expr"])}
+    assert used and used <= exported
