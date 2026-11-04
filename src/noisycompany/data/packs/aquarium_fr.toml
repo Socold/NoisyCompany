@@ -1,0 +1,11 @@
+[meta]
+title = "Aquariophilie"
+lang = "fr"
+description = "Aquariophilie d'eau douce, en français."
+version = 1
+
+[aquariophilie]
+seeds = ["https://fr.wikipedia.org/wiki/Aquariophilie", "https://fr.wikipedia.org/wiki/Aquarium_plant%C3%A9",
+         "https://fr.wikipedia.org/wiki/Cycle_de_l%27azote"]
+domains = ["fr.wikipedia.org", "www.aquaportail.com", "www.aquariophilie.org"]
+queries = ["cycle de l'azote", "plantes d'aquarium", "néon cardinal", "bac planté", "test de l'eau"]

@@ -23,14 +23,14 @@ Defaults can also be set in the `[features]` table of the config file.
 | `metrics` | 2.2 | Prometheus text on http://127.0.0.1:9789/metrics | none |
 | `dashboard` | 2.2 | Local page: budget, KPIs, active personas, on/off buttons. Localhost only, anti DNS rebinding, CSRF token, strict CSP | none |
 | `labelled_log` | 2.2 | JSONL ground truth of every action (`label: benign-noise`) for SOC / IDS / NDR testing | disk only |
+| `privacy_report` | 2.3 | `noisycompany privacy` and a dashboard card: content blocker, encrypted DNS (browser DoH or systemd-resolved DoT), fingerprinting protection, GPC, IPv6 temporary addresses, noise running, noise DNS coherent with browser DNS. Score out of 100, advice for each gap. Read-only, local, no path or browsing data in the output | none |
+| `persona_marketplace` | 2.3 | `noisycompany packs [list\|install\|remove\|check]`: reviewed packs shipped in `data/packs/` (photography, board games, knitting, aquariophilie FR), installed by copy, re-validated at load (a tampered pack is ignored). CI rejects packs with sensitive topics, non-HTTPS seeds, seeds outside their domains, login/ads URLs | none |
 
 ## Planned
 
 | Switch | Milestone | Plan |
 |---|---|---|
-| `privacy_report` | 2.3 | Local checks (encrypted DNS, ECH support, blocker presence, IPv6 privacy addresses) combined with noise stats into a household privacy score, shown in the dashboard |
 | `browser_companion` | 2.3 | WebExtension (Firefox first): rare persona visits inside the real browser, in a dedicated container, no ads, no clicks, same budget rules. The only way to act on browser-level ad profiling |
-| `persona_marketplace` | 2.3 | Reviewed persona packs in the repository, installable by name, checklist enforced in CI (no sensitive topic, robots.txt allows, light pages) |
 | `business_profiles` | 2.4 | Persona packs per business profile (office, dev team, retail, hospital admin) for SOC labs, with labelled output |
 | `appliance_packages` | 2.4 | Raspberry Pi image, OpenWrt package, Home Assistant add-on, Pi-hole / AdGuard Home companion, Umbrel / CasaOS / TrueNAS apps |
 | `request_trees` | 3.0 | Fetch a page's same-origin CSS/JS once (cached) so request trees look less bot-like; doubles bandwidth, hence opt-in |

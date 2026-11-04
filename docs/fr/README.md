@@ -41,7 +41,10 @@ Chaque élément de la feuille de route a un interrupteur, désactivé par défa
 `noisycompany features` (liste), `noisycompany features on <id>`, ou les boutons du
 tableau de bord local (`noisycompany features on dashboard`, puis http://127.0.0.1:9788).
 Disponibles : dérive des personas, pack de personas français, garde connexion limitée,
-DNS sur HTTPS, métriques Prometheus, journal étiqueté pour tester un SOC. Le reste est
+DNS sur HTTPS, métriques Prometheus, journal étiqueté pour tester un SOC, rapport de
+confidentialité (`noisycompany privacy` : bloqueur, DNS chiffré, anti-empreinte, GPC,
+IPv6, cohérence du bruit, score sur 100, rien n'est envoyé) et packs de personas relus
+(`noisycompany packs install <nom>`). Le reste est
 listé « planned » : voir la [feuille de route](../ROADMAP.md).
 
 Voir aussi : [état de l'art](../STATE_OF_THE_ART.md), [opportunités](../OPPORTUNITIES.md).

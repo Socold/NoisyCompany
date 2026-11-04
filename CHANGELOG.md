@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0a3 (unreleased)
+
+- `privacy_report`: `noisycompany privacy` + dashboard card, local read-only checks and score.
+- `persona_marketplace`: `noisycompany packs`, 4 reviewed packs, validator run in CI.
+
 ## 2.0.0a2 (unreleased)
 
 - Feature switches for every roadmap item (`noisycompany features`, dashboard buttons).

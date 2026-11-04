@@ -34,7 +34,10 @@ It is a ground-up rewrite of the idea behind [1tayH/noisy](https://github.com/1t
 - **Zero runtime dependency**: Python standard library only, ~1000 lines with comments, easy to audit.
 - **On/off switches for every roadmap item** (`noisycompany features`, or buttons in the
   local dashboard): persona drift, French persona pack, metered-link guard, DNS over
-  HTTPS, Prometheus metrics, labelled ground-truth log for SOC testing, and more planned.
+  HTTPS, Prometheus metrics, labelled ground-truth log for SOC testing, household privacy
+  report, reviewed persona packs, and more planned.
+- **`noisycompany privacy`**: local score of what really protects you (blocker, encrypted
+  DNS, fingerprinting protection...), with advice. Nothing is sent.
 - `--dry-run` mode, hardened systemd user unit, non-root Docker image.
 
 ## Quick start
@@ -68,6 +71,9 @@ noisycompany run -c noisycompany.toml
 noisycompany features                   # every roadmap item, with its state
 noisycompany features on dashboard      # then open http://127.0.0.1:9788
 noisycompany features on locale_packs   # add the French persona pack
+noisycompany privacy                    # local privacy score and advice
+noisycompany packs install photography  # reviewed persona pack, then:
+noisycompany features on persona_marketplace
 ```
 
 ### As a service

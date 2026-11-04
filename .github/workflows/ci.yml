@@ -22,3 +22,5 @@ jobs:
       - run: ruff check .
       - run: pytest -q
       - run: noisycompany estimate
+      - name: validate persona packs
+        run: noisycompany packs check src/noisycompany/data/packs/*.toml && noisycompany packs check --no-meta src/noisycompany/data/personas*.toml

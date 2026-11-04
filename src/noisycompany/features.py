@@ -49,15 +49,17 @@ FEATURES: tuple[Feature, ...] = (
             "for SOC / IDS / NDR detection testing.",
             "2.2", True),
     Feature("privacy_report", "Household privacy report",
-            "Check encrypted DNS, blocker, ECH and combine with noise stats into a score.",
-            "2.3", False),
+            "Local checks (blocker, encrypted DNS, fingerprinting, GPC, IPv6 privacy, noise "
+            "coherence) combined into a score, shown in the dashboard. Nothing is sent.",
+            "2.3", True),
     Feature("browser_companion", "Browser companion",
             "WebExtension making occasional persona visits inside the real browser, isolated "
             "container, never ads, never clicks.",
             "2.3", False),
     Feature("persona_marketplace", "Persona marketplace",
-            "Reviewed community persona packs, installable by name.",
-            "2.3", False),
+            "Reviewed persona packs shipped with the code, installable by name "
+            "(`noisycompany packs`), validated in CI against sensitive topics.",
+            "2.3", True),
     Feature("business_profiles", "Business traffic profiles",
             "Persona packs per business profile (office, dev team, retail) for SOC labs.",
             "2.4", False),

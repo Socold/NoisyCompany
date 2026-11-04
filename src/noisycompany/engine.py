@@ -7,12 +7,13 @@ import json
 import logging
 import random
 import threading
+import time
 import urllib.parse
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from noisycompany import dns, doh
+from noisycompany import dns, doh, packs, privacy
 from noisycompany.budget import Budget
 from noisycompany.config import PRESETS, TimeRange, load_locale_personas
 from noisycompany.features import FeatureSet
@@ -55,6 +56,9 @@ class Engine:
         self.rng = rng or random.SystemRandom()
         self.stop = stop or threading.Event()
         self.state_dir = state_dir
+        self.base_personas = personas
+        self._packs_sig: tuple[str, ...] = ()
+        self._privacy: tuple[float, dict[str, Any]] | None = None
         self._now = now
         self.stats = Stats()
         b = cfg["budget"]
@@ -103,6 +107,25 @@ class Engine:
         self.budget.daily_bytes = self.eco_cap if self.metered else self.base_cap
         for name, srv in self.servers.items():
             srv.sync(self.features.enabled(name))
+        sig = packs.signature(self.state_dir) if self.features.enabled("persona_marketplace") \
+            else ()
+        if sig != self._packs_sig:
+            merged = self.base_personas | packs.installed_personas(self.state_dir) if sig \
+                else self.base_personas
+            self.rotator = PersonaRotator(merged, self.cfg["personas"]["active_count"],
+                                          self.cfg["personas"]["rotate_days"], self.state_dir)
+            self._packs_sig = sig
+            log.info("personas reloaded: %d available", len(merged))
+
+    def privacy_report(self) -> dict[str, Any] | None:
+        """Cached 10 minutes: the checks read browser profiles from disk."""
+        if not self.features.enabled("privacy_report"):
+            return None
+        now = time.monotonic()
+        if self._privacy is None or now - self._privacy[0] > 600:
+            flags = {"_running": True, "doh_sink": self.features.enabled("doh_sink")}
+            self._privacy = (now, privacy.build_report(Path.home(), flags).as_dict())
+        return self._privacy[1]
 
     def status(self) -> dict[str, Any]:
         return {
@@ -113,6 +136,7 @@ class Engine:
             "state": self.state,
             "active_personas": self.active_personas(),
             "preset": self.cfg["general"]["preset"],
+            "privacy": self.privacy_report(),
         }
 
     def active_personas(self) -> list[str]:

@@ -1,0 +1,11 @@
+[meta]
+title = "Board games"
+lang = "en"
+description = "Modern board games and classic abstract games."
+version = 1
+
+[board_games]
+seeds = ["https://en.wikipedia.org/wiki/Eurogame", "https://en.wikipedia.org/wiki/Go_(game)",
+         "https://en.wikipedia.org/wiki/Cooperative_board_game"]
+domains = ["en.wikipedia.org", "boardgamegeek.com", "www.dicebreaker.com"]
+queries = ["worker placement", "deck building", "carcassonne", "go opening", "solo board games"]

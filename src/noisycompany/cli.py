@@ -8,9 +8,11 @@ import logging
 import os
 import signal
 import sys
+import time
+import tomllib
 from pathlib import Path
 
-from noisycompany import __version__, config, impact
+from noisycompany import __version__, config, impact, packs, privacy
 from noisycompany.engine import Engine
 from noisycompany.features import FEATURES, FeatureSet, NotAvailable, UnknownFeature
 
@@ -81,6 +83,64 @@ def cmd_features(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_privacy(args: argparse.Namespace) -> int:
+    cfg = config.load(args.config, args.preset)
+    fs = FeatureSet(cfg, _state_dir(args.state_dir))
+    report = privacy.build_report(Path.home(), {"doh_sink": fs.enabled("doh_sink"),
+                                                "_running": _is_running(args.state_dir)})
+    print(json.dumps(report.as_dict(), indent=2) if args.json else report.as_text())
+    return 0
+
+
+def _is_running(state_dir: str | None) -> bool:
+    """noisycompany wrote stats.json in the last 15 minutes."""
+    try:
+        return time.time() - (_state_dir(state_dir) / "stats.json").stat().st_mtime < 900
+    except OSError:
+        return False
+
+
+def cmd_packs(args: argparse.Namespace) -> int:
+    state = _state_dir(args.state_dir)
+    if args.action == "check":
+        bad = 0
+        for path in args.names:
+            try:
+                with open(path, "rb") as fh:
+                    data = tomllib.load(fh)
+            except (OSError, tomllib.TOMLDecodeError) as exc:
+                print(f"{path}: cannot read: {exc}")
+                bad += 1
+                continue
+            problems = packs.validate(data, require_meta="meta" in data or not args.no_meta)
+            for p in problems:
+                print(f"{path}: {p}")
+            bad += bool(problems)
+            if not problems:
+                print(f"{path}: ok")
+        return 1 if bad else 0
+    if args.action in ("install", "remove"):
+        if not args.names:
+            print(f"usage: noisycompany packs {args.action} <name>...", file=sys.stderr)
+            return 2
+        for name in args.names:
+            if args.action == "install":
+                packs.install(name, state)
+                print(f"installed {name}")
+            elif packs.remove(name, state):
+                print(f"removed {name}")
+            else:
+                print(f"{name} is not installed", file=sys.stderr)
+        print("(used when the persona_marketplace switch is on)")
+        return 0
+    inst = set(packs.installed(state))
+    for name, data in packs.bundled().items():
+        meta = data["meta"]
+        mark = "installed" if name in inst else ""
+        print(f"{name:16} {meta['lang']:3} {mark:10} {meta['title']}: {meta['description']}")
+    return 0
+
+
 def cmd_config(args: argparse.Namespace) -> int:
     if args.print_default:
         sys.stdout.write(config.default_text())
@@ -118,6 +178,17 @@ def build_parser() -> argparse.ArgumentParser:
     f.add_argument("action", nargs="?", choices=["list", "on", "off"], default="list")
     f.add_argument("feature", nargs="?")
     f.set_defaults(func=cmd_features)
+
+    pr = sub.add_parser("privacy", parents=[common], help="local privacy report and score")
+    pr.add_argument("--json", action="store_true")
+    pr.set_defaults(func=cmd_privacy)
+
+    pk = sub.add_parser("packs", parents=[common], help="persona packs: list, install, check")
+    pk.add_argument("action", nargs="?", choices=["list", "install", "remove", "check"],
+                    default="list")
+    pk.add_argument("names", nargs="*")
+    pk.add_argument("--no-meta", action="store_true", help="check: allow files without [meta]")
+    pk.set_defaults(func=cmd_packs)
 
     c = sub.add_parser("config", parents=[common], help="show effective config")
     c.add_argument("--print-default", action="store_true")

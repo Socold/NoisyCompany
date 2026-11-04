@@ -1,0 +1,11 @@
+[meta]
+title = "Knitting"
+lang = "en"
+description = "Knitting and textile crafts."
+version = 1
+
+[knitting]
+seeds = ["https://en.wikipedia.org/wiki/Knitting", "https://en.wikipedia.org/wiki/Fair_Isle_(technique)",
+         "https://en.wikipedia.org/wiki/Crochet"]
+domains = ["en.wikipedia.org", "www.ravelry.com", "www.lovecrafts.com"]
+queries = ["cable stitch", "merino wool", "circular needles", "sock heel", "blocking lace"]

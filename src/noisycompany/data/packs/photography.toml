@@ -1,0 +1,11 @@
+[meta]
+title = "Photography"
+lang = "en"
+description = "Amateur photography: technique, film, gear history."
+version = 1
+
+[photography]
+seeds = ["https://en.wikipedia.org/wiki/Exposure_triangle", "https://en.wikipedia.org/wiki/Rule_of_thirds",
+         "https://en.wikipedia.org/wiki/Film_photography"]
+domains = ["en.wikipedia.org", "www.dpreview.com", "petapixel.com"]
+queries = ["aperture priority", "depth of field", "golden hour", "35mm film", "long exposure"]
