@@ -3,31 +3,33 @@
 <head><meta charset="utf-8"><link rel="stylesheet" href="popup.css"><title>NoisyCompany</title></head>
 <body>
   <h1>NoisyCompany</h1>
-  <label class="row"><span>Companion</span>
-    <button id="enabled" class="sw" role="switch" aria-checked="false">Off</button></label>
+  <div class="row"><span id="enabledlabel">Companion</span>
+    <button id="enabled" class="sw" role="switch" aria-checked="false" aria-labelledby="enabledlabel"
+            aria-describedby="daemonhelp">Off</button></div>
   <label class="row"><span>Mode</span>
-    <select id="mode">
+    <select id="mode" aria-describedby="modehelp">
       <option value="fetch">Light: background request, no cookie</option>
       <option value="tab">Tab: hidden muted tab, own container</option>
     </select></label>
-  <p id="modehelp" class="help"></p>
+  <p id="modehelp" class="help" aria-live="polite"></p>
   <label class="row" id="containerrow"><span>Tab container</span>
     <select id="tabContainer">
       <option value="noisycompany">Separate NoisyCompany container</option>
       <option value="default">Default container (your cookies)</option>
     </select></label>
   <fieldset class="locales"><legend>Persona languages</legend>
-    <label><input type="checkbox" value="en"> en</label><label><input type="checkbox" value="fr"> fr</label>
-    <label><input type="checkbox" value="de"> de</label><label><input type="checkbox" value="es"> es</label>
-    <label><input type="checkbox" value="it"> it</label></fieldset>
-  <label class="row"><span>Follow the daemon's switch</span><input id="daemonLink" type="checkbox"></label>
-  <p id="daemonhelp" class="help"></p>
-  <label class="row"><span>Daily budget (KB)</span><input id="dailyKB" type="number" min="256" max="20480" step="256"></label>
+    <label><input type="checkbox" value="en" aria-label="English"> en</label><label><input type="checkbox" value="fr" aria-label="French"> fr</label>
+    <label><input type="checkbox" value="de" aria-label="German"> de</label><label><input type="checkbox" value="es" aria-label="Spanish"> es</label>
+    <label><input type="checkbox" value="it" aria-label="Italian"> it</label></fieldset>
+  <label class="row"><span>Follow the daemon's switch</span><input id="daemonLink" type="checkbox" aria-describedby="daemonhelp"></label>
+  <p id="daemonhelp" class="help" aria-live="polite"></p>
+  <label class="row"><span>Daily budget (KB)</span><input id="dailyKB" type="number" min="256" max="20480" step="256" aria-describedby="usage"></label>
   <label class="row"><span>Mean gap (min)</span><input id="meanGapMin" type="number" min="5" max="240"></label>
-  <p id="usage" class="help"></p>
+  <p id="usage" class="help" role="status"></p>
   <p id="personas" class="help"></p>
   <button id="now" class="secondary">Visit one page now</button>
-  <ul id="log"></ul>
+  <h2 id="loglabel" class="help">Recent visits</h2>
+  <ul id="log" aria-labelledby="loglabel"></ul>
   <script src="popup.js"></script>
 </body>
 </html>

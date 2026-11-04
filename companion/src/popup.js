@@ -69,8 +69,10 @@ $("daemonLink").addEventListener("change", async () => {
 });
 $("now").addEventListener("click", async () => {
   $("now").disabled = true;
+  $("now").setAttribute("aria-busy", "true");
   await browser.runtime.sendMessage({ type: "visitNow" });
   $("now").disabled = false;
+  $("now").removeAttribute("aria-busy");
   await load();
 });
 load();
