@@ -37,31 +37,28 @@ Defaults can also be set in the `[features]` table of the config file.
 
 All items above are implemented (v2.0.0).
 
+## Shipped after 2.0.1 (on `main`, next release)
+
+- **2.1 hardening** (always on, no switch): sockets pinned to the vetted public IP,
+  seeded fuzz tests in CI (+ atheris harness), Home Assistant add-on as uid 10001,
+  Sigstore-signed provenance for GHCR images, PyPI trusted-publishing job.
+- **2.2 realism**: switches `dns_coherence`, `weekly_rhythm`, `third_party_bursts` (see
+  the table above), `de` / `es` / `it` locale packs, study imports of Pi-hole and
+  AdGuard Home logs with a `day_off` feature.
+
 ## Next evolutions
 
 Each will get its own switch, off by default, like the items above.
 
-### 2.1: hardening and trust (from the November 2026 audit)
+### Carried over from 2.1 / 2.2
 
-These are safety fixes, so they are always on (no switch).
-
-| Item | Why | Status |
-|---|---|---|
-| Connect to the vetted IP address (custom `HTTPSConnection` with SNI) | Removes the residual check-then-connect window of the public-IP check | Done |
-| Keyless signed provenance for GHCR images (Sigstore, GitHub attestations) | Users can verify the image before running it on a home appliance | Done, from the next tag |
-| Fuzzing of the link parser, body decoder and share-code decoder | All parse untrusted input | Done: seeded fuzz tests in CI, optional atheris harness in `fuzz/` |
-| Home Assistant add-on as non-root | Least privilege on the always-on box | Done (uid 10001). AppArmor profile still to do |
-| Publish on PyPI (trusted publishing) | `pipx install noisycompany` without git | Workflow ready, waits for the PyPI trusted publisher |
-
-### 2.2: realism (driven by `noisycompany study` results)
-
-| Item | Why | Status |
-|---|---|---|
-| Interest coherence across DNS and HTTP: lookups follow the pages actually read | Today DNS sessions and page reads are independent | Done: `dns_coherence` |
-| Seasonal / weekly rhythm (weekends, holidays, evenings) | Hour and weekday are telling features | Done: `weekly_rhythm` (household-wide, not per persona yet) |
-| `Accept-Language` per locale, more locales (de, es, it) | Locale mismatch is a tell | Done: packs `de`, `es`, `it` |
-| Third-party host bursts (opt-in, still capped) | Real page loads resolve dozens of hosts; the study shows it is the main giveaway | Done: `third_party_bursts` |
-| Study: Pi-hole direct import, weekday feature | A stronger observer model | Done (FTL database, AdGuard query log, `day_off`). Packet sizes and TLS fingerprint still open: DNS traces do not carry them |
+| Item | Why |
+|---|---|
+| AppArmor profile for the Home Assistant add-on | Needs testing on a real Supervisor before shipping |
+| PyPI publication | Needs the PyPI trusted publisher, then `PYPI_PUBLISH=true` |
+| Per-persona rhythm (a gardener on Sunday mornings, a gamer at night) | `weekly_rhythm` is household-wide today |
+| Study: packet sizes and TLS fingerprint features (from a pcap or NetFlow export) | DNS traces do not carry them |
+| `de` / `es` / `it` packs in the browser companion | The companion only exports the built-in and `fr` personas |
 
 ### 2.3: browser companion
 
