@@ -97,21 +97,22 @@ class _Handler(BaseHTTPRequestHandler):
             self._send(421, b"misdirected", "text/plain")
             return
         src = self.server.source
+        path = self.path.split("?", 1)[0]  # ?lang=fr selects the dashboard language
         if self.server.mode == "metrics":
-            if self.path == "/metrics":
+            if path == "/metrics":
                 self._send(200, render_metrics(src.status()).encode(),
                            "text/plain; version=0.0.4")
             else:
                 self._send(404, b"not found", "text/plain")
             return
-        if self.path == "/":
+        if path == "/":
             html = _asset("dashboard.html").replace("__TOKEN__", self.server.token)
             self._send(200, html.encode(), "text/html; charset=utf-8")
-        elif self.path == "/app.js":
+        elif path == "/app.js":
             self._send(200, _asset("dashboard.js").encode(), "text/javascript")
-        elif self.path == "/app.css":
+        elif path == "/app.css":
             self._send(200, _asset("dashboard.css").encode(), "text/css")
-        elif self.path == "/api/status":
+        elif path == "/api/status":
             self._json(200, src.status() | {"features": src.features.snapshot()})
         else:
             self._send(404, b"not found", "text/plain")

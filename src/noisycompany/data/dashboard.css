@@ -5,6 +5,13 @@
           --accent:#5fb39a; --accent-fg:#0f1a17; --off:#44453f; }
 }
 * { box-sizing:border-box; }
+.skip { position:absolute; left:-999px; top:8px; background:var(--card); color:var(--fg);
+        padding:6px 10px; border:2px solid var(--accent); border-radius:6px; }
+.skip:focus { left:8px; }
+.error { color:#b4442f; margin:4px 0 0; }
+.error:empty { display:none; }
+@media (prefers-color-scheme: dark) { .error { color:#e58a73; } }
+@media (prefers-reduced-motion: reduce) { .fill { transition:none; } }
 body { margin:0; background:var(--bg); color:var(--fg);
        font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
 header, main { max-width:860px; margin:0 auto; padding:16px; }

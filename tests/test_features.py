@@ -150,3 +150,14 @@ def test_feature_ids_are_unique():
     from noisycompany import features
     ids = [f.id for f in features.FEATURES]
     assert len(ids) == len(set(ids))
+
+
+def test_dashboard_has_a_french_title_for_every_feature():
+    from importlib import resources
+    js = resources.files("noisycompany.data").joinpath("dashboard.js").read_text("utf-8")
+    block = js[js.index("const FR_FEATURES"):js.index("};", js.index("const FR_FEATURES"))]
+    missing = [f.id for f in FEATURES if f"  {f.id}: [" not in block]
+    assert not missing
+    from noisycompany import privacy
+    checks = privacy.build_report(__import__("pathlib").Path("/nonexistent"), {}).checks
+    assert all(f"  {c.id}: [" in js for c in checks)
