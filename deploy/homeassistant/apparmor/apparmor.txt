@@ -1,0 +1,59 @@
+# AppArmor profile for the NoisyCompany Home Assistant add-on (DRAFT, not active).
+# The Supervisor loads it only when this file sits next to config.yaml as apparmor.txt.
+# Checked by `apparmor_parser` in CI; to be tried on a real Supervisor before moving it
+# (see README.md in this folder).
+#include <tunables/global>
+
+profile noisycompany flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/python>
+  #include <abstractions/nameservice>
+  #include <abstractions/ssl_certs>
+
+  # Entrypoint: read options as root, chown /data/state, then drop to uid 10001.
+  capability chown,
+  capability fowner,
+  capability dac_override,
+  capability setuid,
+  capability setgid,
+
+  # DNS and HTTPS noise, DoH, local dashboard/metrics on 127.0.0.1.
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network netlink raw,
+
+  # Image contents.
+  /run.py r,
+  /usr/local/bin/** rix,
+  /usr/local/lib/** mr,
+  /usr/bin/** rix,
+  /usr/lib/** mr,
+  /lib/** mr,
+  /bin/** rix,
+  /etc/** r,
+  /tmp/** rw,
+
+  # Supervisor data: options and persistent state only.
+  /data/ r,
+  /data/options.json r,
+  /data/state/ rw,
+  /data/state/** rwk,
+  /data/* rw,           # legacy state of <= 2.0.1, moved on first start
+
+  # netwatch reads interface counters; metered_guard reads link info.
+  @{PROC}/net/dev r,
+  @{PROC}/@{pid}/net/dev r,
+  @{PROC}/@{pid}/net/route r,
+  /sys/class/net/ r,
+  /sys/class/net/** r,
+  /sys/devices/** r,
+  # energy: RAPL counters (readable only when the host allows it).
+  /sys/class/powercap/** r,
+
+  deny @{PROC}/sys/kernel/** w,
+  deny /sys/** w,
+  deny mount,
+  deny ptrace,
+}
