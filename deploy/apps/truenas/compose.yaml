@@ -1,0 +1,15 @@
+# TrueNAS SCALE 24.10+: Apps > Discover > Install via YAML, paste this file.
+# Create the dataset first and give it to uid 10001:
+#   mkdir -p /mnt/<pool>/apps/noisycompany && chown 10001:10001 /mnt/<pool>/apps/noisycompany
+services:
+  noisycompany:
+    image: ghcr.io/socold/noisycompany:v2.0.1
+    network_mode: host
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 96m
+    restart: unless-stopped
+    command: ["run", "-p", "eco"]
+    volumes:
+      - /mnt/tank/apps/noisycompany:/state   # change "tank" to your pool

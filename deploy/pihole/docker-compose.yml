@@ -1,0 +1,16 @@
+# NoisyCompany next to Pi-hole (or AdGuard Home) on the same box.
+# The noise uses the box's system resolver, i.e. your Pi-hole, so the upstream resolver
+# and your ISP see decoy queries mixed with the household's real ones.
+services:
+  noisycompany:
+    image: ghcr.io/socold/noisycompany:v2.0.1
+    network_mode: host
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 96m
+    restart: unless-stopped
+    command: ["run", "-c", "/config/noisycompany.toml"]
+    volumes:
+      - ./state:/state                      # chown 10001:10001 ./state first
+      - ./noisycompany.toml:/config/noisycompany.toml:ro

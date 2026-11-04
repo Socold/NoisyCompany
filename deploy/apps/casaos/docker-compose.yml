@@ -1,0 +1,45 @@
+# CasaOS: App Store > Custom install > Import, paste this file.
+name: noisycompany
+services:
+  # The image runs as uid 10001: give it the state directory the platform creates as root.
+  state-owner:
+    image: ghcr.io/socold/noisycompany:v2.0.1
+    user: "0:0"
+    entrypoint: ["chown", "10001:10001", "/state"]
+    network_mode: none
+    cap_drop: [ALL]
+    cap_add: [CHOWN]
+    restart: "no"
+    volumes:
+      - /DATA/AppData/noisycompany/state:/state
+  noisycompany:
+    image: ghcr.io/socold/noisycompany:v2.0.1
+    depends_on:
+      state-owner: { condition: service_completed_successfully }
+    network_mode: host
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 96m
+    restart: unless-stopped
+    command: ["run", "-p", "eco"]
+    volumes:
+      - type: bind
+        source: /DATA/AppData/noisycompany/state
+        target: /state
+x-casaos:
+  architectures: [amd64, arm64, arm]
+  main: noisycompany
+  category: Network
+  author: NoisyCompany contributors
+  developer: NoisyCompany contributors
+  title: { en_us: NoisyCompany, fr_fr: NoisyCompany }
+  tagline:
+    en_us: Light network noise with coherent decoy personas
+    fr_fr: Un bruit réseau léger avec des personas leurres cohérentes
+  description:
+    en_us: Rare, plausible DNS and web activity that dilutes what your ISP sees. Eco preset, a few MB per day.
+    fr_fr: Une activité DNS et web rare et plausible qui dilue ce que voit votre FAI. Préréglage éco, quelques Mo par jour.
+  project_url: https://github.com/Socold/NoisyCompany
+  index: /
+  port_map: ""

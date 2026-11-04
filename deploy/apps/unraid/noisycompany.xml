@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- Unraid: copy to /boot/config/plugins/dockerMan/templates-user/ then Docker > Add Container. -->
+<Container version="2">
+  <Name>NoisyCompany</Name>
+  <Repository>ghcr.io/socold/noisycompany:v2.0.1</Repository>
+  <Registry>https://github.com/Socold/NoisyCompany/pkgs/container/noisycompany</Registry>
+  <Network>host</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/Socold/NoisyCompany/issues</Support>
+  <Project>https://github.com/Socold/NoisyCompany</Project>
+  <Overview>Light network noise with coherent decoy personas. Eco preset: a few MB per day, nothing at night, pauses while your network is busy. No account, no telemetry.</Overview>
+  <Category>Network:Other Security:</Category>
+  <PostArgs>run -p eco</PostArgs>
+  <ExtraParams>--read-only --cap-drop=ALL --security-opt=no-new-privileges:true --memory=96m</ExtraParams>
+  <Config Name="State" Target="/state" Default="/mnt/user/appdata/noisycompany" Mode="rw" Description="Salt, switches and stats. Owned by uid 10001." Type="Path" Display="always" Required="true">/mnt/user/appdata/noisycompany</Config>
+</Container>

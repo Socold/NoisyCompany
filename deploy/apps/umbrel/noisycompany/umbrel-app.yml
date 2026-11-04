@@ -1,0 +1,22 @@
+manifestVersion: 1
+id: noisycompany
+category: networking
+name: NoisyCompany
+version: "2.0.1"
+tagline: Light network noise with coherent decoy personas
+description: >-
+  Adds rare, plausible DNS and web activity from your Umbrel so that what your ISP or
+  DNS resolver sees about the household is diluted with harmless decoy interests.
+  Eco preset: a few MB per day, nothing at night, pauses while your network is busy.
+  No account, no telemetry. The dashboard stays on the Umbrel itself (localhost).
+developer: NoisyCompany contributors
+website: https://github.com/Socold/NoisyCompany
+repo: https://github.com/Socold/NoisyCompany
+support: https://github.com/Socold/NoisyCompany/issues
+port: 0
+gallery: []
+dependencies: []
+path: ""
+releaseNotes: Security and data-privacy audit fixes.
+submitter: NoisyCompany contributors
+submission: https://github.com/Socold/NoisyCompany
