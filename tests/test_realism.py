@@ -65,3 +65,20 @@ def test_estimate_counts_third_party_lookups():
     base = impact.estimate(cfg).dns_lookups_per_day
     cfg["features"]["third_party_bursts"] = True
     assert impact.estimate(cfg).dns_lookups_per_day > base
+
+
+def test_study_reads_pihole_ftl_db_and_adguard_querylog(tmp_path):
+    import sqlite3
+    import time
+
+    from noisycompany import study
+    db = tmp_path / "pihole-FTL.db"
+    now = int(time.time())
+    with sqlite3.connect(db) as c:
+        c.execute("CREATE TABLE queries (id INTEGER, timestamp INTEGER, domain TEXT)")
+        c.executemany("INSERT INTO queries VALUES (?, ?, ?)",
+                      [(1, now - 60, "Example.ORG."), (2, now - 30, "www.wikipedia.org")])
+    assert [e.host for e in study.load_trace(db)] == ["example.org", "www.wikipedia.org"]
+    log = tmp_path / "querylog.json"
+    log.write_text('{"T":"2026-11-03T20:01:02.5+01:00","QH":"lichess.org","QT":"A"}\n')
+    assert study.load_trace(log)[0].host == "lichess.org"

@@ -5,7 +5,7 @@ Inputs, both local:
 - the labelled log written by NoisyCompany (`labelled_log` switch), i.e. the noise;
 - a trace of real activity on the same network, exported by the user: CSV or JSONL with
   a timestamp and a hostname per line (a Pi-hole / AdGuard Home / dnsmasq query log export
-  works).
+  works), Pi-hole's `pihole-FTL.db` directly, or AdGuard Home's `querylog.json`.
 
 Method: both streams are cut into time windows; each window becomes a feature vector of
 what a network observer sees (volume, host diversity, revisits, timing, hour of day). A
@@ -24,14 +24,17 @@ import datetime as dt
 import json
 import math
 import random
+import sqlite3
 import statistics
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
+from noisycompany import rhythm
+
 FEATURES = [
     "events", "unique_hosts", "unique_ratio", "gap_mean", "gap_std", "gap_max",
-    "revisit_ratio", "label_depth", "www_ratio", "hour_sin", "hour_cos",
+    "revisit_ratio", "label_depth", "www_ratio", "hour_sin", "hour_cos", "day_off",
 ]
 
 
@@ -67,12 +70,28 @@ def load_noise(path: Path) -> list[Event]:
     return sorted(out, key=lambda e: e.ts)
 
 
-TS_KEYS = ("ts", "timestamp", "time", "date")
-HOST_KEYS = ("host", "domain", "name", "query", "target")
+TS_KEYS = ("ts", "timestamp", "time", "date", "t")  # t / qh: AdGuard Home querylog
+HOST_KEYS = ("host", "domain", "name", "query", "target", "qh")
+FTL_DAYS_MAX = 400
+
+
+def load_pihole_db(path: Path) -> list[Event]:
+    """Pi-hole FTL database (read-only): every query's timestamp and domain."""
+    uri = path.resolve().as_uri() + "?mode=ro"
+    with sqlite3.connect(uri, uri=True) as db:
+        # `queries` is a view over query_storage + domain_by_id in FTL v5.
+        cur = db.execute("SELECT timestamp, domain FROM queries WHERE timestamp > "
+                         "strftime('%s','now') - ? ORDER BY timestamp",
+                         (FTL_DAYS_MAX * 86400,))
+        return [Event(float(ts), _host(str(d))) for ts, d in cur if d]
 
 
 def load_trace(path: Path) -> list[Event]:
-    """CSV (header with a time and a domain column) or JSONL with the same keys."""
+    """CSV (header with a time and a domain column), JSONL with the same keys, or a
+    Pi-hole FTL database."""
+    with path.open("rb") as fh:
+        if fh.read(16) == b"SQLite format 3\x00":
+            return load_pihole_db(path)
     text = path.read_text("utf-8", errors="replace")
     rows: Iterable[dict[str, str]]
     if text.lstrip().startswith("{"):
@@ -126,6 +145,7 @@ def featurize(stream: list[list[Event]]) -> list[list[float]]:
             statistics.fmean(h.count(".") for h in uniq),
             sum(h.startswith("www.") for h in uniq) / len(uniq),
             math.sin(2 * math.pi * hour / 24), math.cos(2 * math.pi * hour / 24),
+            float(rhythm.day_off(start.date())),
         ])
     return rows
 
