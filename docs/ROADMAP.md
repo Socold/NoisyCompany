@@ -64,17 +64,22 @@ Each will get its own switch, off by default, like the items above.
 - Per-persona rhythm (`rhythm` windows in personas, with `weekly_rhythm`).
 - Page-load bursts (`page_load_bursts`) and noise interleaved with your browsing
   (`interleave_with_user`). Benchmark 0.97 -> 0.95.
+- Accessibility of the companion popup (tested statically in CI) and French CLI
+  messages (`LANG=fr`, `NOISYCOMPANY_LANG=fr`).
+- OpenWrt packages built from each pull request with the official SDK (24.10 `.ipk`).
+- AppArmor profile for the Home Assistant add-on: draft, parsed in CI, not active
+  until tried on a Supervisor (`deploy/homeassistant/apparmor/`).
+- `noisycompany study --pcap`: packet sizes and TLS ClientHello shape per flow. Result:
+  daemon HTTPS is identifiable by its Python TLS fingerprint.
 
 ### Carried over from 2.1 / 2.2
 
 | Item | Why |
 |---|---|
-| AppArmor profile for the Home Assistant add-on | Needs testing on a real Supervisor before shipping |
 | PyPI publication | Needs the PyPI trusted publisher, then `PYPI_PUBLISH=true` |
-| Build the OpenWrt packages in CI (SDK container) and submit app templates to the Umbrel / CasaOS stores | Today they are checked by format only |
-| Accessibility review of the companion popup, French CLI output | Same standard as the dashboard |
+| Submit app templates to the Umbrel / CasaOS stores, OpenWrt 25.12 `apk` packages | Store accounts and reviews; 25.12 changed the package format |
 | RAPL and smart-plug numbers from several machines in IMPACT.md | One CPU-time measurement so far |
-| Study: packet sizes and TLS fingerprint features (from a pcap or NetFlow export) | DNS traces do not carry them |
+| Browser-like TLS for daemon web noise, or HTTP noise left to the companion | `study --pcap` shows the Python TLS fingerprint gives it away |
 
 ### 2.3: browser companion
 

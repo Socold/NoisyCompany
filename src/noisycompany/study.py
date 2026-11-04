@@ -236,6 +236,12 @@ def run(noise: list[Event], human: list[Event], window_s: float = 600, folds: in
         seed: int = 0) -> StudyResult:
     xn = featurize(windows(noise, window_s))
     xh = featurize(windows(human, window_s))
+    return cross_validate(xn, xh, FEATURES, folds, seed)
+
+
+def cross_validate(xn: list[list[float]], xh: list[list[float]], names: list[str],
+                   folds: int = 5, seed: int = 0) -> StudyResult:
+    """k-fold logistic regression, noise = 1. Shared by the DNS and the pcap studies."""
     data = [(x, 1) for x in xn] + [(x, 0) for x in xh]
     if len(xn) < folds or len(xh) < folds:
         return StudyResult(float("nan"), folds, len(xn), len(xh), {})
@@ -251,4 +257,4 @@ def run(noise: list[Event], human: list[Event], window_s: float = 600, folds: in
     xall, _ = _standardize([d[0] for d in data], [])
     w, _ = fit(xall, [d[1] for d in data])
     return StudyResult(auc(scores, labels), folds, len(xn), len(xh),
-                       dict(zip(FEATURES, w, strict=True)))
+                       dict(zip(names, w, strict=True)))

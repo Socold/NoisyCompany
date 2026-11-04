@@ -77,6 +77,10 @@ FR = {
     "usage: noisycompany features on|off <id>": "usage : noisycompany features on|off <id>",
     "where salt, switches and stats.json live":
         "dossier du sel, des interrupteurs et de stats.json",
+    "packet capture (pcap/pcapng): study TLS flows instead":
+        "capture de paquets (pcap/pcapng) : étudier les flux TLS à la place",
+    "study needs --human or --pcap": "study demande --human ou --pcap",
+    "TLS flows, not DNS windows:": "Flux TLS, pas des fenêtres DNS :",
     "window width, seconds": "largeur de fenêtre, secondes",
     "{f}: {a} (applies at the next session)": "{f} : {a} (appliqué à la prochaine session)",
     "{n} is not installed": "{n} n'est pas installé",

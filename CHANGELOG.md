@@ -10,6 +10,12 @@ Carried-over items (3.1):
   then hosts the persona already read; never invented names.
 - `interleave_with_user`: sessions start mostly while the local traffic counter shows
   you online. Benchmark: 0.97 -> 0.95 AUC; see docs/BENCHMARK.md for what it cannot show.
+- Companion popup accessibility: the switch is named, help texts are linked, the usage
+  line is a status region, visible focus, warning colour readable in dark mode.
+- French CLI messages and help when `LANG` (or `NOISYCOMPANY_LANG`) is `fr`.
+- CI builds the OpenWrt packages with the official SDK; artifact `openwrt-packages`.
+- Home Assistant AppArmor profile, draft and parsed in CI (not active yet).
+- `noisycompany study --pcap`: TLS flow study (sizes, timing, ClientHello shape).
 
 Research and collective:
 

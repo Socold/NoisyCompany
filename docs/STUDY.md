@@ -40,9 +40,28 @@ example `unique_hosts` (a real page load resolves dozens of third-party hosts) o
 Remedies: tune active hours, `weekly_rhythm` (hours and days), `third_party_bursts` and
 `dns_coherence` (host diversity and revisits), `request_trees`, or the browser companion.
 
+## Packets and TLS (`--pcap`)
+
+```bash
+sudo tcpdump -i eth0 -w capture.pcap 'tcp port 443'      # a few hours, while you browse
+noisycompany study --noise ~/.local/state/noisycompany/labelled.jsonl --pcap capture.pcap
+```
+
+Flows to port 443 are labelled noise when their TLS server name (SNI) is a host the
+daemon fetched within 5 s of the flow start; the rest is your traffic. Features: packet
+counts, bytes and mean sizes both ways, duration, ClientHello length, cipher suites,
+extensions, GREASE and ALPN `h2`. pcap and pcapng, Ethernet, VLAN, Linux cooked and raw IP.
+Encrypted Client Hello hides the SNI: such flows are skipped.
+
+Expected result: **trivially separable**. The daemon speaks TLS through Python's `ssl`
+(checked: no GREASE, no ALPN, 35 suites), unlike any browser. A TLS-aware observer can
+filter daemon web noise flow by flow. The browser companion does not have this limit: it
+uses the browser's own TLS stack.
+
 ## Limits
 
-One observer model only: no TLS fingerprint, no packet sizes, no cross-household view.
+One observer model per study, no cross-household view. NetFlow exports carry no
+ClientHello: only the DNS study applies to them.
 A high AUC is a real warning; a low AUC is not a proof of safety. Expect DNS-level noise
 from the daemon to be largely separable from a real DNS log (no third-party bursts): its
 value is in diluting the *interest categories* of hostnames, not in being invisible.

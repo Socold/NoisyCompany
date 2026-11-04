@@ -19,6 +19,7 @@ from noisycompany import (
     config,
     impact,
     packs,
+    pcapstudy,
     privacy,
     study,
 )
@@ -312,6 +313,19 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
 
 def cmd_study(args: argparse.Namespace) -> int:
     noise = study.load_noise(Path(args.noise))
+    if args.pcap:
+        try:
+            res = pcapstudy.run(Path(args.pcap), noise, args.folds)
+        except pcapstudy.PcapError as exc:
+            print(f"{args.pcap}: {exc}", file=sys.stderr)
+            return 2
+    elif not args.human:
+        print(_("study needs --human or --pcap"), file=sys.stderr)
+        return 2
+    if args.pcap:
+        print(json.dumps(res.__dict__ | {"verdict": res.verdict()}, indent=2) if args.json
+              else _("TLS flows, not DNS windows:") + "\n" + res.as_text())
+        return 0 if res.auc == res.auc else 1
     human = study.load_trace(Path(args.human))
     if args.exclude_noise_hosts:
         # A DNS trace taken on the same network also contains the noise itself.
@@ -426,7 +440,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     st = sub.add_parser("study", parents=[common], help=_("how separable is the noise?"))
     st.add_argument("--noise", required=True, help=_("labelled log (JSONL) from labelled_log"))
-    st.add_argument("--human", required=True, help=_("real trace: CSV or JSONL, time + domain"))
+    st.add_argument("--human", help=_("real trace: CSV or JSONL, time + domain"))
+    st.add_argument("--pcap", help=_("packet capture (pcap/pcapng): study TLS flows instead"))
     st.add_argument("--window", type=float, default=600, help=_("window width, seconds"))
     st.add_argument("--folds", type=int, default=5)
     st.add_argument("--exclude-noise-hosts", action="store_true",

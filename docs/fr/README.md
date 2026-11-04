@@ -50,6 +50,10 @@ du même site une seule fois, environ +60 % de données). Réalisme : packs alle
 espagnol et italien, DNS qui suit les pages lues (`dns_coherence`), rythme de la semaine
 et des congés (`weekly_rhythm`), rafales DNS des domaines tiers d'une page sans
 téléchargement ni traqueurs (`third_party_bursts`).
+Depuis la 3.1 : rythme propre à chaque persona (jardinage le week-end matin), rafales
+de la taille d'un vrai chargement de page (`page_load_bursts`), sessions mêlées à votre
+navigation (`interleave_with_user`), messages du CLI en français si `LANG=fr`, et
+`noisycompany study --pcap` pour mesurer l'empreinte TLS.
 
 Boîtiers : add-on Home Assistant, docker-compose, installateur Raspberry Pi, service
 OpenWrt, image multi-architecture et `noisycompany health`. Bruit collectif : des foyers
