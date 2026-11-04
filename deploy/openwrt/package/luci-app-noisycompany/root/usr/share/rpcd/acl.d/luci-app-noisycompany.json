@@ -1,0 +1,7 @@
+{
+	"luci-app-noisycompany": {
+		"description": "Grant UCI access for NoisyCompany",
+		"read": { "uci": [ "noisycompany" ] },
+		"write": { "uci": [ "noisycompany" ] }
+	}
+}

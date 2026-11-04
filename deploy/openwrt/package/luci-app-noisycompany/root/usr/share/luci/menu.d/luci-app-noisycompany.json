@@ -1,0 +1,7 @@
+{
+	"admin/services/noisycompany": {
+		"title": "NoisyCompany",
+		"action": { "type": "view", "path": "noisycompany" },
+		"depends": { "acl": [ "luci-app-noisycompany" ], "uci": { "noisycompany": true } }
+	}
+}
