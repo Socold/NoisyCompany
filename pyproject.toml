@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "noisycompany"
-version = "2.0.0a4"
+version = "2.0.0a5"
 description = "Lightweight, bandwidth-aware network noise generator with coherent decoy personas"
 readme = "README.md"
 license = "GPL-3.0-or-later"

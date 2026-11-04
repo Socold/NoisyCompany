@@ -48,6 +48,13 @@ IPv6, cohérence du bruit, score sur 100, rien n'est envoyé) et packs de person
 bureau, équipe de dev, commerce) et arbres de requêtes réalistes (`request_trees`, CSS/JS
 du même site une seule fois, environ +60 % de données).
 
+Boîtiers : add-on Home Assistant, docker-compose, installateur Raspberry Pi, service
+OpenWrt, image multi-architecture et `noisycompany health`. Bruit collectif : des foyers
+partagent un code court (`noisycompany collective`) et font tourner les mêmes leurres au
+même moment, sans serveur et sans pouvoir ajouter de domaine. Étude de détectabilité :
+`noisycompany study` mesure (AUC) si un observateur peut séparer le bruit de votre trafic
+réel, voir [STUDY.md](../STUDY.md).
+
 Extension Firefox ([companion/](../../companion/README.md)) : les mêmes visites rares, faites
 par votre vrai navigateur, donc avec la même empreinte réseau. Désactivée par défaut, mode
 léger sans cookie ou mode onglet caché dans un conteneur dédié. Le reste est

@@ -28,14 +28,11 @@ Defaults can also be set in the `[features]` table of the config file.
 | `browser_companion` | 2.3 | Firefox WebExtension in `companion/`: rare persona visits from the real browser. Light mode (no cookie, ~100 KB) or tab mode (hidden muted tab in a dedicated container, ~2 MB). Only while the user is active, 2 MB/day cap, host access limited to persona domains. Switched from its own popup. See [companion/README.md](../companion/README.md) | ~2 MB/day max |
 | `business_profiles` | 2.4 | Replaces personas with a business profile (`office`, `dev_team`, `retail`), profile written in every labelled-log record: benign traffic with ground truth for SOC labs | none |
 | `request_trees` | 3.0 | Fetches up to 3 same-origin CSS/JS per page, once per URL (like a cache), robots.txt checked, half the page cap each | ~+60 % |
+| `appliance_packages` | 2.4 | Home Assistant add-on (`deploy/homeassistant/`), `docker-compose.yml` (host network, read-only, no capability), Raspberry Pi installer (`deploy/raspberrypi/install.sh`, eco preset, user service with linger), OpenWrt procd service (`deploy/openwrt/`, state in RAM), multi-arch image on GHCR at each `v*` tag. The switch writes a heartbeat used by `noisycompany health` and the Docker HEALTHCHECK | none |
+| `collective_noise` | 3.0 | `noisycompany collective create\|join\|leave\|show`: a short share code (`nc1:...`, ~320 chars) carries a shared salt and a list of **already reviewed** personas, with a SHA-256 digest. Members rotate the same decoys at the same time. No server; a code cannot add domains, so a malicious member cannot steer your traffic to their server | none |
+| `separability_study` | research | `noisycompany study --noise labelled.jsonl --human trace.csv`: windows + logistic regression (pure Python), k-fold ROC AUC and the most telling features. See [STUDY.md](STUDY.md) | none |
 
-## Planned
-
-| Switch | Milestone | Plan |
-|---|---|---|
-| `appliance_packages` | 2.4 | Raspberry Pi image, OpenWrt package, Home Assistant add-on, Pi-hole / AdGuard Home companion, Umbrel / CasaOS / TrueNAS apps |
-| `collective_noise` | 3.0 | Households share persona sets (signed, peer-to-peer or static files) so decoy profiles are indistinguishable across users; no central server |
-| `separability_study` | research | Capture + classifier kit to measure how well an observer can filter noise out; results published |
+All roadmap items are implemented. Next ideas are tracked in GitHub issues.
 
 ## Use cases enabled
 

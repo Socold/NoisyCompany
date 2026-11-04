@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0a5 (unreleased)
+
+- `appliance_packages`: Home Assistant add-on, docker-compose, Raspberry Pi installer,
+  OpenWrt service, GHCR multi-arch release workflow, `noisycompany health` + HEALTHCHECK.
+- `collective_noise`: share codes with digest, reviewed personas only, shared rotation.
+- `separability_study`: `noisycompany study`, ROC AUC with k-fold CV, telling features.
+- Every roadmap item is now implemented.
+
 ## 2.0.0a4 (unreleased)
 
 - `browser_companion`: Firefox WebExtension (MV3) in `companion/`, personas and manifest

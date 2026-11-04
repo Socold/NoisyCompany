@@ -37,6 +37,11 @@ It is a ground-up rewrite of the idea behind [1tayH/noisy](https://github.com/1t
   HTTPS, Prometheus metrics, labelled ground-truth log for SOC testing, household privacy
   report, reviewed persona packs, business traffic profiles for SOC labs, realistic
   request trees, and more planned.
+- **Appliances**: Home Assistant add-on, docker-compose, Raspberry Pi installer, OpenWrt
+  service, multi-arch image, `noisycompany health`.
+- **Collective noise**: households share a short code and rotate the same decoys.
+- **`noisycompany study`**: measures how separable the noise is from your real traffic
+  (ROC AUC), see [docs/STUDY.md](docs/STUDY.md).
 - **Firefox companion** ([companion/](companion/README.md)): the same rare decoy visits
   made by your real browser, so they share its network fingerprint. Off by default.
 - **`noisycompany privacy`**: local score of what really protects you (blocker, encrypted
@@ -86,12 +91,15 @@ cp deploy/systemd/noisycompany.service ~/.config/systemd/user/
 systemctl --user enable --now noisycompany
 ```
 
-### Docker
+### Docker, Raspberry Pi, Home Assistant, OpenWrt
 
 ```bash
-docker build -t noisycompany .
-docker run -d --network host --read-only -v noisycompany-state:/state noisycompany
+docker compose up -d                                   # docker-compose.yml
+bash deploy/raspberrypi/install.sh                      # read it first; eco preset
 ```
+
+Home Assistant: add this repository as an add-on repository, install *NoisyCompany*
+(`deploy/homeassistant/`). OpenWrt: see `deploy/openwrt/noisycompany.init`.
 
 `--network host` lets netwatch see your real traffic; without it, only the budget applies.
 
