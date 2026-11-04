@@ -107,14 +107,29 @@ class _ScopedRedirects(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+# Third-party hosts never resolved by bursts: we add decoys, not ad or tracker profiles.
+TRACKER_FRAGMENTS = (
+    "doubleclick", "googlesyndication", "googletagmanager", "google-analytics", "adservice",
+    "adsystem", "adnxs", "criteo", "taboola", "outbrain", "scorecardresearch", "hotjar",
+    "facebook", "connect.facebook", "pixel", "track", "analytics", "metrics", "stats.",
+    "beacon", "segment.", "quantserve", "amazon-adsystem", "ads.",
+)
+
+
 class _LinkParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.links: list[str] = []
         self.assets: list[str] = []
+        self.embeds: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         a = dict(attrs)
+        if tag in ("script", "img", "iframe", "source", "video", "audio") and a.get("src"):
+            self.embeds.append(a["src"] or "")
+        elif tag == "link" and a.get("href") and set((a.get("rel") or "").lower().split()) & {
+                "stylesheet", "preconnect", "dns-prefetch", "preload", "icon", "modulepreload"}:
+            self.embeds.append(a["href"] or "")  # what a browser actually connects to
         if tag == "a":
             href = a.get("href")
             if href and not href.startswith("#"):
@@ -144,6 +159,39 @@ def extract_assets(html: str, base_url: str) -> list[str]:
         clean = urllib.parse.urlunsplit((u.scheme, u.netloc, u.path, u.query, ""))
         if clean not in out:
             out.append(clean)
+    return out
+
+
+def _site(host: str) -> str:
+    """Rough registrable domain (last two labels): enough to tell first from third party."""
+    return ".".join(host.split(".")[-2:])
+
+
+def third_party_hosts(html: str, base_url: str) -> list[str]:
+    """Distinct hosts embedded by a page on another site, trackers left out, in order."""
+    parser = _LinkParser()
+    try:
+        parser.feed(html)
+    except Exception:  # noqa: BLE001 - truncated or broken HTML is expected
+        log.debug("html parse error on %s", base_url)
+    own = _site((urllib.parse.urlsplit(base_url).hostname or "").lower())
+    out: list[str] = []
+    for raw in parser.embeds:
+        try:
+            u = urllib.parse.urlsplit(urllib.parse.urljoin(base_url, raw.strip()))
+        except ValueError:
+            continue
+        host = (u.hostname or "").lower()
+        if u.scheme not in ("http", "https") or not host or "." not in host:
+            continue
+        try:
+            ipaddress.ip_address(host)
+            continue  # literal addresses are not lookups
+        except ValueError:
+            pass
+        if _site(host) == own or any(f in host for f in TRACKER_FRAGMENTS) or host in out:
+            continue
+        out.append(host)
     return out
 
 

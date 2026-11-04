@@ -41,7 +41,8 @@ def reviewed_personas() -> dict[str, dict[str, list[str]]]:
     out: dict[str, dict[str, list[str]]] = {}
     data = resources.files("noisycompany.data")
     names = ["personas.toml"] + sorted(
-        p.name for p in data.iterdir() if p.name.startswith("personas_") and p.name.endswith(".toml"))
+        p.name for p in data.iterdir()
+        if p.name.startswith("personas_") and p.name.endswith(".toml"))
     for name in names:
         out.update(tomllib.loads(data.joinpath(name).read_text("utf-8")))
     for pack in packs.bundled().values():

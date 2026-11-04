@@ -87,6 +87,9 @@ dashboard = false
 labelled_log = false
 business_profiles = false
 request_trees = false
+dns_coherence = false
+weekly_rhythm = false
+third_party_bursts = false
 browser_companion = false
 
 [features.options]
@@ -104,3 +107,5 @@ dashboard_port = 9788
 labelled_log_path = ""
 # business_profiles: one of office, dev_team, retail (data/business/).
 business_profile = "office"
+# third_party_bursts: at most this many third-party hosts resolved per page.
+third_party_max = 4

@@ -76,6 +76,18 @@ FEATURES: tuple[Feature, ...] = (
             "Join a collective by share code: members rotate the same reviewed personas at "
             "the same time, so decoys are common to all. No server, no new domains.",
             "3.0", True),
+    Feature("dns_coherence", "DNS follows reading",
+            "DNS noise looks up the hosts of pages the persona actually read and the links "
+            "it saw, like a browser revisiting, instead of independent lookups.",
+            "2.2", True),
+    Feature("weekly_rhythm", "Weekly rhythm",
+            "Busier on evenings, later mornings on weekends and holidays, quieter in "
+            "summer. Changes when sessions happen, never the daily cap.",
+            "2.2", True),
+    Feature("third_party_bursts", "Third-party host bursts",
+            "After a page, resolve (DNS only, no download) a few of the other hosts it "
+            "embeds, as a browser does. Ad and tracker hosts are skipped. ~300 B each.",
+            "2.2", True),
     Feature("separability_study", "Separability study",
             "`noisycompany study`: classifier (ROC AUC) between the labelled log and a real "
             "DNS trace you export (Pi-hole...). Tells which features give the noise away.",

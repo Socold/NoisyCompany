@@ -13,7 +13,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from noisycompany import collective, dns, doh, packs, privacy
+from noisycompany import collective, dns, doh, packs, privacy, rhythm
 from noisycompany.budget import Budget
 from noisycompany.config import PRESETS, TimeRange, load_locale_personas
 from noisycompany.features import FeatureSet
@@ -21,7 +21,14 @@ from noisycompany.metered import MeteredProbe
 from noisycompany.netwatch import NetWatch
 from noisycompany.personas import PersonaRotator
 from noisycompany.server import LocalServer
-from noisycompany.web import REQUEST_OVERHEAD, Fetcher, extract_links, host_allowed, is_blocked
+from noisycompany.web import (
+    REQUEST_OVERHEAD,
+    Fetcher,
+    extract_links,
+    host_allowed,
+    is_blocked,
+    third_party_hosts,
+)
 
 log = logging.getLogger(__name__)
 
@@ -111,6 +118,8 @@ class Engine:
         log_path = self.options.get("labelled_log_path") or (
             str(state_dir / "labelled.jsonl") if state_dir else "")
         self.labelled_path = Path(log_path) if log_path else None
+        # Hosts each persona read or saw links to (feature dns_coherence), bounded.
+        self.seen_hosts: dict[str, list[str]] = {}
 
     # ---------------------------------------------------------------- features
     def drift_days(self) -> float | None:
@@ -312,23 +321,57 @@ class Engine:
         for _ in range(self._randint(self.cfg["dns"]["lookups_per_session"])):
             if not self.budget.can_act(cost):
                 return
-            host = dns.candidate_hosts(domains, self.rng)
-            self.budget.record_action()
-            if self.dry_run:
-                ok = True
-            elif use_doh:
-                ok = doh.resolve(self.options.get("doh_url", ""), host,
-                                 self.cfg["http"]["user_agent"], rng=self.rng)
+            pool = self.seen_hosts.get(persona, [])
+            if pool and self.features.enabled("dns_coherence") and self.rng.random() < 0.7:
+                host = self.rng.choice(pool)
             else:
-                ok = dns.resolve(host)
+                host = dns.candidate_hosts(domains, self.rng)
+            self.budget.record_action()
+            ok, cost, kind = self.lookup(host)
             self._spend(cost)
-            self.label("doh" if use_doh else "dns", host, ok, cost, persona)
+            self.label(kind, host, ok, cost, persona)
             if ok:
                 self.stats.dns_ok += 1
             else:
                 self.stats.dns_fail += 1
             log.debug("dns %s %s", host, "ok" if ok else "fail")
             if not self._sleep(self.rng.uniform(0.3, 3.0)):
+                return
+
+    def remember_hosts(self, persona: str, urls: list[str]) -> None:
+        pool = self.seen_hosts.setdefault(persona, [])
+        for u in urls:
+            host = (urllib.parse.urlsplit(u).hostname or "").lower()
+            if host and host not in pool:
+                pool.append(host)
+        del pool[:-50]
+
+    def lookup(self, host: str) -> tuple[bool, int, str]:
+        """One DNS noise lookup (system resolver or DoH). Returns (ok, cost, kind)."""
+        use_doh = self.features.enabled("doh_sink")
+        cost = doh.DOH_BYTES_ESTIMATE if use_doh else dns.DNS_BYTES_ESTIMATE
+        if self.dry_run:
+            ok = True
+        elif use_doh:
+            ok = doh.resolve(self.options.get("doh_url", ""), host,
+                             self.cfg["http"]["user_agent"], rng=self.rng)
+        else:
+            ok = dns.resolve(host)
+        return ok, cost, "doh" if use_doh else "dns"
+
+    def third_party_burst(self, html: str, url: str, persona: str) -> None:
+        """Resolve a few embedded third-party hosts (feature third_party_bursts)."""
+        limit = int(self.options.get("third_party_max", 4))
+        blocked = self.cfg["safety"]["blocked_fragments"]
+        hosts = [h for h in third_party_hosts(html, url) if not is_blocked(h, blocked)]
+        for host in hosts[:limit]:
+            if not self.budget.can_act(doh.DOH_BYTES_ESTIMATE):
+                return
+            self.budget.record_action()
+            ok, cost, kind = self.lookup(host)
+            self._spend(cost)
+            self.label(kind + "-third-party", host, ok, cost, persona)
+            if not self._sleep(self.rng.uniform(0.02, 0.2)):
                 return
 
     def _entry_url(self, persona: dict[str, list[str]]) -> str:
@@ -378,11 +421,14 @@ class Engine:
                 links = extract_links(res.html, url)
                 if self.features.enabled("request_trees"):
                     self.fetch_tree(res.html, url, name)
+                if self.features.enabled("third_party_bursts"):
+                    self.third_party_burst(res.html, url, name)
             candidates = [
                 link for link in links
                 if not is_blocked(link, safety["blocked_fragments"])
                 and (not http["stay_on_persona_domains"] or host_allowed(link, persona["domains"]))
             ]
+            self.remember_hosts(name, [url, *candidates[:20]])
             url = self.rng.choice(candidates) if candidates else None
             if not self._sleep(self._uniform(sched["dwell_s"])):
                 return
@@ -428,7 +474,9 @@ class Engine:
         gap = self.cfg["schedule"]["mean_session_gap_s"]
         try:
             while not self.stop.is_set():
-                if not once and not self._sleep(self.rng.expovariate(1 / gap)):
+                mean = rhythm.session_gap(gap, self._now()) \
+                    if self.features.enabled("weekly_rhythm") else gap
+                if not once and not self._sleep(self.rng.expovariate(1 / mean)):
                     break
                 if not once and not self.wait_for_slot():
                     break

@@ -91,6 +91,10 @@ def estimate(cfg: dict[str, Any], grid_gco2_per_kwh: float = 50.0) -> Estimate:
         # Up to 3 same-origin assets at half the page cap, first visit per URL only:
         # empirically about +60 % on persona sites.
         page_bytes *= 1.6
+    feats = cfg.get("features", {})
+    if feats.get("third_party_bursts"):
+        # DNS only, at most third_party_max lookups per page; persona sites embed few.
+        lookups += pages * min(int(feats.get("options", {}).get("third_party_max", 4)), 4)
     expected = lookups * dns_cost + pages * page_bytes
     # robots.txt is fetched once per origin; small, counted as 5% overhead.
     expected *= 1.05
