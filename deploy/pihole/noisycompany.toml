@@ -1,0 +1,9 @@
+# NoisyCompany on a Pi-hole / AdGuard Home box.
+[general]
+preset = "eco"
+
+[features]
+labelled_log = true      # ground truth for the study below
+weekly_rhythm = true
+dns_coherence = true
+appliance_packages = true

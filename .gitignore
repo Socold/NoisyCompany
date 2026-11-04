@@ -5,6 +5,6 @@ build/
 dist/
 .pytest_cache/
 .ruff_cache/
-noisycompany.toml
+/noisycompany.toml
 node_modules/
 companion/build/
