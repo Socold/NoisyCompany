@@ -38,11 +38,13 @@ class PersonaRotator:
         rotate_days: float,
         state_dir: Path | None = None,
         clock=time.time,
+        salt: str | None = None,
     ) -> None:
         self.personas = personas
         self.active_count = min(active_count, len(personas))
         self.period_s = max(rotate_days, 0.01) * 86400
-        self._salt = _salt(state_dir)
+        # A shared salt (collective noise) makes several households rotate identically.
+        self._salt = salt or _salt(state_dir)
         self._clock = clock
 
     def epoch(self) -> int:

@@ -9,7 +9,7 @@ import pytest
 
 from noisycompany import config, doh
 from noisycompany.engine import Engine
-from noisycompany.features import BY_ID, FEATURES, FeatureSet, NotAvailable, UnknownFeature
+from noisycompany.features import FEATURES, FeatureSet, NotAvailable, UnknownFeature
 from noisycompany.metered import MeteredProbe, parse_nmcli
 from noisycompany.personas import PersonaRotator
 from noisycompany.server import render_metrics
@@ -35,10 +35,10 @@ def test_switch_persists_and_planned_items_refuse(tmp_path):
     fs.set("doh_sink", True)
     assert FeatureSet(config.load(), tmp_path).enabled("doh_sink")
     with pytest.raises(NotAvailable):
-        fs.set("collective_noise", True)
+        fs.set("test_planned", True)
     with pytest.raises(UnknownFeature):
         fs.set("nope", True)
-    fs.set("collective_noise", False)  # switching a planned item off is harmless
+    fs.set("test_planned", False)  # switching a planned item off is harmless
 
 
 def test_switch_from_another_process_is_seen_on_reload(tmp_path):
@@ -136,15 +136,17 @@ def test_dashboard_buttons_and_hardening(tmp_path):
                     post | {"X-NC-Token": token, "Origin": "http://evil.example"}, body)[0] == 403
         ok = _req(port, "POST", "/api/features/metrics", post | {"X-NC-Token": token}, body)
         assert ok[0] == 200 and eng.features.enabled("metrics")
-        planned = _req(port, "POST", "/api/features/collective_noise",
+        planned = _req(port, "POST", "/api/features/test_planned",
                        post | {"X-NC-Token": token}, body)
         assert planned[0] == 409
         status, data, _ = _req(port, "GET", "/api/status", host)
         snap = {f["id"]: f for f in json.loads(data)["features"]}
-        assert snap["metrics"]["enabled"] and not snap["collective_noise"]["available"]
+        assert snap["metrics"]["enabled"] and not snap["test_planned"]["available"]
     finally:
         srv.stop()
 
 
 def test_feature_ids_are_unique():
-    assert len(BY_ID) == len(FEATURES)
+    from noisycompany import features
+    ids = [f.id for f in features.FEATURES]
+    assert len(ids) == len(set(ids))

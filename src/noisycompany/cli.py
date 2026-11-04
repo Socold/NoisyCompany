@@ -12,7 +12,16 @@ import time
 import tomllib
 from pathlib import Path
 
-from noisycompany import __version__, companion, config, impact, packs, privacy
+from noisycompany import (
+    __version__,
+    collective,
+    companion,
+    config,
+    impact,
+    packs,
+    privacy,
+    study,
+)
 from noisycompany.engine import Engine
 from noisycompany.features import FEATURES, FeatureSet, NotAvailable, UnknownFeature
 
@@ -158,6 +167,76 @@ def cmd_companion(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_health(args: argparse.Namespace) -> int:
+    """Exit 0 when healthy. Used by Docker HEALTHCHECK and appliance supervisors."""
+    cfg = config.load(args.config, args.preset)
+    state = _state_dir(args.state_dir)
+    if not FeatureSet(cfg, state).enabled("appliance_packages"):
+        print("health file disabled (switch appliance_packages off)")
+        return 0
+    try:
+        age = time.time() - (state / "health").stat().st_mtime
+    except OSError:
+        print("no health file yet", file=sys.stderr)
+        return 1
+    ok = age <= args.max_age
+    print(f"{'healthy' if ok else 'stale'}: last heartbeat {age:.0f} s ago")
+    return 0 if ok else 1
+
+
+def cmd_collective(args: argparse.Namespace) -> int:
+    state = _state_dir(args.state_dir)
+    if args.action == "create":
+        cfg = config.load(args.config, args.preset)
+        names = args.personas.split(",") if args.personas else cfg["personas"]["enabled"]
+        group = collective.create(args.name or "household", names, args.rotate_days,
+                                  args.active_count)
+        code = collective.encode(group)
+        print(code)
+        print("\nShare this code with the other members (it contains the shared secret).\n"
+              "Each member runs: noisycompany collective join '<code>'\n"
+              "then: noisycompany features on collective_noise", file=sys.stderr)
+        if args.join:
+            collective.join(code, state)
+        return 0
+    if args.action == "join":
+        if not args.code:
+            print("usage: noisycompany collective join <code|file>", file=sys.stderr)
+            return 2
+        code = Path(args.code).read_text().strip() if Path(args.code).is_file() else args.code
+        group = collective.join(code, state)
+        print(f"joined {group['name']!r}: {len(group['personas'])} personas, "
+              f"{group['active_count']} active, rotation {group['rotate_days']} d")
+        return 0
+    if args.action == "leave":
+        print("left the collective" if collective.leave(state) else "no collective joined")
+        return 0
+    group = collective.current(state)
+    if not group:
+        print("no collective joined")
+        return 0
+    print(f"{group['name']}: {', '.join(group['personas'])} "
+          f"({group['active_count']} active, rotation {group['rotate_days']} d)")
+    if args.code_out:
+        print(collective.encode(group))
+    return 0
+
+
+def cmd_study(args: argparse.Namespace) -> int:
+    noise = study.load_noise(Path(args.noise))
+    human = study.load_trace(Path(args.human))
+    if args.exclude_noise_hosts:
+        # A DNS trace taken on the same network also contains the noise itself.
+        noise_ts = {(round(e.ts), e.host) for e in noise}
+        human = [e for e in human if (round(e.ts), e.host) not in noise_ts]
+    res = study.run(noise, human, args.window, args.folds)
+    if args.json:
+        print(json.dumps(res.__dict__ | {"verdict": res.verdict()}, indent=2))
+    else:
+        print(res.as_text())
+    return 0 if res.auc == res.auc else 1
+
+
 def cmd_config(args: argparse.Namespace) -> int:
     if args.print_default:
         sys.stdout.write(config.default_text())
@@ -212,6 +291,34 @@ def build_parser() -> argparse.ArgumentParser:
     co.add_argument("--dir", default="companion/src")
     co.add_argument("--check", action="store_true", help="fail if files are stale")
     co.set_defaults(func=cmd_companion)
+
+    h = sub.add_parser("health", parents=[common], help="exit 0 if the daemon is alive")
+    h.add_argument("--max-age", type=float, default=180,
+                   help="seconds since the last heartbeat (default 180)")
+    h.set_defaults(func=cmd_health)
+
+    cl = sub.add_parser("collective", parents=[common],
+                        help="shared decoy personas across households")
+    cl.add_argument("action", nargs="?", choices=["show", "create", "join", "leave"],
+                    default="show")
+    cl.add_argument("code", nargs="?", help="join: share code or file")
+    cl.add_argument("--name", help="create: collective name")
+    cl.add_argument("--personas", help="create: comma-separated personas (default: enabled)")
+    cl.add_argument("--rotate-days", type=int, default=10)
+    cl.add_argument("--active-count", type=int, default=3)
+    cl.add_argument("--join", action="store_true", help="create: also join it")
+    cl.add_argument("--code-out", action="store_true", help="show: print the share code")
+    cl.set_defaults(func=cmd_collective)
+
+    st = sub.add_parser("study", parents=[common], help="how separable is the noise?")
+    st.add_argument("--noise", required=True, help="labelled log (JSONL) from labelled_log")
+    st.add_argument("--human", required=True, help="real trace: CSV or JSONL, time + domain")
+    st.add_argument("--window", type=float, default=600, help="window width, seconds")
+    st.add_argument("--folds", type=int, default=5)
+    st.add_argument("--exclude-noise-hosts", action="store_true",
+                    help="drop trace lines matching a noise event (same second + host)")
+    st.add_argument("--json", action="store_true")
+    st.set_defaults(func=cmd_study)
 
     c = sub.add_parser("config", parents=[common], help="show effective config")
     c.add_argument("--print-default", action="store_true")

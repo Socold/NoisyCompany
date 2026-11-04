@@ -13,7 +13,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from noisycompany import dns, doh, packs, privacy
+from noisycompany import collective, dns, doh, packs, privacy
 from noisycompany.budget import Budget
 from noisycompany.config import PRESETS, TimeRange, load_locale_personas
 from noisycompany.features import FeatureSet
@@ -108,23 +108,47 @@ class Engine:
         for name, srv in self.servers.items():
             srv.sync(self.features.enabled(name))
         profile = self.business_profile()
+        group = collective.current(self.state_dir) \
+            if self.features.enabled("collective_noise") else None
         if profile:
             sig: tuple[str, ...] = ("business:" + profile,)
+        elif group:
+            sig = ("collective:" + group["digest"],)
         elif self.features.enabled("persona_marketplace"):
             sig = packs.signature(self.state_dir)
         else:
             sig = ()
         if sig != self._packs_sig:
+            salt = None
+            active = self.cfg["personas"]["active_count"]
+            rotate = self.cfg["personas"]["rotate_days"]
             if profile:
                 merged = packs.business_personas(profile)
+            elif group:
+                reviewed = collective.reviewed_personas()
+                merged = {n: reviewed[n] for n in group["personas"]}
+                salt, active, rotate = group["salt"], group["active_count"], group["rotate_days"]
             elif sig:
                 merged = self.base_personas | packs.installed_personas(self.state_dir)
             else:
                 merged = self.base_personas
-            self.rotator = PersonaRotator(merged, self.cfg["personas"]["active_count"],
-                                          self.cfg["personas"]["rotate_days"], self.state_dir)
+            self.rotator = PersonaRotator(merged, active, rotate, self.state_dir, salt=salt)
             self._packs_sig = sig
             log.info("personas reloaded: %d available", len(merged))
+
+    def heartbeat(self) -> None:
+        """Health file for appliance supervisors (feature appliance_packages)."""
+        if not self.state_dir or not self.features.enabled("appliance_packages"):
+            return
+        try:
+            self.state_dir.mkdir(parents=True, exist_ok=True)
+            (self.state_dir / "health").write_text(self._now().isoformat(timespec="seconds"))
+        except OSError as exc:
+            log.warning("health file: %s", exc)
+
+    def shared_persona_set(self) -> bool:
+        """Business profile or collective: personas must not be mixed with locale ones."""
+        return bool(self._packs_sig) and self._packs_sig[0].startswith(("collective:", "business:"))
 
     def business_profile(self) -> str:
         if not self.features.enabled("business_profiles"):
@@ -155,7 +179,8 @@ class Engine:
 
     def active_personas(self) -> list[str]:
         out = self.rotator.active(self.drift_days())
-        if self.locale_rotator and self.features.enabled("locale_packs"):
+        if (self.locale_rotator and self.features.enabled("locale_packs")
+                and not self.shared_persona_set()):
             out += self.locale_rotator.active(self.drift_days())
         return out
 
@@ -176,8 +201,14 @@ class Engine:
 
     # ---------------------------------------------------------------- helpers
     def _sleep(self, seconds: float) -> bool:
-        """Interruptible sleep. Returns False if asked to stop."""
-        return not self.stop.wait(max(0.0, seconds))
+        """Interruptible sleep, heartbeat every minute. Returns False if asked to stop."""
+        remaining = max(0.0, seconds)
+        while remaining > 60:
+            if self.stop.wait(60):
+                return False
+            remaining -= 60
+            self.heartbeat()
+        return not self.stop.wait(remaining)
 
     def _uniform(self, pair: list[float]) -> float:
         return self.rng.uniform(pair[0], pair[1])
@@ -226,6 +257,7 @@ class Engine:
         """Block until we are allowed to act. Returns False if stopping."""
         while not self.stop.is_set():
             self.refresh_features()
+            self.heartbeat()
             if not self.is_active_time():
                 self.state = "outside active hours"
                 if not self._sleep(60):
@@ -349,7 +381,7 @@ class Engine:
     def run_session(self) -> None:
         rotator = self.rotator
         if (self.locale_rotator and self.features.enabled("locale_packs")
-                and not self.business_profile()
+                and not self.shared_persona_set()
                 and self.rng.random() < float(self.options.get("locale_share", 0.6))):
             rotator = self.locale_rotator
         name, persona = rotator.pick(self.rng, self.drift_days())
@@ -376,6 +408,7 @@ class Engine:
                 if not once and not self.wait_for_slot():
                     break
                 self.run_session()
+                self.heartbeat()
                 self.save_stats()
                 if once:
                     break

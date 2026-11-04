@@ -65,19 +65,21 @@ FEATURES: tuple[Feature, ...] = (
             "the profile is written in the labelled log.",
             "2.4", True),
     Feature("appliance_packages", "Appliance packages",
-            "Raspberry Pi image, OpenWrt package, Home Assistant add-on, Pi-hole companion.",
-            "2.4", False),
+            "Home Assistant add-on, docker-compose, Raspberry Pi and OpenWrt installers, "
+            "multi-arch image. The switch writes a health file for `noisycompany health`.",
+            "2.4", True),
     Feature("request_trees", "Realistic request trees",
             "Also fetch up to 3 same-origin CSS/JS files per page, once per URL like a browser "
             "cache, to look less like a bot. About +60 % bandwidth.",
             "3.0", True),
     Feature("collective_noise", "Collective noise",
-            "Households share persona sets so decoy profiles are indistinguishable "
-            "across users, without a central server.",
-            "3.0", False),
+            "Join a collective by share code: members rotate the same reviewed personas at "
+            "the same time, so decoys are common to all. No server, no new domains.",
+            "3.0", True),
     Feature("separability_study", "Separability study",
-            "Built-in capture + classifier to measure how well noise can be filtered.",
-            "research", False),
+            "`noisycompany study`: classifier (ROC AUC) between the labelled log and a real "
+            "DNS trace you export (Pi-hole...). Tells which features give the noise away.",
+            "research", True),
 )
 
 BY_ID = {f.id: f for f in FEATURES}
