@@ -455,7 +455,11 @@ class Engine:
                 and not self.shared_persona_set()
                 and self.rng.random() < float(self.options.get("locale_share", 0.6))):
             rotator = self.locale_rotator
-        name, persona = rotator.pick(self.rng, self.drift_days())
+        affinity = None
+        if self.features.enabled("weekly_rhythm"):
+            now = self._now()
+            affinity = lambda p: rhythm.persona_affinity(p.get("rhythm"), now)  # noqa: E731
+        name, persona = rotator.pick(self.rng, self.drift_days(), affinity)
         dns_cfg, http_cfg = self.cfg["dns"], self.cfg["http"]
         weights = [dns_cfg["weight"] if dns_cfg["enabled"] else 0.0,
                    http_cfg["weight"] if http_cfg["enabled"] else 0.0]

@@ -3,6 +3,8 @@
 #   seeds   : entry pages for browsing sessions
 #   domains : hosts it may follow links on and resolve in DNS sessions
 #   queries : terms used for on-site searches (Wikipedia search, never ad-funded engines)
+#   rhythm  : optional peak windows ("sat-sun 07-12", may wrap past midnight). With the
+#             weekly_rhythm switch the persona is 3x likelier inside, 0.4x outside.
 # Contributions welcome. Rules: no sensitive category (health, sexuality, religion,
 # politics, crime, finance hardship), no login-only site, lightweight pages preferred.
 
@@ -11,30 +13,35 @@ seeds = ["https://en.wikipedia.org/wiki/Gardening", "https://en.wikipedia.org/wi
          "https://en.wikipedia.org/wiki/Companion_planting"]
 domains = ["en.wikipedia.org", "www.rhs.org.uk", "extension.umn.edu", "www.gardenersworld.com"]
 queries = ["tomato pruning", "compost ratio", "raised bed soil", "heirloom seeds", "mulching"]
+rhythm = ["sat-sun 07-12", "wed 17-20"]
 
 [astronomy]
 seeds = ["https://en.wikipedia.org/wiki/Amateur_astronomy", "https://en.wikipedia.org/wiki/Messier_object",
          "https://en.wikipedia.org/wiki/Dobsonian_telescope"]
 domains = ["en.wikipedia.org", "science.nasa.gov", "www.esa.int", "skyandtelescope.org"]
 queries = ["andromeda galaxy", "meteor shower", "light pollution", "planetary nebula", "jupiter moons"]
+rhythm = ["mon-sun 21-02"]
 
 [cooking]
 seeds = ["https://en.wikipedia.org/wiki/Sourdough", "https://en.wikipedia.org/wiki/French_cuisine",
          "https://en.wikipedia.org/wiki/Fermentation_in_food_processing"]
 domains = ["en.wikipedia.org", "www.seriouseats.com", "www.bbcgoodfood.com", "cooking.nytimes.com"]
 queries = ["bechamel", "ramen broth", "cast iron seasoning", "kimchi", "croissant lamination"]
+rhythm = ["mon-fri 17-20", "sun 10-13"]
 
 [cycling]
 seeds = ["https://en.wikipedia.org/wiki/Bicycle_touring", "https://en.wikipedia.org/wiki/Gravel_bike",
          "https://en.wikipedia.org/wiki/Tour_de_France"]
 domains = ["en.wikipedia.org", "www.cyclingweekly.com", "www.sheldonbrown.com", "bikepacking.com"]
 queries = ["derailleur adjustment", "tubeless tyres", "bike fitting", "randonneuring", "chain wear"]
+rhythm = ["sat-sun 07-11", "mon-fri 18-20"]
 
 [chess]
 seeds = ["https://en.wikipedia.org/wiki/Chess_opening", "https://en.wikipedia.org/wiki/Sicilian_Defence",
          "https://en.wikipedia.org/wiki/Endgame_tablebase"]
 domains = ["en.wikipedia.org", "lichess.org", "www.chess.com", "www.chessprogramming.org"]
 queries = ["queen's gambit", "zugzwang", "rook endgame", "elo rating", "caro-kann"]
+rhythm = ["mon-sun 20-01", "sat-sun 14-18"]
 
 [birdwatching]
 seeds = ["https://en.wikipedia.org/wiki/Birdwatching", "https://en.wikipedia.org/wiki/Bird_migration",
@@ -65,3 +72,4 @@ seeds = ["https://en.wikipedia.org/wiki/Hiking", "https://en.wikipedia.org/wiki/
          "https://en.wikipedia.org/wiki/Leave_No_Trace"]
 domains = ["en.wikipedia.org", "www.alltrails.com", "www.rei.com", "www.nps.gov"]
 queries = ["ultralight backpacking", "trekking poles", "via ferrata", "mountain hut", "trail running"]
+rhythm = ["thu-fri 19-23", "sat-sun 06-09"]

@@ -39,3 +39,42 @@ def factor(now: dt.datetime) -> float:
 def session_gap(mean_gap_s: float, now: dt.datetime, floor: float = 0.05) -> float:
     """Mean gap to the next session: shorter when the household is usually online."""
     return mean_gap_s / max(factor(now), floor)
+
+
+# Per-persona rhythm: optional `rhythm = ["sat-sun 07-12", "mon-fri 20-23"]` in a persona.
+DAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+PEAK, OFF_PEAK = 3.0, 0.4
+
+
+def parse_window(text: str) -> tuple[frozenset[int], int, int]:
+    """'sat-sun 07-12' -> (days, start hour, end hour). End may wrap past midnight."""
+    try:
+        days_part, hours_part = text.strip().lower().split()
+        if "-" in days_part:
+            a, b = (DAYS.index(d) for d in days_part.split("-"))
+            days = frozenset((a + i) % 7 for i in range((b - a) % 7 + 1))
+        else:
+            days = frozenset(DAYS.index(d) for d in days_part.split(","))
+        start, end = (int(h) for h in hours_part.split("-"))
+    except ValueError as exc:
+        raise ValueError(f"bad rhythm window {text!r} (expected e.g. 'sat-sun 07-12')") from exc
+    if not (0 <= start <= 23 and 1 <= end <= 24 and start != end):
+        raise ValueError(f"bad rhythm hours in {text!r}")
+    return days, start, end
+
+
+def in_window(window: tuple[frozenset[int], int, int], now: dt.datetime) -> bool:
+    days, start, end = window
+    if start < end:
+        return now.weekday() in days and start <= now.hour < end
+    # Wraps past midnight: the early hours belong to the previous day.
+    if now.hour >= start:
+        return now.weekday() in days
+    return now.hour < end and (now.weekday() - 1) % 7 in days
+
+
+def persona_affinity(spec: list[str] | None, now: dt.datetime) -> float:
+    """Weight multiplier for a persona at this moment: 1.0 without a rhythm."""
+    if not spec:
+        return 1.0
+    return PEAK if any(in_window(parse_window(w), now) for w in spec) else OFF_PEAK

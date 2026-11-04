@@ -9,6 +9,8 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+from noisycompany import rhythm
+
 PRESETS: dict[str, dict[str, dict[str, Any]]] = {
     # ~3 MB/day: DNS-heavy, very few pages. For metered or slow links.
     "eco": {
@@ -160,6 +162,11 @@ def load_personas(cfg: dict[str, Any]) -> dict[str, dict[str, list[str]]]:
         for field in ("seeds", "domains", "queries"):
             if not isinstance(p.get(field), list) or not p[field]:
                 raise ConfigError(f"persona {name!r}: {field!r} must be a non-empty list")
+        for window in p.get("rhythm", []):
+            try:
+                rhythm.parse_window(window)
+            except ValueError as exc:
+                raise ConfigError(f"persona {name!r}: {exc}") from exc
     if not selected:
         raise ConfigError("[personas] enabled is empty")
     return selected

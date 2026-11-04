@@ -15,6 +15,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
+from noisycompany import rhythm
 from noisycompany.config import ConfigError
 
 NAME_RE = re.compile(r"^[a-z0-9_]{2,40}$")
@@ -84,6 +85,11 @@ def validate(data: dict[str, Any], require_meta: bool = True) -> list[str]:
             host = s.split("/")[2].lower()
             if not any(host == d or host.endswith("." + d) for d in domains):
                 errors.append(f"{where}: seed host {host!r} not in domains")
+        for window in p.get("rhythm", []) if isinstance(p.get("rhythm", []), list) else [None]:
+            try:
+                rhythm.parse_window(str(window))
+            except ValueError as exc:
+                errors.append(f"{where}: {exc}")
         for d in domains:
             if not isinstance(d, str) or "/" in d or ":" in d or "." not in d:
                 errors.append(f"{where}: domain {d!r} must be a bare hostname")

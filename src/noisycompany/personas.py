@@ -67,10 +67,13 @@ class PersonaRotator:
         rest = [n for n in names if n != main]
         return [main, *self._rng("set", self.epoch()).sample(rest, self.active_count - 1)]
 
-    def pick(self, rng: random.Random,
-             drift_main_days: float | None = None) -> tuple[str, dict[str, list[str]]]:
+    def pick(self, rng: random.Random, drift_main_days: float | None = None,
+             affinity=None) -> tuple[str, dict[str, list[str]]]:
         # Weighted: the first active persona is the "main hobby", visited more often.
+        # affinity(persona) scales that weight (per-persona rhythm, weekly_rhythm switch).
         names = self.active(drift_main_days)
         weights = [len(names) - i for i in range(len(names))]
+        if affinity:
+            weights = [w * affinity(self.personas[n]) for w, n in zip(weights, names, strict=True)]
         name = rng.choices(names, weights=weights, k=1)[0]
         return name, self.personas[name]
