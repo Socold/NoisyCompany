@@ -62,6 +62,22 @@ async function refresh() {
   $("state").textContent = s.state;
   $("personas").replaceChildren(...s.active_personas.map((p) => el("li", {}, p)));
   renderFeatures(s.features);
+  renderPrivacy(s.privacy);
+}
+
+function renderPrivacy(p) {
+  const card = $("privacy-card");
+  card.hidden = !p;
+  if (!p) return;
+  $("pscore").textContent = p.score === null ? "n/a" : p.score + "/100";
+  const label = { pass: "OK", fail: "TO DO", unknown: "unknown" };
+  $("privacy").replaceChildren(...p.checks.map((c) => {
+    const li = el("li");
+    li.append(el("span", { class: "st " + c.status }, label[c.status]),
+              document.createTextNode(c.title + (c.detail ? " (" + c.detail + ")" : "")));
+    if (c.status === "fail") li.append(el("div", { class: "adv" }, c.advice));
+    return li;
+  }));
 }
 
 refresh();
