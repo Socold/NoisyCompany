@@ -13,5 +13,8 @@ ENV XDG_STATE_HOME=/state
 VOLUME ["/state"]
 # netwatch needs the host network namespace to see the user's traffic:
 #   docker run --network host --read-only -v noisycompany-state:/state noisycompany
+# `noisycompany health` exits 0 while the daemon writes its heartbeat
+# (switch appliance_packages on; it always succeeds when the switch is off).
+HEALTHCHECK --interval=2m --timeout=10s --start-period=1m CMD ["noisycompany", "health"]
 ENTRYPOINT ["noisycompany"]
 CMD ["run"]

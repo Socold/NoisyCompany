@@ -1,0 +1,24 @@
+name: NoisyCompany
+version: "2.0.0"
+slug: noisycompany
+description: Lightweight network noise with coherent decoy personas, off by night, a few MB per day.
+url: https://github.com/Socold/NoisyCompany
+arch: [aarch64, amd64, armv7]
+init: false
+startup: application
+boot: auto
+host_network: true
+options:
+  preset: eco
+  daily_mb: 3
+  active_hours: ["08:00-12:30", "13:30-23:00"]
+  locale_packs: true
+  doh_sink: false
+  privacy_report: false
+schema:
+  preset: list(eco|balanced|max)
+  daily_mb: float(0.5,200)
+  active_hours: ["match(^\\d{2}:\\d{2}-\\d{2}:\\d{2}$)"]
+  locale_packs: bool
+  doh_sink: bool
+  privacy_report: bool

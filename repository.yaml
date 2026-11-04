@@ -1,0 +1,3 @@
+# Home Assistant add-on repository (add-on in deploy/homeassistant/).
+name: NoisyCompany
+url: https://github.com/Socold/NoisyCompany

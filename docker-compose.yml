@@ -1,0 +1,19 @@
+# docker compose up -d
+# Host network so netwatch sees your real traffic; read-only root, no capability.
+services:
+  noisycompany:
+    image: ghcr.io/socold/noisycompany:latest
+    build: .
+    network_mode: host
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 96m
+    cpus: 0.1
+    restart: unless-stopped
+    volumes:
+      - noisycompany-state:/state
+      # - ./noisycompany.toml:/config/noisycompany.toml:ro
+    # command: ["run", "-c", "/config/noisycompany.toml"]
+volumes:
+  noisycompany-state:
