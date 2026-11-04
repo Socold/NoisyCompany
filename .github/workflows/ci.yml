@@ -46,3 +46,19 @@ jobs:
       - name: Chromium manifest sanity
         run: node -e 'const m=require("./build/chromium/manifest.json"); if(m.background.service_worker!=="sw.js"||m.permissions.includes("cookies")) process.exit(1)'
 
+
+  openwrt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Build the OpenWrt packages with the official SDK (24.10, ipk)
+        run: |
+          mkdir -p out && chmod 777 out
+          docker run --rm -v "$PWD:/src:ro" -v "$PWD/out:/out" \
+            openwrt/sdk:x86-64-v24.10.8 sh /src/deploy/openwrt/ci-build.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: openwrt-packages
+          path: out/*

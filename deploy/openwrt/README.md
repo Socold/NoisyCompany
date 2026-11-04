@@ -18,4 +18,7 @@ Two ways:
 
 Needs about 10 MB of flash for Python (`python3-light` and a few modules). The service
 stays off until enabled in LuCI or with `uci set noisycompany.main.enabled=1 && uci commit`.
-The package files follow the SDK conventions but were not built on every target yet.
+CI builds both packages from each pull request with the official SDK container
+(`openwrt/sdk:x86-64-v24.10.8`, `ci-build.sh`) and keeps the `.ipk` files as an artifact;
+they are `all`-architecture, so the same files install on any 24.10 router. OpenWrt 25.12
+switched to `apk` packages: not built yet.
