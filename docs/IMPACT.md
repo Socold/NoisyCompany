@@ -28,12 +28,14 @@ How the footprint is kept small:
 |---|---|
 | `doh_sink` | DNS lookups cost ~5 KB instead of ~300 B (TLS to the resolver) |
 | `request_trees` | About +60 % on HTTP noise (up to 3 same-origin CSS/JS per page, once per URL) |
+| `third_party_bursts` | Up to 4 extra DNS lookups per page (~300 B each, ~5 KB with `doh_sink`), no download |
+| `dns_coherence`, `weekly_rhythm` | No change: they choose *which* host and *when*, within the same budget |
 | `metered_guard` | On a metered link, the daily cap drops to 3 MB |
 | `browser_companion` (Firefox) | Up to 2 MB/day, light mode ~100 KB per visit, tab mode ~2 MB per visit |
 | others | No traffic change |
 
-`noisycompany estimate` accounts for `doh_sink` and `request_trees` when they are on in
-the config file.
+`noisycompany estimate` accounts for `doh_sink`, `request_trees` and `third_party_bursts`
+when they are on in the config file.
 
 ## Effect on your browsing
 

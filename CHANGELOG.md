@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased (2.1)
+## Unreleased (2.1, 2.2)
+
+Realism, guided by the separability study (all new switches off by default):
+
+- German, Spanish and Italian locale packs, with matching `Accept-Language`.
+- `dns_coherence`: DNS noise follows the pages read and the links seen.
+- `weekly_rhythm`: evening peaks, later weekend and holiday mornings, quieter summer.
+- `third_party_bursts`: DNS lookups of a page's embedded third-party hosts, trackers
+  skipped, no download.
+- Study reads Pi-hole `pihole-FTL.db` and AdGuard Home `querylog.json` directly, and
+  uses a weekday/holiday feature.
 
 Hardening from the November 2026 audit:
 

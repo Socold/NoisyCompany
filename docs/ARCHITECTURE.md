@@ -29,6 +29,7 @@ companion/ (Firefox MV3): lib.js (pure logic) + background.js (alarms, idle, fet
 | `budget.py` | Daily byte cap, hourly action cap |
 | `features.py` | Registry of every roadmap item and its switch, runtime overrides |
 | `personas.py` | Salted rotation, persona drift |
+| `rhythm.py` | Weekday / weekend / holiday / season activity factor (`weekly_rhythm`) |
 | `packs.py` | Reviewed packs, business profiles, validator (sensitive topics, https, scope) |
 | `collective.py` | Share codes (`nc1:`), digest, reviewed personas only |
 | `dns.py` / `doh.py` | System-resolver lookups / RFC 8484 DoH |

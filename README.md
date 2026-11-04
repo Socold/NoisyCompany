@@ -78,7 +78,7 @@ noisycompany run -c noisycompany.toml
 ```bash
 noisycompany features                   # every roadmap item, with its state
 noisycompany features on dashboard      # then open http://127.0.0.1:9788
-noisycompany features on locale_packs   # add the French persona pack
+noisycompany features on locale_packs   # add persona packs in your language (fr, de, es, it)
 noisycompany privacy                    # local privacy score and advice
 noisycompany packs install photography  # reviewed persona pack, then:
 noisycompany features on persona_marketplace

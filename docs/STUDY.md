@@ -7,10 +7,10 @@ timing (ISP, resolver, Wi-Fi) filter NoisyCompany's traffic out of yours?**
 
 1. `noisycompany features on labelled_log`, run for a few days. The noise is written to
    `~/.local/state/noisycompany/labelled.jsonl`.
-2. Export a real trace from the same network and period, for example from Pi-hole
-   (*Query Log* > export, or `pihole-FTL sqlite3 /etc/pihole/pihole-FTL.db
-   "select timestamp, domain from queries"` as CSV with a `timestamp,domain` header).
-   Any CSV or JSONL with a time column (`ts`, `timestamp`, `time`, `date`) and a host
+2. Give a real trace from the same network and period:
+   - Pi-hole: pass a copy of `/etc/pihole/pihole-FTL.db` directly (opened read-only);
+   - AdGuard Home: `querylog.json` as is;
+   - anything else: any CSV or JSONL with a time column (`ts`, `timestamp`, `time`, `date`) and a host
    column (`host`, `domain`, `name`, `query`, `target`) works.
 
 The trace stays on your machine. Do not publish it: it is your real browsing.
@@ -36,8 +36,9 @@ noisycompany study --noise ~/.local/state/noisycompany/labelled.jsonl \
 
 The output lists the most telling features (positive weight = looks like noise), for
 example `unique_hosts` (a real page load resolves dozens of third-party hosts) or
-`hour_sin/hour_cos` (activity at hours you are never online). Use them to tune active
-hours, enable `request_trees`, or prefer the browser companion.
+`hour_sin/hour_cos` and `day_off` (activity at hours or on days you are never online).
+Remedies: tune active hours, `weekly_rhythm` (hours and days), `third_party_bursts` and
+`dns_coherence` (host diversity and revisits), `request_trees`, or the browser companion.
 
 ## Limits
 

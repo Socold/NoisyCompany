@@ -46,7 +46,10 @@ confidentialité (`noisycompany privacy` : bloqueur, DNS chiffré, anti-empreint
 IPv6, cohérence du bruit, score sur 100, rien n'est envoyé) et packs de personas relus
 (`noisycompany packs install <nom>`), profils métier pour labos SOC (`business_profiles` :
 bureau, équipe de dev, commerce) et arbres de requêtes réalistes (`request_trees`, CSS/JS
-du même site une seule fois, environ +60 % de données).
+du même site une seule fois, environ +60 % de données). Réalisme : packs allemand,
+espagnol et italien, DNS qui suit les pages lues (`dns_coherence`), rythme de la semaine
+et des congés (`weekly_rhythm`), rafales DNS des domaines tiers d'une page sans
+téléchargement ni traqueurs (`third_party_bursts`).
 
 Boîtiers : add-on Home Assistant, docker-compose, installateur Raspberry Pi, service
 OpenWrt, image multi-architecture et `noisycompany health`. Bruit collectif : des foyers
@@ -74,9 +77,7 @@ dans [PRIVACY.md](../PRIVACY.md).
 
 ## Prochaines évolutions
 
-Durcissement (connexion à l'IP vérifiée, signature des images, fuzzing, PyPI), réalisme
-guidé par l'étude (cohérence DNS/HTTP, rythmes hebdomadaires, plus de langues, rafales de
-domaines tiers), extension signée sur addons.mozilla.org et portage Chromium, intégration
+Durcissement et réalisme sont faits (2.1, 2.2). Ensuite : extension signée sur addons.mozilla.org et portage Chromium, intégration
 Pi-hole / AdGuard Home, applications Umbrel / TrueNAS, paquet OpenWrt, tableau Grafana,
 interface en français, codes de collectif en QR, banc d'essai public de détectabilité,
 mesure réelle de l'énergie. Détail : [ROADMAP.md](../ROADMAP.md#next-evolutions).
