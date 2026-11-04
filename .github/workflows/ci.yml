@@ -40,5 +40,9 @@ jobs:
           node-version: "22"
       - run: npm test
       - run: npm run check
+      - run: npm run build
       - name: Mozilla add-on linter
-        run: npx --yes web-ext@8.3.0 lint --source-dir src --self-hosted
+        run: npx --yes web-ext@8.3.0 lint --source-dir build/firefox --self-hosted
+      - name: Chromium manifest sanity
+        run: node -e 'const m=require("./build/chromium/manifest.json"); if(m.background.service_worker!=="sw.js"||m.permissions.includes("cookies")) process.exit(1)'
+

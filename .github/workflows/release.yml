@@ -74,3 +74,34 @@ jobs:
             | python -c 'import json,sys;print(json.load(sys.stdin)["token"])')
           echo "::add-mask::$token"
           TWINE_USERNAME=__token__ TWINE_PASSWORD="$token" python -m twine upload --non-interactive dist/*
+
+  amo:
+    # Signed, listed Firefox build. Enabled once AMO API keys are stored as secrets
+    # AMO_JWT_ISSUER / AMO_JWT_SECRET and the repository variable AMO_SIGN is "true".
+    if: vars.AMO_SIGN == 'true'
+    runs-on: ubuntu-latest
+    environment: amo
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: companion
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - run: npm test && npm run build
+      - name: Sign on addons.mozilla.org
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+          WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: npx --yes web-ext@8.3.0 sign --source-dir build/firefox --channel listed --approval-timeout 0
+      - name: Chromium zip (for the Chrome Web Store, uploaded by hand)
+        run: cd build/chromium && zip -qr ../noisycompany-chromium.zip .
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: companion-chromium
+          path: companion/build/noisycompany-chromium.zip
