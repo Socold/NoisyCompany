@@ -24,6 +24,7 @@ from noisycompany import (
 )
 from noisycompany.engine import Engine
 from noisycompany.features import FEATURES, FeatureSet, NotAvailable, UnknownFeature
+from noisycompany.i18n import _
 
 
 def _state_dir(arg: str | None) -> Path:
@@ -73,17 +74,17 @@ def cmd_features(args: argparse.Namespace) -> int:
     fs = FeatureSet(cfg, _state_dir(args.state_dir))
     if args.action in ("on", "off"):
         if not args.feature:
-            print("usage: noisycompany features on|off <id>", file=sys.stderr)
+            print(_("usage: noisycompany features on|off <id>"), file=sys.stderr)
             return 2
         try:
             fs.set(args.feature, args.action == "on")
         except UnknownFeature:
-            print(f"unknown feature {args.feature!r}", file=sys.stderr)
+            print(_("unknown feature {f!r}").format(f=args.feature), file=sys.stderr)
             return 2
         except NotAvailable as exc:
-            print(f"not available yet: {exc}", file=sys.stderr)
+            print(_("not available yet: {e}").format(e=exc), file=sys.stderr)
             return 3
-        print(f"{args.feature}: {args.action} (applies at the next session)")
+        print(_("{f}: {a} (applies at the next session)").format(f=args.feature, a=args.action))
         return 0
     width = max(len(f.id) for f in FEATURES)
     for f in fs.snapshot():
@@ -135,12 +136,12 @@ def cmd_packs(args: argparse.Namespace) -> int:
         for name in args.names:
             if args.action == "install":
                 packs.install(name, state)
-                print(f"installed {name}")
+                print(_("installed {n}").format(n=name))
             elif packs.remove(name, state):
-                print(f"removed {name}")
+                print(_("removed {n}").format(n=name))
             else:
-                print(f"{name} is not installed", file=sys.stderr)
-        print("(used when the persona_marketplace switch is on)")
+                print(_("{n} is not installed").format(n=name), file=sys.stderr)
+        print(_("(used when the persona_marketplace switch is on)"))
         return 0
     inst = set(packs.installed(state))
     for name, data in packs.bundled().items():
@@ -153,7 +154,7 @@ def cmd_packs(args: argparse.Namespace) -> int:
 def cmd_companion(args: argparse.Namespace) -> int:
     target = Path(args.dir)
     if not target.is_dir():
-        print(f"{target} is not a directory", file=sys.stderr)
+        print(_("{t} is not a directory").format(t=target), file=sys.stderr)
         return 2
     stale = companion.export(target, check=args.check)
     if args.check:
@@ -161,7 +162,7 @@ def cmd_companion(args: argparse.Namespace) -> int:
             print("stale companion files: " + ", ".join(stale)
                   + " (run `noisycompany companion export`)", file=sys.stderr)
             return 1
-        print("companion files up to date")
+        print(_("companion files up to date"))
         return 0
     print("written: " + (", ".join(stale) if stale else "nothing (already up to date)"))
     return 0
@@ -172,15 +173,16 @@ def cmd_health(args: argparse.Namespace) -> int:
     cfg = config.load(args.config, args.preset)
     state = _state_dir(args.state_dir)
     if not FeatureSet(cfg, state).enabled("appliance_packages"):
-        print("health file disabled (switch appliance_packages off)")
+        print(_("health file disabled (switch appliance_packages off)"))
         return 0
     try:
         age = time.time() - (state / "health").stat().st_mtime
     except OSError:
-        print("no health file yet", file=sys.stderr)
+        print(_("no health file yet"), file=sys.stderr)
         return 1
     ok = age <= args.max_age
-    print(f"{'healthy' if ok else 'stale'}: last heartbeat {age:.0f} s ago")
+    msg = "healthy: last heartbeat {s:.0f} s ago" if ok else "stale: last heartbeat {s:.0f} s ago"
+    print(_(msg).format(s=age))
     return 0 if ok else 1
 
 
@@ -203,7 +205,7 @@ def cmd_collective(args: argparse.Namespace) -> int:
         return 0
     if args.action == "join":
         if not args.code:
-            print("usage: noisycompany collective join <code|file>", file=sys.stderr)
+            print(_("usage: noisycompany collective join <code|file>"), file=sys.stderr)
             return 2
         code = args.code if args.code.startswith(collective.PREFIX) \
             else Path(args.code).read_text().strip()
@@ -216,7 +218,7 @@ def cmd_collective(args: argparse.Namespace) -> int:
             group = json.loads((state / "collective.json").read_text())
             group = collective.decode(collective.encode(group))
         except (OSError, ValueError, config.ConfigError):
-            print("no collective joined", file=sys.stderr)
+            print(_("no collective joined"), file=sys.stderr)
             return 1
         if args.action == "rotate":
             group = collective.rotate(group, _expiry(args))
@@ -228,7 +230,7 @@ def cmd_collective(args: argparse.Namespace) -> int:
         _print_qr(code, args.svg)
         return 0
     if args.action == "leave":
-        print("left the collective" if collective.leave(state) else "no collective joined")
+        print(_("left the collective") if collective.leave(state) else _("no collective joined"))
         return 0
     group = collective.current(state)
     if not group:
@@ -253,7 +255,7 @@ def _print_qr(code: str, svg: str | None) -> None:
     q = qr.encode(code)
     if svg:
         Path(svg).write_text(q.to_svg())
-        print(f"QR code written to {svg}", file=sys.stderr)
+        print(_("QR code written to {p}").format(p=svg), file=sys.stderr)
     else:
         print(q.to_text(), file=sys.stderr)
 
@@ -336,103 +338,103 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="noisycompany", description=__doc__)
     p.add_argument("--version", action="version", version=f"noisycompany {__version__}")
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("-c", "--config", help="TOML config file")
+    common.add_argument("-c", "--config", help=_("TOML config file"))
     common.add_argument("-p", "--preset", choices=sorted(config.PRESETS))
-    common.add_argument("--state-dir", help="where salt, switches and stats.json live")
+    common.add_argument("--state-dir", help=_("where salt, switches and stats.json live"))
     sub = p.add_subparsers(dest="command", required=True)
 
-    r = sub.add_parser("run", parents=[common], help="generate noise")
-    r.add_argument("--dry-run", action="store_true", help="no network, log intended actions")
-    r.add_argument("--once", action="store_true", help="run a single session then exit")
+    r = sub.add_parser("run", parents=[common], help=_("generate noise"))
+    r.add_argument("--dry-run", action="store_true", help=_("no network, log intended actions"))
+    r.add_argument("--once", action="store_true", help=_("run a single session then exit"))
     r.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     r.set_defaults(func=cmd_run)
 
-    e = sub.add_parser("estimate", parents=[common], help="bandwidth and energy estimate")
+    e = sub.add_parser("estimate", parents=[common], help=_("bandwidth and energy estimate"))
     e.add_argument("--grid", type=float, default=50.0,
-                   help="grid carbon intensity gCO2e/kWh (default 50, ~France; EU ~250)")
+                   help=_("grid carbon intensity gCO2e/kWh (default 50, ~France; EU ~250)"))
     e.add_argument("--json", action="store_true")
     e.set_defaults(func=cmd_estimate)
 
-    pe = sub.add_parser("personas", parents=[common], help="list enabled personas")
+    pe = sub.add_parser("personas", parents=[common], help=_("list enabled personas"))
     pe.set_defaults(func=cmd_personas)
 
-    f = sub.add_parser("features", parents=[common], help="list or switch features on/off")
+    f = sub.add_parser("features", parents=[common], help=_("list or switch features on/off"))
     f.add_argument("action", nargs="?", choices=["list", "on", "off"], default="list")
     f.add_argument("feature", nargs="?")
     f.set_defaults(func=cmd_features)
 
-    pr = sub.add_parser("privacy", parents=[common], help="local privacy report and score")
+    pr = sub.add_parser("privacy", parents=[common], help=_("local privacy report and score"))
     pr.add_argument("--json", action="store_true")
     pr.set_defaults(func=cmd_privacy)
 
-    pk = sub.add_parser("packs", parents=[common], help="persona packs: list, install, check")
+    pk = sub.add_parser("packs", parents=[common], help=_("persona packs: list, install, check"))
     pk.add_argument("action", nargs="?", choices=["list", "install", "remove", "check"],
                     default="list")
     pk.add_argument("names", nargs="*")
-    pk.add_argument("--no-meta", action="store_true", help="check: allow files without [meta]")
+    pk.add_argument("--no-meta", action="store_true", help=_("check: allow files without [meta]"))
     pk.set_defaults(func=cmd_packs)
 
-    co = sub.add_parser("companion", help="generate the browser companion's personas/manifest")
+    co = sub.add_parser("companion", help=_("generate the browser companion's personas/manifest"))
     co.add_argument("action", choices=["export"])
     co.add_argument("--dir", default="companion/src")
-    co.add_argument("--check", action="store_true", help="fail if files are stale")
+    co.add_argument("--check", action="store_true", help=_("fail if files are stale"))
     co.set_defaults(func=cmd_companion)
 
-    h = sub.add_parser("health", parents=[common], help="exit 0 if the daemon is alive")
+    h = sub.add_parser("health", parents=[common], help=_("exit 0 if the daemon is alive"))
     h.add_argument("--max-age", type=float, default=180,
-                   help="seconds since the last heartbeat (default 180)")
+                   help=_("seconds since the last heartbeat (default 180)"))
     h.set_defaults(func=cmd_health)
 
     cl = sub.add_parser("collective", parents=[common],
-                        help="shared decoy personas across households")
+                        help=_("shared decoy personas across households"))
     cl.add_argument("action", nargs="?",
                     choices=["show", "create", "join", "leave", "qr", "rotate"],
                     default="show")
-    cl.add_argument("code", nargs="?", help="join: share code or file")
-    cl.add_argument("--name", help="create: collective name")
-    cl.add_argument("--personas", help="create: comma-separated personas (default: enabled)")
+    cl.add_argument("code", nargs="?", help=_("join: share code or file"))
+    cl.add_argument("--name", help=_("create: collective name"))
+    cl.add_argument("--personas", help=_("create: comma-separated personas (default: enabled)"))
     cl.add_argument("--rotate-days", type=int, default=10)
     cl.add_argument("--active-count", type=int, default=3)
-    cl.add_argument("--join", action="store_true", help="create: also join it")
-    cl.add_argument("--code-out", action="store_true", help="show: print the share code")
+    cl.add_argument("--join", action="store_true", help=_("create: also join it"))
+    cl.add_argument("--code-out", action="store_true", help=_("show: print the share code"))
     cl.add_argument("--expires-days", type=int, default=0,
-                    help="create/rotate: code valid this many days (0 = no expiry)")
-    cl.add_argument("--qr", action="store_true", help="create: also print a QR code")
-    cl.add_argument("--svg", help="qr/rotate/create: write the QR code to this SVG file")
+                    help=_("create/rotate: code valid this many days (0 = no expiry)"))
+    cl.add_argument("--qr", action="store_true", help=_("create: also print a QR code"))
+    cl.add_argument("--svg", help=_("qr/rotate/create: write the QR code to this SVG file"))
     cl.set_defaults(func=cmd_collective)
 
     en = sub.add_parser("energy", parents=[common],
-                        help="measure CPU time and RAPL energy of real sessions")
+                        help=_("measure CPU time and RAPL energy of real sessions"))
     en.add_argument("--sessions", type=int, default=20)
-    en.add_argument("--dry-run", action="store_true", help="no network (CPU cost only)")
+    en.add_argument("--dry-run", action="store_true", help=_("no network (CPU cost only)"))
     en.set_defaults(func=cmd_energy)
 
     sc = sub.add_parser("scenario", parents=[common],
-                        help="SOC test scenarios: labelled benign traffic, offline")
+                        help=_("SOC test scenarios: labelled benign traffic, offline"))
     sc.add_argument("action", nargs="?", choices=["list", "run"], default="list")
-    sc.add_argument("name", nargs="?", help="run: scenario name or .toml file")
-    sc.add_argument("--out", default="scenario.jsonl", help="run: labelled JSONL output")
+    sc.add_argument("name", nargs="?", help=_("run: scenario name or .toml file"))
+    sc.add_argument("--out", default="scenario.jsonl", help=_("run: labelled JSONL output"))
     sc.add_argument("--seed", type=int, default=1)
     sc.set_defaults(func=cmd_scenario)
 
     bm = sub.add_parser("benchmark", parents=[common],
-                        help="offline separability benchmark on simulated days")
+                        help=_("offline separability benchmark on simulated days"))
     bm.add_argument("--days", type=int, default=14)
     bm.add_argument("--seed", type=int, default=7)
     bm.add_argument("--json", action="store_true")
     bm.set_defaults(func=cmd_benchmark)
 
-    st = sub.add_parser("study", parents=[common], help="how separable is the noise?")
-    st.add_argument("--noise", required=True, help="labelled log (JSONL) from labelled_log")
-    st.add_argument("--human", required=True, help="real trace: CSV or JSONL, time + domain")
-    st.add_argument("--window", type=float, default=600, help="window width, seconds")
+    st = sub.add_parser("study", parents=[common], help=_("how separable is the noise?"))
+    st.add_argument("--noise", required=True, help=_("labelled log (JSONL) from labelled_log"))
+    st.add_argument("--human", required=True, help=_("real trace: CSV or JSONL, time + domain"))
+    st.add_argument("--window", type=float, default=600, help=_("window width, seconds"))
     st.add_argument("--folds", type=int, default=5)
     st.add_argument("--exclude-noise-hosts", action="store_true",
-                    help="drop trace lines matching a noise event (same second + host)")
+                    help=_("drop trace lines matching a noise event (same second + host)"))
     st.add_argument("--json", action="store_true")
     st.set_defaults(func=cmd_study)
 
-    c = sub.add_parser("config", parents=[common], help="show effective config")
+    c = sub.add_parser("config", parents=[common], help=_("show effective config"))
     c.add_argument("--print-default", action="store_true")
     c.set_defaults(func=cmd_config)
     return p
@@ -445,5 +447,5 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return args.func(args)
     except config.ConfigError as exc:
-        print(f"config error: {exc}", file=sys.stderr)
+        print(_("config error: {e}").format(e=exc), file=sys.stderr)
         return 2
