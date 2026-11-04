@@ -165,3 +165,29 @@ def test_study_cli_with_pihole_like_csv(tmp_path):
         f"{e.ts},A,{e.host},192.0.2.10" for e in synth("human", 30, rng, start=1_780_200_000)]
     trace.write_text("\n".join(rows))
     assert main(["study", "--noise", str(noise), "--human", str(trace), "--json"]) == 0
+
+
+def test_collective_expiry_rotation_and_qr(tmp_path, capsys):
+    import datetime as dt
+
+    from noisycompany import qr
+    from noisycompany.config import ConfigError
+    group = collective.create("Famille", ["chess", "jazz", "hiking"], 7, 2,
+                              expires=dt.date(2026, 1, 31))
+    assert collective.expired(group, dt.date(2026, 2, 1))
+    assert not collective.expired(group, dt.date(2026, 1, 31))
+    with pytest.raises(ConfigError):  # already expired today
+        collective.join(collective.encode(group), tmp_path)
+    fresh = collective.create("Famille", ["chess", "jazz", "hiking"], 7, 2)
+    collective.join(collective.encode(fresh), tmp_path)
+    assert main(["collective", "rotate", "--state-dir", str(tmp_path),
+                 "--expires-days", "30", "--svg", str(tmp_path / "c.svg")]) == 0
+    rotated = collective.current(tmp_path)
+    assert rotated["salt"] != fresh["salt"] and rotated["personas"] == fresh["personas"]
+    assert rotated["expires"] and (tmp_path / "c.svg").read_text().startswith("<svg")
+    code = capsys.readouterr().out.strip()
+    assert qr.encode(code).version <= 15
+    bad = dict(fresh, extra="x")
+    bad.pop("digest")
+    with pytest.raises(ConfigError):
+        collective.validate(bad)

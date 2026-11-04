@@ -190,9 +190,11 @@ def cmd_collective(args: argparse.Namespace) -> int:
         cfg = config.load(args.config, args.preset)
         names = args.personas.split(",") if args.personas else cfg["personas"]["enabled"]
         group = collective.create(args.name or "household", names, args.rotate_days,
-                                  min(args.active_count, len(set(names))))
+                                  min(args.active_count, len(set(names))), _expiry(args))
         code = collective.encode(group)
         print(code)
+        if args.qr:
+            _print_qr(code, args.svg)
         print("\nShare this code with the other members (it contains the shared secret).\n"
               "Each member runs: noisycompany collective join '<code>'\n"
               "then: noisycompany features on collective_noise", file=sys.stderr)
@@ -209,18 +211,51 @@ def cmd_collective(args: argparse.Namespace) -> int:
         print(f"joined {group['name']!r}: {len(group['personas'])} personas, "
               f"{group['active_count']} active, rotation {group['rotate_days']} d")
         return 0
+    if args.action in ("qr", "rotate"):
+        try:
+            group = json.loads((state / "collective.json").read_text())
+            group = collective.decode(collective.encode(group))
+        except (OSError, ValueError, config.ConfigError):
+            print("no collective joined", file=sys.stderr)
+            return 1
+        if args.action == "rotate":
+            group = collective.rotate(group, _expiry(args))
+            collective.join(collective.encode(group), state)
+            print("new shared salt: send the new code to every member, the old one no "
+                  "longer matches your rotation", file=sys.stderr)
+        code = collective.encode(group)
+        print(code)
+        _print_qr(code, args.svg)
+        return 0
     if args.action == "leave":
         print("left the collective" if collective.leave(state) else "no collective joined")
         return 0
     group = collective.current(state)
     if not group:
-        print("no collective joined")
+        raw = state / "collective.json"
+        print("collective expired: ask for a new code (collective rotate)" if raw.exists()
+              else "no collective joined")
         return 0
     print(f"{group['name']}: {', '.join(group['personas'])} "
           f"({group['active_count']} active, rotation {group['rotate_days']} d)")
     if args.code_out:
         print(collective.encode(group))
     return 0
+
+
+def _expiry(args: argparse.Namespace):
+    import datetime as dt
+    return dt.date.today() + dt.timedelta(days=args.expires_days) if args.expires_days else None
+
+
+def _print_qr(code: str, svg: str | None) -> None:
+    from noisycompany import qr
+    q = qr.encode(code)
+    if svg:
+        Path(svg).write_text(q.to_svg())
+        print(f"QR code written to {svg}", file=sys.stderr)
+    else:
+        print(q.to_text(), file=sys.stderr)
 
 
 def cmd_study(args: argparse.Namespace) -> int:
@@ -300,7 +335,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     cl = sub.add_parser("collective", parents=[common],
                         help="shared decoy personas across households")
-    cl.add_argument("action", nargs="?", choices=["show", "create", "join", "leave"],
+    cl.add_argument("action", nargs="?",
+                    choices=["show", "create", "join", "leave", "qr", "rotate"],
                     default="show")
     cl.add_argument("code", nargs="?", help="join: share code or file")
     cl.add_argument("--name", help="create: collective name")
@@ -309,6 +345,10 @@ def build_parser() -> argparse.ArgumentParser:
     cl.add_argument("--active-count", type=int, default=3)
     cl.add_argument("--join", action="store_true", help="create: also join it")
     cl.add_argument("--code-out", action="store_true", help="show: print the share code")
+    cl.add_argument("--expires-days", type=int, default=0,
+                    help="create/rotate: code valid this many days (0 = no expiry)")
+    cl.add_argument("--qr", action="store_true", help="create: also print a QR code")
+    cl.add_argument("--svg", help="qr/rotate/create: write the QR code to this SVG file")
     cl.set_defaults(func=cmd_collective)
 
     st = sub.add_parser("study", parents=[common], help="how separable is the noise?")

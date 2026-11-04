@@ -12,12 +12,15 @@ QR code, paper). Safety rules, because a code comes from someone else:
   bundled packs). It cannot bring new domains, so a malicious member cannot steer your
   traffic (and IP address) to a server they control;
 - the payload carries a SHA-256 digest; any alteration is rejected;
-- the code is small, compressed JSON, never executed.
+- the code is small, compressed JSON, never executed;
+- it can carry an expiry date: past it, members stop using it. `collective rotate`
+  issues a new code (new salt, same personas) to replace a leaked or old one.
 """
 
 from __future__ import annotations
 
 import base64
+import datetime as dt
 import hashlib
 import json
 import re
@@ -56,12 +59,25 @@ def _digest(body: dict[str, Any]) -> str:
 
 
 def create(name: str, personas: list[str], rotate_days: int = 10,
-           active_count: int = 3) -> dict[str, Any]:
-    body = {"format": FORMAT, "v": 1, "name": name, "salt": secrets.token_hex(16),
-            "personas": sorted(set(personas)), "rotate_days": rotate_days,
-            "active_count": active_count}
+           active_count: int = 3, expires: dt.date | None = None) -> dict[str, Any]:
+    body: dict[str, Any] = {"format": FORMAT, "v": 1, "name": name,
+                            "salt": secrets.token_hex(16), "personas": sorted(set(personas)),
+                            "rotate_days": rotate_days, "active_count": active_count}
+    if expires:
+        body["expires"] = expires.isoformat()
     validate(body)
     return body | {"digest": _digest(body)}
+
+
+def rotate(group: dict[str, Any], expires: dt.date | None = None) -> dict[str, Any]:
+    """Same collective, new shared salt (and expiry): replaces a leaked or old code."""
+    return create(group["name"], group["personas"], group["rotate_days"],
+                  group["active_count"], expires)
+
+
+def expired(group: dict[str, Any], today: dt.date | None = None) -> bool:
+    exp = group.get("expires")
+    return bool(exp) and (today or dt.date.today()) > dt.date.fromisoformat(exp)
 
 
 def validate(body: dict[str, Any]) -> None:
@@ -82,6 +98,18 @@ def validate(body: dict[str, Any]) -> None:
         raise ConfigError("rotate_days must be an integer in [1, 60]")
     if not isinstance(ac, int) or not 1 <= ac <= len(names):
         raise ConfigError("active_count must be in [1, number of personas]")
+    exp = body.get("expires")
+    if exp is not None:
+        try:
+            if not isinstance(exp, str):
+                raise ValueError
+            dt.date.fromisoformat(exp)
+        except ValueError as exc:
+            raise ConfigError("expires must be a YYYY-MM-DD date") from exc
+    extra = set(body) - {"format", "v", "name", "salt", "personas", "rotate_days",
+                         "active_count", "expires"}
+    if extra:
+        raise ConfigError(f"unknown collective fields: {sorted(extra)}")
 
 
 def encode(collective: dict[str, Any]) -> str:
@@ -118,6 +146,8 @@ def _path(state_dir: Path) -> Path:
 
 def join(code: str, state_dir: Path) -> dict[str, Any]:
     collective = decode(code)
+    if expired(collective):
+        raise ConfigError(f"this share code expired on {collective['expires']}: ask for a new one")
     state_dir.mkdir(parents=True, exist_ok=True)
     path = _path(state_dir)
     path.write_text(json.dumps(collective, indent=2))
@@ -138,6 +168,7 @@ def current(state_dir: Path | None) -> dict[str, Any] | None:
         return None
     try:
         data = json.loads(_path(state_dir).read_text())
-        return decode(encode(data))  # re-validate what is on disk
+        group = decode(encode(data))  # re-validate what is on disk
+        return None if expired(group) else group
     except (OSError, ValueError, ConfigError):
         return None
