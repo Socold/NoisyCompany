@@ -45,6 +45,9 @@ All items above are implemented (v2.0.0).
 - **2.2 realism**: switches `dns_coherence`, `weekly_rhythm`, `third_party_bursts` (see
   the table above), `de` / `es` / `it` locale packs, study imports of Pi-hole and
   AdGuard Home logs with a `day_off` feature.
+- **2.3 companion**: Chromium port (Chrome, Brave, Edge; light mode only), persona
+  languages in the popup, opt-in link to the daemon's switch, tab mode in the default
+  container behind a warning, AMO signing job.
 
 ## Next evolutions
 
@@ -58,16 +61,16 @@ Each will get its own switch, off by default, like the items above.
 | PyPI publication | Needs the PyPI trusted publisher, then `PYPI_PUBLISH=true` |
 | Per-persona rhythm (a gardener on Sunday mornings, a gamer at night) | `weekly_rhythm` is household-wide today |
 | Study: packet sizes and TLS fingerprint features (from a pcap or NetFlow export) | DNS traces do not carry them |
-| `de` / `es` / `it` packs in the browser companion | The companion only exports the built-in and `fr` personas |
 
 ### 2.3: browser companion
 
-| Item | Why |
-|---|---|
-| Signed build on addons.mozilla.org | Normal install, automatic updates |
-| Chromium MV3 port (Chrome, Brave, Edge) | Most users |
-| Companion reads the daemon's dashboard switches (opt-in localhost link) | One place to control everything |
-| Optional "default container" tab mode with explicit warning | Dilutes the user's own cookie profile, for those who want it |
+| Item | Why | Status |
+|---|---|---|
+| Signed build on addons.mozilla.org | Normal install, automatic updates | Job ready (`amo`), waits for AMO API keys and `AMO_SIGN=true` |
+| Chromium MV3 port (Chrome, Brave, Edge) | Most users | Done: `npm run build`, light mode only (no containers). Chrome Web Store listing by hand |
+| Companion reads the daemon's dashboard switches (opt-in localhost link) | One place to control everything | Done: follows `browser_companion` |
+| Optional "default container" tab mode with explicit warning | Dilutes the user's own cookie profile, for those who want it | Done (Firefox) |
+| Persona languages in the companion | Same locales as the daemon | Done: en, fr, de, es, it |
 
 ### 2.4: appliances and integrations
 

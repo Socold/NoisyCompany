@@ -77,7 +77,9 @@ dans [PRIVACY.md](../PRIVACY.md).
 
 ## Prochaines évolutions
 
-Durcissement et réalisme sont faits (2.1, 2.2). Reste de ces lots : profil AppArmor, publication PyPI, rythme par persona, tailles de paquets dans l'étude, nouvelles langues dans l'extension. Ensuite : extension signée sur addons.mozilla.org et portage Chromium, intégration
+Durcissement et réalisme sont faits (2.1, 2.2). Reste de ces lots : profil AppArmor, publication PyPI, rythme par persona, tailles de paquets dans l'étude. 2.3 faite aussi : extension pour Chrome, Brave et Edge
+(mode léger), choix des langues, pilotage par l'interrupteur du démon, conteneur par
+défaut sur avertissement ; la signature addons.mozilla.org attend les clés. Ensuite : intégration
 Pi-hole / AdGuard Home, applications Umbrel / TrueNAS, paquet OpenWrt, tableau Grafana,
 interface en français, codes de collectif en QR, banc d'essai public de détectabilité,
 mesure réelle de l'énergie. Détail : [ROADMAP.md](../ROADMAP.md#next-evolutions).

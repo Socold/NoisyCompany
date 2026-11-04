@@ -19,8 +19,11 @@ account or server run by the project. The dashboard and metrics endpoints listen
 
 The Firefox companion sends the same kind of requests as the daemon:
 - **light mode**: no cookie, redirects not followed;
-- **tab mode**: a hidden tab loads the page in a separate container. Trackers on that
-  page see a decoy visit, and your cookies are not involved.
+- **tab mode** (Firefox): a hidden tab loads the page in a separate container. Trackers
+  on that page see a decoy visit, and your cookies are not involved, unless you choose
+  the default container (opt-in, with a warning): then the visit uses your cookies;
+- **daemon link** (opt-in): one read-only request to `127.0.0.1` (the daemon's
+  dashboard) per tick. Nothing leaves the machine.
 
 ## What is stored locally
 

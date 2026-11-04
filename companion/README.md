@@ -17,6 +17,25 @@ Neither mode clicks anything, loads ads on purpose, fills forms or logs in. Your
 blocker keeps working in tab mode. Visits only happen while you are active at the
 computer (`idle` API), on average one every 25 minutes, under a daily cap (2 MB).
 
+## Options (popup)
+
+- **Persona languages**: en (built-in), fr, de, es, it. Default en + fr.
+- **Tab container** (tab mode, Firefox): the separate NoisyCompany container (default),
+  or your **default container**, after a warning. The second one adds the decoy
+  interests to *your* own cookie profile: that dilutes your real ad profile, but sites
+  then also see those visits as yours.
+- **Follow the daemon's switch**: the companion turns on and off with the daemon's
+  `browser_companion` switch (CLI or dashboard). It reads
+  `http://127.0.0.1:9788/api/status` (read-only); Firefox asks for that localhost
+  permission when you tick the box. If the daemon does not answer, the popup switch
+  applies.
+
+## Chromium (Chrome, Brave, Edge)
+
+`cd companion && npm run build`, then `chrome://extensions` > Developer mode > *Load
+unpacked* > `companion/build/chromium`. Light mode only: Chromium has no containers, so
+a tab would carry your own cookies.
+
 ## Honest scope
 
 - Light mode does not change ad profiles built from cookies: there are no cookies.
@@ -27,15 +46,18 @@ computer (`idle` API), on average one every 25 minutes, under a daily cap (2 MB)
 
 ## Install (development)
 
-1. `about:debugging#/runtime/this-firefox` > *Load Temporary Add-on* > `companion/src/manifest.json`.
+1. `npm run build`, then `about:debugging#/runtime/this-firefox` > *Load Temporary Add-on* >
+   `companion/build/firefox/manifest.json`.
 2. Click the NoisyCompany toolbar icon, switch it on.
 
-A signed build on addons.mozilla.org is planned.
+A signed build on addons.mozilla.org comes from the release workflow once the AMO keys
+are set (job `amo`).
 
 ## Permissions
 
 `alarms`, `storage`, `idle`, `contextualIdentities` + `cookies` (container for tab
-mode), and host access **only** to the persona domains (no `<all_urls>`, no `tabs`).
+mode, Firefox only), and host access **only** to the persona domains (no `<all_urls>`,
+no `tabs`). Optional, asked at the click: `http://127.0.0.1/*` for the daemon link.
 No data leaves the extension; the visit log (last 20) stays in local storage.
 
 ## Development

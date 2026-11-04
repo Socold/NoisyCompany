@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased (2.1, 2.2)
+## Unreleased (2.1, 2.2, 2.3)
+
+Browser companion:
+
+- Chromium port (Chrome, Brave, Edge), light mode only; `npm run build` makes both
+  packages.
+- Persona languages (en, fr, de, es, it), opt-in link to the daemon's
+  `browser_companion` switch, tab mode in the default container behind a warning.
+- Release job to sign the Firefox build on addons.mozilla.org (off until configured).
 
 Realism, guided by the separability study (all new switches off by default):
 
