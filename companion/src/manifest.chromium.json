@@ -1,0 +1,81 @@
+{
+  "manifest_version": 3,
+  "name": "NoisyCompany companion",
+  "version": "2.0.1",
+  "description": "Rare, light decoy visits from your own browser. Off by default, no ads, no clicks, no data collected.",
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "NoisyCompany"
+  },
+  "permissions": [
+    "alarms",
+    "storage",
+    "idle"
+  ],
+  "host_permissions": [
+    "https://bikepacking.com/*",
+    "https://cooking.nytimes.com/*",
+    "https://cuisine.journaldesfemmes.fr/*",
+    "https://de.wikibooks.org/*",
+    "https://de.wikipedia.org/*",
+    "https://de.wikivoyage.org/*",
+    "https://en.wikipedia.org/*",
+    "https://es.wikibooks.org/*",
+    "https://es.wikipedia.org/*",
+    "https://es.wikivoyage.org/*",
+    "https://extension.umn.edu/*",
+    "https://fr.wikipedia.org/*",
+    "https://it.wikibooks.org/*",
+    "https://it.wikipedia.org/*",
+    "https://it.wikivoyage.org/*",
+    "https://lichess.org/*",
+    "https://science.nasa.gov/*",
+    "https://skyandtelescope.org/*",
+    "https://www.afastronomie.fr/*",
+    "https://www.allaboutbirds.org/*",
+    "https://www.allmusic.com/*",
+    "https://www.alltrails.com/*",
+    "https://www.audubon.org/*",
+    "https://www.bbcgoodfood.com/*",
+    "https://www.bricoleurdudimanche.com/*",
+    "https://www.britannica.com/*",
+    "https://www.chess.com/*",
+    "https://www.chessprogramming.org/*",
+    "https://www.cieletespace.fr/*",
+    "https://www.cyclingweekly.com/*",
+    "https://www.esa.int/*",
+    "https://www.ffrandonnee.fr/*",
+    "https://www.finewoodworking.com/*",
+    "https://www.francevelotourisme.com/*",
+    "https://www.gardenersworld.com/*",
+    "https://www.herodote.net/*",
+    "https://www.histoire-pour-tous.fr/*",
+    "https://www.jardiner-malin.fr/*",
+    "https://www.jazzwise.com/*",
+    "https://www.lpo.fr/*",
+    "https://www.marmiton.org/*",
+    "https://www.nps.gov/*",
+    "https://www.oiseaux.net/*",
+    "https://www.popularwoodworking.com/*",
+    "https://www.rei.com/*",
+    "https://www.rhs.org.uk/*",
+    "https://www.rspb.org.uk/*",
+    "https://www.rustica.fr/*",
+    "https://www.seriouseats.com/*",
+    "https://www.sheldonbrown.com/*",
+    "https://www.systemed.fr/*",
+    "https://www.velo101.com/*",
+    "https://www.visorando.com/*",
+    "https://www.worldhistory.org/*"
+  ],
+  "optional_host_permissions": [
+    "http://127.0.0.1/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'"
+  },
+  "minimum_chrome_version": "120"
+}

@@ -16,6 +16,7 @@
   },
   "background": {
     "scripts": [
+      "compat.js",
       "lib.js",
       "personas.js",
       "background.js"
@@ -36,9 +37,18 @@
     "https://bikepacking.com/*",
     "https://cooking.nytimes.com/*",
     "https://cuisine.journaldesfemmes.fr/*",
+    "https://de.wikibooks.org/*",
+    "https://de.wikipedia.org/*",
+    "https://de.wikivoyage.org/*",
     "https://en.wikipedia.org/*",
+    "https://es.wikibooks.org/*",
+    "https://es.wikipedia.org/*",
+    "https://es.wikivoyage.org/*",
     "https://extension.umn.edu/*",
     "https://fr.wikipedia.org/*",
+    "https://it.wikibooks.org/*",
+    "https://it.wikipedia.org/*",
+    "https://it.wikivoyage.org/*",
     "https://lichess.org/*",
     "https://science.nasa.gov/*",
     "https://skyandtelescope.org/*",
@@ -78,6 +88,9 @@
     "https://www.velo101.com/*",
     "https://www.visorando.com/*",
     "https://www.worldhistory.org/*"
+  ],
+  "optional_host_permissions": [
+    "http://127.0.0.1/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'"

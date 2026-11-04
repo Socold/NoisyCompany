@@ -94,7 +94,7 @@ def test_estimate_accounts_for_request_trees():
 
 
 def test_companion_files_are_generated_and_minimal(tmp_path):
-    assert companion.export(tmp_path) == ["personas.js", "manifest.json"]
+    assert companion.export(tmp_path) == ["personas.js", "manifest.json", "manifest.chromium.json"]
     assert companion.export(tmp_path, check=True) == []
     m = json.loads((tmp_path / "manifest.json").read_text())
     assert m["manifest_version"] == 3

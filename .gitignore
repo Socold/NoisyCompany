@@ -7,3 +7,4 @@ dist/
 .ruff_cache/
 noisycompany.toml
 node_modules/
+companion/build/

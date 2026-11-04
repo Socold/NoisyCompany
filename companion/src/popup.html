@@ -11,6 +11,17 @@
       <option value="tab">Tab: hidden muted tab, own container</option>
     </select></label>
   <p id="modehelp" class="help"></p>
+  <label class="row" id="containerrow"><span>Tab container</span>
+    <select id="tabContainer">
+      <option value="noisycompany">Separate NoisyCompany container</option>
+      <option value="default">Default container (your cookies)</option>
+    </select></label>
+  <fieldset class="locales"><legend>Persona languages</legend>
+    <label><input type="checkbox" value="en"> en</label><label><input type="checkbox" value="fr"> fr</label>
+    <label><input type="checkbox" value="de"> de</label><label><input type="checkbox" value="es"> es</label>
+    <label><input type="checkbox" value="it"> it</label></fieldset>
+  <label class="row"><span>Follow the daemon's switch</span><input id="daemonLink" type="checkbox"></label>
+  <p id="daemonhelp" class="help"></p>
   <label class="row"><span>Daily budget (KB)</span><input id="dailyKB" type="number" min="256" max="20480" step="256"></label>
   <label class="row"><span>Mean gap (min)</span><input id="meanGapMin" type="number" min="5" max="240"></label>
   <p id="usage" class="help"></p>

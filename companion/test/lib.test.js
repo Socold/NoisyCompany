@@ -54,3 +54,31 @@ test("nextUrl stays on persona domains and frontier is bounded", () => {
   assert.equal(f.length, 20);
   for (let i = 0; i < 50; i++) assert.ok(NC.hostAllowed(NC.nextUrl(persona, [...f, "https://evil.example/"]), persona.domains));
 });
+
+test("personaNames filters by locale, built-in counts as en", () => {
+  const p = { chess: { locale: "en" }, jardinage: { locale: "fr" }, wandern: { locale: "de" }, old: {} };
+  assert.deepEqual(NC.personaNames(p, ["fr", "de"]), ["jardinage", "wandern"]);
+  assert.deepEqual(NC.personaNames(p, []), ["chess", "old"]);
+});
+
+test("sanitizeSettings: no tab mode on Chromium, bounded values, known locales only", () => {
+  const cur = { ...NC.DEFAULTS };
+  const s = NC.sanitizeSettings(cur, { mode: "tab", dailyKB: 1e9, locales: ["it", "xx"],
+    tabContainer: "weird", daemonLink: "yes", daemonPort: 80, evil: 1 }, true);
+  assert.equal(s.mode, "fetch");
+  assert.equal(s.dailyKB, 20480);
+  assert.deepEqual(s.locales, ["it"]);
+  assert.equal(s.tabContainer, "noisycompany");
+  assert.equal(s.daemonLink, false);
+  assert.equal(s.daemonPort, 9788);
+  assert.ok(!("evil" in s));
+  assert.equal(NC.sanitizeSettings(cur, { mode: "tab", tabContainer: "default" }).tabContainer, "default");
+  assert.deepEqual(NC.sanitizeSettings(cur, { locales: [] }).locales, ["en"]);
+});
+
+test("daemonSwitch reads browser_companion from the dashboard status", () => {
+  assert.equal(NC.daemonSwitch({ features: [{ id: "browser_companion", enabled: true }] }), true);
+  assert.equal(NC.daemonSwitch({ features: [{ id: "browser_companion", enabled: false }] }), false);
+  assert.equal(NC.daemonSwitch({ features: [] }), null);
+  assert.equal(NC.daemonSwitch("<html>"), null);
+});

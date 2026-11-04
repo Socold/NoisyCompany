@@ -20,7 +20,45 @@ const DEFAULTS = Object.freeze({
   tabLifetimeS: [20, 60],
   activePersonas: 3,
   rotateDays: 10,
+  locales: ["en", "fr"],  // persona packs used (en = built-in)
+  tabContainer: "noisycompany",  // or "default": your own cookies, opt-in with a warning
+  daemonLink: false,      // follow the daemon's browser_companion switch (localhost)
+  daemonPort: 9788,
 });
+
+const LOCALES = ["en", "fr", "de", "es", "it"];
+
+function personaNames(personas, locales) {
+  const want = new Set(locales && locales.length ? locales : ["en"]);
+  return Object.keys(personas).filter((n) => want.has(personas[n].locale || "en"));
+}
+
+// Clean a settings patch coming from the popup. isChromium: no containers there, so no
+// tab mode at all (a tab would carry the user's own cookies).
+function sanitizeSettings(cur, patch, isChromium = false) {
+  const out = { ...cur };
+  for (const k of ["enabled", "mode", "dailyKB", "meanGapMin", "locales", "tabContainer",
+                   "daemonLink", "daemonPort"]) if (patch && k in patch) out[k] = patch[k];
+  out.enabled = out.enabled === true;
+  out.mode = out.mode === "tab" && !isChromium ? "tab" : "fetch";
+  out.dailyKB = Math.max(256, Math.min(20480, Number(out.dailyKB) || DEFAULTS.dailyKB));
+  out.meanGapMin = Math.max(5, Math.min(240, Number(out.meanGapMin) || DEFAULTS.meanGapMin));
+  out.locales = Array.isArray(out.locales) ? out.locales.filter((l) => LOCALES.includes(l)) : [];
+  if (!out.locales.length) out.locales = ["en"];
+  out.tabContainer = out.tabContainer === "default" ? "default" : "noisycompany";
+  out.daemonLink = out.daemonLink === true;
+  const port = Number(out.daemonPort);
+  out.daemonPort = Number.isInteger(port) && port >= 1024 && port <= 65535 ? port : 9788;
+  return out;
+}
+
+// Daemon dashboard /api/status -> true/false for its browser_companion switch, or null
+// when the answer is not a NoisyCompany status (then the popup setting applies).
+function daemonSwitch(status) {
+  if (!status || !Array.isArray(status.features)) return null;
+  const f = status.features.find((x) => x && x.id === "browser_companion");
+  return f ? f.enabled === true : null;
+}
 
 const TAB_COST_KB = 2048;
 
@@ -127,7 +165,7 @@ function updateFrontier(frontier, links, max = 20, rnd = Math.random) {
 const api = {
   BLOCKED, DEFAULTS, TAB_COST_KB, hostAllowed, isBlocked, extractLinks, candidateLinks,
   today, activePersonas, actProbability, canSpend, spend, nextUrl, updateFrontier,
-  hashString,
+  hashString, LOCALES, personaNames, sanitizeSettings, daemonSwitch,
 };
 if (typeof module !== "undefined") module.exports = api;
 else globalThis.NC = api;

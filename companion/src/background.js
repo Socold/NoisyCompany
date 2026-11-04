@@ -63,8 +63,30 @@ async function fetchCapped(url, maxBytes) {
   }
 }
 
+// Opt-in: the daemon's dashboard decides on/off. Read-only GET, localhost only, short
+// timeout; unreachable daemon = the popup setting applies.
+async function daemonEnabled(s) {
+  if (!s.daemonLink) return null;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 2000);
+  try {
+    const r = await fetch(`http://127.0.0.1:${s.daemonPort}/api/status`,
+      { credentials: "omit", redirect: "error", signal: ctrl.signal });
+    return r.ok ? NC.daemonSwitch(await r.json()) : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function personaPool(s) {
+  return NC.personaNames(NC_PERSONAS, s.locales);
+}
+
 async function openTab(url, s) {
-  const cookieStoreId = await containerId();
+  if (NC_CHROMIUM) return;  // no containers: never open a tab with the user's cookies
+  const cookieStoreId = s.tabContainer === "default" ? undefined : await containerId();
   const tab = await browser.tabs.create({ url, active: false, ...(cookieStoreId ? { cookieStoreId } : {}) });
   await browser.tabs.update(tab.id, { muted: true });
   if (browser.tabs.hide) browser.tabs.hide(tab.id).catch(() => {});
@@ -74,24 +96,27 @@ async function openTab(url, s) {
 
 async function visit(force = false) {
   const s = await settings();
-  if (!s.enabled && !force) return null;
+  const linked = await daemonEnabled(s);
+  const enabled = linked === null ? s.enabled : linked;
+  if (!enabled && !force) return null;
   if (!force) {
     if ((await browser.idle.queryState(300)) !== "active") return null;
     if (Math.random() >= NC.actProbability(TICK_MIN, s.meanGapMin)) return null;
   }
   const st = await state();
   const day = NC.today();
-  const cost = s.mode === "tab" ? NC.TAB_COST_KB : s.maxResponseKB + 6;
+  const tab = s.mode === "tab" && !NC_CHROMIUM;
+  const cost = tab ? NC.TAB_COST_KB : s.maxResponseKB + 6;
   if (!NC.canSpend(st.usage, day, cost, s.dailyKB)) return null;
 
-  const names = NC.activePersonas(Object.keys(NC_PERSONAS), st.salt, s.rotateDays, s.activePersonas);
+  const names = NC.activePersonas(personaPool(s), st.salt, s.rotateDays, s.activePersonas);
   const name = names[Math.floor(Math.random() * names.length)];
   const persona = NC_PERSONAS[name];
   const url = NC.nextUrl(persona, st.frontiers[name]);
 
   let kb = cost;
   let ok = true;
-  if (s.mode === "tab") {
+  if (tab) {
     await openTab(url, s);
   } else {
     const res = await fetchCapped(url, s.maxResponseKB * 1024);
@@ -109,25 +134,26 @@ async function visit(force = false) {
 browser.alarms.create("tick", { periodInMinutes: TICK_MIN });
 browser.alarms.onAlarm.addListener((a) => { if (a.name === "tick") visit().catch(() => {}); });
 
-browser.runtime.onMessage.addListener(async (msg) => {
+async function handle(msg) {
   if (msg && msg.type === "status") {
     const [s, st] = [await settings(), await state()];
     const day = NC.today();
     return { settings: s, usage: st.usage.day === day ? st.usage : { day, kb: 0, visits: 0 },
-             log: st.log, personas: NC.activePersonas(Object.keys(NC_PERSONAS), st.salt,
-                                                      s.rotateDays, s.activePersonas) };
+             log: st.log, chromium: NC_CHROMIUM, daemon: await daemonEnabled(s),
+             personas: NC.activePersonas(personaPool(s), st.salt, s.rotateDays, s.activePersonas) };
   }
   if (msg && msg.type === "save" && msg.settings && typeof msg.settings === "object") {
-    const allowed = ["enabled", "mode", "dailyKB", "meanGapMin"];
-    const cur = await settings();
-    for (const k of allowed) if (k in msg.settings) cur[k] = msg.settings[k];
-    cur.mode = cur.mode === "tab" ? "tab" : "fetch";
-    cur.dailyKB = Math.max(256, Math.min(20480, Number(cur.dailyKB) || NC.DEFAULTS.dailyKB));
-    cur.meanGapMin = Math.max(5, Math.min(240, Number(cur.meanGapMin) || NC.DEFAULTS.meanGapMin));
-    cur.enabled = cur.enabled === true;
+    const cur = NC.sanitizeSettings(await settings(), msg.settings, NC_CHROMIUM);
     await browser.storage.local.set({ settings: cur });
     return { ok: true };
   }
   if (msg && msg.type === "visitNow") return visit(true);
   return undefined;
+}
+
+// sendResponse + `return true` works on both Firefox and Chromium.
+browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (sender.id !== browser.runtime.id) return false;  // only our own popup
+  handle(msg).then(sendResponse, () => sendResponse(undefined));
+  return true;
 });

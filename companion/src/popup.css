@@ -10,4 +10,7 @@ select, input { background:var(--bg); color:var(--fg); border:1px solid var(--li
 .sw { width:56px; height:26px; border-radius:13px; border:0; background:var(--off); color:var(--fg); font-weight:600; cursor:pointer; }
 .sw[aria-checked="true"] { background:var(--accent); color:var(--accent-fg); }
 .secondary { margin-top:8px; width:100%; padding:6px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--fg); cursor:pointer; }
+fieldset.locales { border:1px solid var(--line); border-radius:6px; margin:8px 0; padding:4px 8px; display:flex; gap:10px; flex-wrap:wrap; }
+fieldset.locales legend { color:var(--muted); padding:0 4px; }
+.warn { color:#b3541e; }
 ul { list-style:none; padding:0; margin:8px 0 0; color:var(--muted); font-size:12px; }
