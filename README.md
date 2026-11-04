@@ -99,7 +99,16 @@ bash deploy/raspberrypi/install.sh                      # read it first; eco pre
 ```
 
 Home Assistant: add this repository as an add-on repository, install *NoisyCompany*
-(`deploy/homeassistant/`). OpenWrt: see `deploy/openwrt/noisycompany.init`.
+(`deploy/homeassistant/`). Also:
+
+| Where | Files |
+|---|---|
+| Pi-hole / AdGuard Home box (noise + study) | [deploy/pihole/](deploy/pihole/README.md) |
+| Umbrel, CasaOS, TrueNAS SCALE, Unraid | [deploy/apps/](deploy/apps/README.md) |
+| OpenWrt package + LuCI page | [deploy/openwrt/](deploy/openwrt/README.md) |
+| Grafana (Prometheus metrics) | [deploy/grafana/](deploy/grafana/README.md) |
+
+The dashboard is in English and French (browser language, or `?lang=fr`).
 
 `--network host` lets netwatch see your real traffic; without it, only the budget applies.
 

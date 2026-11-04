@@ -42,6 +42,12 @@ companion/ (Firefox MV3): lib.js (pure logic) + background.js (alarms, idle, fet
 | `server.py` | Localhost dashboard and Prometheus metrics |
 | `data/` | Default config, personas, packs, business profiles, dashboard assets |
 
+## Deployment (`deploy/`)
+
+`homeassistant/`, `raspberrypi/`, `systemd/`, `openwrt/` (init script and SDK packages),
+`pihole/`, `apps/` (Umbrel, CasaOS, TrueNAS, Unraid), `grafana/`. All use the same image
+or sources, the eco preset and no published port.
+
 ## Design rules
 
 - **Zero runtime dependency** (stdlib only); the companion has none either.

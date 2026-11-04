@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased (2.1, 2.2, 2.3)
+## Unreleased (2.1, 2.2, 2.3, 2.4)
+
+Integrations:
+
+- Pi-hole / AdGuard Home deployment (`deploy/pihole/`) with the study on the FTL database.
+- App templates for Umbrel, CasaOS, TrueNAS SCALE and Unraid (`deploy/apps/`).
+- OpenWrt package with UCI config and LuCI page (`deploy/openwrt/package/`).
+- Grafana dashboard for the Prometheus metrics (`deploy/grafana/`).
+- Dashboard in French and accessibility fixes (focus kept on refresh, live regions,
+  skip link, inline errors, reduced motion). The dashboard now accepts query strings.
 
 Browser companion:
 

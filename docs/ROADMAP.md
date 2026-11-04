@@ -48,6 +48,9 @@ All items above are implemented (v2.0.0).
 - **2.3 companion**: Chromium port (Chrome, Brave, Edge; light mode only), persona
   languages in the popup, opt-in link to the daemon's switch, tab mode in the default
   container behind a warning, AMO signing job.
+- **2.4 integrations**: Pi-hole / AdGuard Home box, Umbrel / CasaOS / TrueNAS / Unraid
+  templates, OpenWrt package with a LuCI page, Grafana dashboard, French dashboard and
+  accessibility fixes.
 
 ## Next evolutions
 
@@ -59,6 +62,8 @@ Each will get its own switch, off by default, like the items above.
 |---|---|
 | AppArmor profile for the Home Assistant add-on | Needs testing on a real Supervisor before shipping |
 | PyPI publication | Needs the PyPI trusted publisher, then `PYPI_PUBLISH=true` |
+| Build the OpenWrt packages in CI (SDK container) and submit app templates to the Umbrel / CasaOS stores | Today they are checked by format only |
+| Accessibility review of the companion popup, French CLI output | Same standard as the dashboard |
 | Per-persona rhythm (a gardener on Sunday mornings, a gamer at night) | `weekly_rhythm` is household-wide today |
 | Study: packet sizes and TLS fingerprint features (from a pcap or NetFlow export) | DNS traces do not carry them |
 
@@ -74,13 +79,13 @@ Each will get its own switch, off by default, like the items above.
 
 ### 2.4: appliances and integrations
 
-| Item | Why |
-|---|---|
-| Pi-hole / AdGuard Home plugin (noise from the resolver box, study from its log) | Best place for DNS noise and for measurement |
-| Umbrel / CasaOS / TrueNAS / Unraid app templates | One-click installs |
-| OpenWrt `.ipk` package with LuCI page | Routers without manual copy |
-| Grafana dashboard JSON for the Prometheus metrics | Home-lab users |
-| Dashboard in French (i18n) and accessibility audit | Wider audience |
+| Item | Why | Status |
+|---|---|---|
+| Pi-hole / AdGuard Home integration (noise from the resolver box, study from its log) | Best place for DNS noise and for measurement | Done: `deploy/pihole/` (compose, config, study on a copy of the FTL database). A real Pi-hole web-UI plugin does not exist as an extension point |
+| Umbrel / CasaOS / TrueNAS / Unraid app templates | One-click installs | Done: `deploy/apps/`. Submission to the official stores still to do |
+| OpenWrt `.ipk` package with LuCI page | Routers without manual copy | Done: `deploy/openwrt/package/` (UCI, LuCI form). Not built in CI (needs the SDK) |
+| Grafana dashboard JSON for the Prometheus metrics | Home-lab users | Done: `deploy/grafana/`, metric names tested |
+| Dashboard in French (i18n) and accessibility audit | Wider audience | Done: see [ACCESSIBILITY.md](ACCESSIBILITY.md) |
 
 ### 3.x: research and collective
 
