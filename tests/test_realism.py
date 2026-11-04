@@ -1,6 +1,7 @@
 import datetime as dt
 import json
 
+import pytest
 from test_features import make_engine
 
 from noisycompany import config, impact, rhythm
@@ -98,3 +99,18 @@ def test_grafana_dashboard_only_uses_exported_metrics():
     used = {m for p in dash["panels"] for t in p["targets"]
             for m in re.findall(r"noisycompany_\w+", t["expr"])}
     assert used and used <= exported
+
+
+def test_benchmark_runs_the_real_engine_offline(monkeypatch):
+    import socket
+
+    from noisycompany import benchmark
+    monkeypatch.setattr(socket, "getaddrinfo", lambda *a, **k: pytest.fail("network used"))
+    noise = benchmark.simulate_noise({"third_party_bursts": True}, days=1, seed=1)
+    assert noise and all(e.ts >= benchmark.START.timestamp() for e in noise)
+    assert any(h.endswith(".cloudfront.net") or "." in h for h in (e.host for e in noise))
+    human = benchmark.simulate_household(days=1, seed=1)
+    assert len(human) > len(noise) / 10
+    rows = list(benchmark.run(days=2, seed=1))
+    assert [r.name for r in rows] == list(benchmark.CONFIGS)
+    assert all(0.0 <= r.auc <= 1.0 for r in rows)

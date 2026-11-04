@@ -258,6 +258,14 @@ def _print_qr(code: str, svg: str | None) -> None:
         print(q.to_text(), file=sys.stderr)
 
 
+def cmd_benchmark(args: argparse.Namespace) -> int:
+    from noisycompany import __version__, benchmark
+    rows = list(benchmark.run(args.days, args.seed))
+    print(benchmark.as_json(rows) if args.json
+          else benchmark.as_markdown(rows, args.days, args.seed, __version__))
+    return 0
+
+
 def cmd_study(args: argparse.Namespace) -> int:
     noise = study.load_noise(Path(args.noise))
     human = study.load_trace(Path(args.human))
@@ -350,6 +358,13 @@ def build_parser() -> argparse.ArgumentParser:
     cl.add_argument("--qr", action="store_true", help="create: also print a QR code")
     cl.add_argument("--svg", help="qr/rotate/create: write the QR code to this SVG file")
     cl.set_defaults(func=cmd_collective)
+
+    bm = sub.add_parser("benchmark", parents=[common],
+                        help="offline separability benchmark on simulated days")
+    bm.add_argument("--days", type=int, default=14)
+    bm.add_argument("--seed", type=int, default=7)
+    bm.add_argument("--json", action="store_true")
+    bm.set_defaults(func=cmd_benchmark)
 
     st = sub.add_parser("study", parents=[common], help="how separable is the noise?")
     st.add_argument("--noise", required=True, help="labelled log (JSONL) from labelled_log")
