@@ -13,6 +13,7 @@ replace `noisycompany study` on your own trace.
 
 from __future__ import annotations
 
+import bisect
 import datetime as dt
 import json
 import random
@@ -26,6 +27,7 @@ from tempfile import TemporaryDirectory
 from noisycompany import config, rhythm, study
 from noisycompany.budget import Budget
 from noisycompany.engine import Engine
+from noisycompany.netwatch import NetWatch
 from noisycompany.web import REQUEST_OVERHEAD, Fetcher, FetchResult
 
 START = dt.datetime(2026, 3, 2)  # a Monday, outside holidays
@@ -46,6 +48,10 @@ CONFIGS = {
     "+ third_party_bursts": {"third_party_bursts": True},
     "all 2.2 realism switches": {"weekly_rhythm": True, "dns_coherence": True,
                                  "third_party_bursts": True},
+    "+ page_load_bursts": {"weekly_rhythm": True, "dns_coherence": True,
+                           "page_load_bursts": True},
+    "+ interleave_with_user": {"weekly_rhythm": True, "dns_coherence": True,
+                               "page_load_bursts": True, "interleave_with_user": True},
 }
 
 
@@ -79,7 +85,7 @@ class _FakeFetcher(Fetcher):
         links = "".join(f'<a href="https://{host}/p/{self.rng.randrange(500)}">x</a>'
                         for _ in range(8))
         embeds = "".join(f'<script src="https://{h}/a.js"></script>'
-                         for h in self.rng.sample(CDN, 4))
+                         for h in self.rng.sample(CDN, self.rng.randint(5, 25)))
         size = int(self.max_response_bytes * self.rng.uniform(0.3, 0.9))
         return FetchResult(url, 200, REQUEST_OVERHEAD + size, f"<html>{embeds}{links}</html>")
 
@@ -87,9 +93,25 @@ class _FakeFetcher(Fetcher):
         return REQUEST_OVERHEAD + self.asset_cap // 2
 
 
+class _HouseholdNetWatch(NetWatch):
+    """User traffic as seen by the counter: 'online' within 2 min of a household event."""
+
+    def __init__(self, household: list[study.Event], clock: _SimClock) -> None:
+        super().__init__(400, reader=lambda: "", clock=lambda: clock.t)
+        self.times = [e.ts for e in household]
+        self.sim = clock
+
+    def user_rate_bps(self) -> float:
+        i = bisect.bisect_right(self.times, self.sim.t)
+        online = i > 0 and self.sim.t - self.times[i - 1] < 120
+        self.last_rate_bps = 25_000.0 if online else 0.0  # 200 kbps, under the pause level
+        return self.last_rate_bps
+
+
 def simulate_noise(switches: dict[str, bool], days: int, seed: int,
                    cfg: dict | None = None, options: dict | None = None,
-                   keep_log: Path | None = None) -> list[study.Event]:
+                   keep_log: Path | None = None,
+                   household: list[study.Event] | None = None) -> list[study.Event]:
     """Run the real engine offline; optionally copy its labelled log to keep_log."""
     rng = random.Random(seed)
     clock = _SimClock(START)
@@ -104,6 +126,8 @@ def simulate_noise(switches: dict[str, bool], days: int, seed: int,
                             clock=lambda: clock.t, today=lambda: clock.now().date())
         eng.base_cap = eng.budget.daily_bytes
         eng.fetcher = _FakeFetcher(eng.fetcher, rng)
+        if household is not None:
+            eng.netwatch = _HouseholdNetWatch(household, clock)
         eng.lookup = lambda host: (True, 300, "dns")  # type: ignore[method-assign]
         eng.save_stats = lambda: None  # type: ignore[method-assign]
         eng.options.update(options or {})
@@ -164,7 +188,7 @@ class Row:
 def run(days: int = 14, seed: int = 7) -> Iterator[Row]:
     human = simulate_household(days, seed)
     for name, switches in CONFIGS.items():
-        noise = simulate_noise(switches, days, seed)
+        noise = simulate_noise(switches, days, seed, household=human)
         res = study.run(noise, human, window_s=600, seed=seed)
         top = sorted(res.weights, key=lambda k: -abs(res.weights[k]))[:3]
         yield Row(name, res.auc, len(noise), top)

@@ -9,12 +9,16 @@ seed) and runs in each release workflow, whose summary shows the table.
 
 | Configuration (v2.0.1, 14 simulated days, seed 7) | ROC AUC | Noise events | Most telling features |
 |---|---|---|---|
-| baseline (eco) | 1.00 | 2751 | unique_hosts, www_ratio, events |
-| + weekly_rhythm | 1.00 | 2436 | unique_hosts, www_ratio, events |
-| + dns_coherence | 1.00 | 2672 | unique_hosts, unique_ratio, events |
-| + third_party_bursts | 0.98 | 4164 | unique_hosts, www_ratio, events |
-| all 2.2 realism switches | 0.98 | 3692 | unique_hosts, events, gap_std |
+| baseline (eco) | 1.00 | 2877 | unique_hosts, www_ratio, events |
+| + weekly_rhythm | 1.00 | 2540 | www_ratio, unique_hosts, events |
+| + dns_coherence | 1.00 | 2690 | unique_hosts, unique_ratio, events |
+| + third_party_bursts | 0.98 | 4056 | unique_hosts, www_ratio, events |
+| all 2.2 realism switches | 0.97 | 3771 | unique_hosts, events, gap_std |
+| + page_load_bursts | 0.95 | 4135 | unique_hosts, events, gap_std |
+| + interleave_with_user | 0.95 | 4088 | unique_hosts, events, www_ratio |
 
+Since 3.1 the synthetic pages embed 5-25 third-party hosts, like the household's, instead
+of 4; the first rows moved by a few hundredths for that reason only.
 
 ## Reading
 
@@ -38,7 +42,14 @@ The household is a model (Zipf favourites, evening and weekend peaks, device cha
 the network is fake, and the observer is one logistic regression on DNS windows. Track
 the trend between releases; measure your own case with `noisycompany study`.
 
+- `page_load_bursts` (3.1) gives the best score so far, 0.95: page-sized bursts make
+  noise windows look more like page loads, but window volume still differs.
+- `interleave_with_user` (3.1) does not move this score, and that is expected: the
+  study labels each window as noise *or* household, so it cannot reward noise that
+  hides inside the user's own windows. Its value is against an observer that only sees
+  the mixed stream (the real case), where off-hours noise is the first thing to filter.
+
 ## Next steps suggested by the benchmark
 
-- Bursts closer to real page loads (more hosts per page, sub-second spacing).
-- Sessions that interleave with the household's own browsing instead of standing alone.
+- A mixed-stream observer (windows labelled by majority) to measure interleaving.
+- Session volume closer to the household's (fewer, larger sessions at the same budget).

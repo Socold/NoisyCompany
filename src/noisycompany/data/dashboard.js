@@ -37,6 +37,8 @@ const FR_FEATURES = {
   collective_noise: ["Bruit collectif", "Rejoindre un collectif par code : les membres font tourner les mêmes personas au même moment. Sans serveur, sans nouveau domaine."],
   dns_coherence: ["DNS qui suit la lecture", "Le bruit DNS interroge les sites que la persona a lus et les liens vus, comme un navigateur qui y revient."],
   weekly_rhythm: ["Rythme de la semaine", "Plus actif le soir, matins plus tardifs le week-end et les jours fériés, plus calme l'été. Ne change jamais le plafond quotidien."],
+  page_load_bursts: ["Rafales de chargement de page", "Rafales tierces de la taille d'un vrai chargement : 5 à 25 domaines en une seconde environ (domaines intégrés d'abord, puis ceux déjà lus par la persona). DNS seulement."],
+  interleave_with_user: ["Mêlé à votre navigation", "Lance les sessions surtout quand vous êtes en ligne (compteur de trafic local), rarement quand le réseau est calme : bruit et vrai trafic partagent les mêmes heures."],
   third_party_bursts: ["Rafales de domaines tiers", "Après une page, résout (DNS seulement) quelques domaines tiers qu'elle charge. Publicité et traqueurs exclus. ~300 o chacun."],
   separability_study: ["Étude de détectabilité", "`noisycompany study` : mesure (AUC) si un observateur sépare le bruit de votre vrai trafic (Pi-hole, AdGuard...)."],
 };

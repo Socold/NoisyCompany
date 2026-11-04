@@ -59,6 +59,12 @@ All items above are implemented (v2.0.0).
 
 Each will get its own switch, off by default, like the items above.
 
+### Done in 3.1 (carried over)
+
+- Per-persona rhythm (`rhythm` windows in personas, with `weekly_rhythm`).
+- Page-load bursts (`page_load_bursts`) and noise interleaved with your browsing
+  (`interleave_with_user`). Benchmark 0.97 -> 0.95.
+
 ### Carried over from 2.1 / 2.2
 
 | Item | Why |
@@ -67,9 +73,7 @@ Each will get its own switch, off by default, like the items above.
 | PyPI publication | Needs the PyPI trusted publisher, then `PYPI_PUBLISH=true` |
 | Build the OpenWrt packages in CI (SDK container) and submit app templates to the Umbrel / CasaOS stores | Today they are checked by format only |
 | Accessibility review of the companion popup, French CLI output | Same standard as the dashboard |
-| Page-load-like bursts (5-25 hosts within a second) and noise interleaved with real browsing | The benchmark shows burst size and session shape are what give the noise away |
 | RAPL and smart-plug numbers from several machines in IMPACT.md | One CPU-time measurement so far |
-| Per-persona rhythm (a gardener on Sunday mornings, a gamer at night) | `weekly_rhythm` is household-wide today |
 | Study: packet sizes and TLS fingerprint features (from a pcap or NetFlow export) | DNS traces do not carry them |
 
 ### 2.3: browser companion

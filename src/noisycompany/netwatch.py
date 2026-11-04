@@ -50,6 +50,7 @@ class NetWatch:
         self.enabled = enabled and (reader is not None or PROC_NET_DEV.exists())
         self._last: tuple[float, int] | None = None
         self._own_since_last = 0
+        self.last_rate_bps = 0.0
 
     def note_own_bytes(self, n: int) -> None:
         self._own_since_last += n
@@ -70,7 +71,12 @@ class NetWatch:
             rate = max(0.0, (counters - c0 - self._own_since_last) / elapsed)
         self._last = (now, counters)
         self._own_since_last = 0
+        self.last_rate_bps = rate
         return rate
+
+    def user_online(self, active_kbps: float) -> bool:
+        """Fresh sample: is the user's own traffic above active_kbps?"""
+        return self.enabled and self.user_rate_bps() > active_kbps * 1000 / 8
 
     def busy(self) -> bool:
         return self.enabled and self.user_rate_bps() > self.threshold_bps

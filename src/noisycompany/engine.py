@@ -364,6 +364,17 @@ class Engine:
         limit = int(self.options.get("third_party_max", 4))
         blocked = self.cfg["safety"]["blocked_fragments"]
         hosts = [h for h in third_party_hosts(html, url) if not is_blocked(h, blocked)]
+        gap = (0.02, 0.2)
+        if self.features.enabled("page_load_bursts"):
+            # A browser resolves 5-25 hosts within a second of a page load. Embedded hosts
+            # first, then hosts this persona already read (never invented names: NXDOMAIN
+            # bursts would be a give-away of their own).
+            limit = self._randint(self.options.get("burst_hosts", [5, 25]))
+            page_host = (urllib.parse.urlsplit(url).hostname or "").lower()
+            known = [h for h in self.seen_hosts.get(persona, [])
+                     if h not in hosts and h != page_host and not is_blocked(h, blocked)]
+            hosts += self.rng.sample(known, min(len(known), max(0, limit - len(hosts))))
+            gap = (0.005, 0.08)
         for host in hosts[:limit]:
             if not self.budget.can_act(doh.DOH_BYTES_ESTIMATE):
                 return
@@ -371,7 +382,7 @@ class Engine:
             ok, cost, kind = self.lookup(host)
             self._spend(cost)
             self.label(kind + "-third-party", host, ok, cost, persona)
-            if not self._sleep(self.rng.uniform(0.02, 0.2)):
+            if not self._sleep(self.rng.uniform(*gap)):
                 return
 
     def _entry_url(self, persona: dict[str, list[str]]) -> str:
@@ -421,7 +432,8 @@ class Engine:
                 links = extract_links(res.html, url)
                 if self.features.enabled("request_trees"):
                     self.fetch_tree(res.html, url, name)
-                if self.features.enabled("third_party_bursts"):
+                if (self.features.enabled("third_party_bursts")
+                        or self.features.enabled("page_load_bursts")):
                     self.third_party_burst(res.html, url, name)
             candidates = [
                 link for link in links
@@ -480,8 +492,17 @@ class Engine:
             while not self.stop.is_set():
                 mean = rhythm.session_gap(gap, self._now()) \
                     if self.features.enabled("weekly_rhythm") else gap
+                interleave = (self.features.enabled("interleave_with_user") and not once
+                              and self.netwatch.enabled)  # no counter = no signal to follow
+                if interleave:
+                    mean *= 0.4  # more wake-ups, most of them skipped while you are offline
                 if not once and not self._sleep(self.rng.expovariate(1 / mean)):
                     break
+                if interleave and not self.netwatch.user_online(
+                        float(self.options.get("interleave_active_kbps", 40))) \
+                        and self.rng.random() > float(self.options.get("interleave_idle_share",
+                                                                       0.15)):
+                    continue
                 if not once and not self.wait_for_slot():
                     break
                 self.run_session()

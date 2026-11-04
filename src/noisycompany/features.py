@@ -88,6 +88,14 @@ FEATURES: tuple[Feature, ...] = (
             "After a page, resolve (DNS only, no download) a few of the other hosts it "
             "embeds, as a browser does. Ad and tracker hosts are skipped. ~300 B each.",
             "2.2", True),
+    Feature("page_load_bursts", "Page-load bursts",
+            "Third-party bursts the size of a real page load: 5-25 hosts within about a "
+            "second (embedded hosts first, then hosts the persona already read). DNS only.",
+            "3.1", True),
+    Feature("interleave_with_user", "Interleave with your browsing",
+            "Start sessions mostly while you are online (local traffic counter), rarely "
+            "when the network is quiet, so noise and real traffic share the same hours.",
+            "3.1", True),
     Feature("separability_study", "Separability study",
             "`noisycompany study`: classifier (ROC AUC) between the labelled log and a real "
             "DNS trace you export (Pi-hole...). Tells which features give the noise away.",

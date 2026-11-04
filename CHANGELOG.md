@@ -2,6 +2,15 @@
 
 ## Unreleased (2.1, 2.2, 2.3, 2.4, 3.x)
 
+Carried-over items (3.1):
+
+- Per-persona rhythm: optional `rhythm = ["sat-sun 07-12"]` peak windows, followed when
+  `weekly_rhythm` is on (3x inside, 0.4x outside); validated in config and packs.
+- `page_load_bursts`: 5-25 hosts within about a second per page, embedded hosts first,
+  then hosts the persona already read; never invented names.
+- `interleave_with_user`: sessions start mostly while the local traffic counter shows
+  you online. Benchmark: 0.97 -> 0.95 AUC; see docs/BENCHMARK.md for what it cannot show.
+
 Research and collective:
 
 - Collective share codes as QR codes (terminal or SVG), expiry dates, `collective rotate`

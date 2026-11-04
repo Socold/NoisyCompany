@@ -46,3 +46,28 @@ def test_builtin_rhythms_are_valid():
     assert packs.validate(data, require_meta=False) == []
     data["gardening"] = dict(data["gardening"], rhythm=["someday 7-12"])
     assert any("rhythm" in e for e in packs.validate(data, require_meta=False))
+
+
+def _burst_sizes(switches, seed=3):
+    from collections import Counter
+
+    from noisycompany import benchmark
+    noise = benchmark.simulate_noise(switches, days=1, seed=seed)
+    # Group third-party lookups by the second they start in.
+    return Counter(int(e.ts) for e in noise if any(c in e.host for c in ("cdn.", "static.",
+                                                                       "img.", "fonts.", "api.")))
+
+
+def test_page_load_bursts_are_page_sized():
+    small = _burst_sizes({"third_party_bursts": True})
+    big = _burst_sizes({"page_load_bursts": True})
+    assert max(small.values()) <= 4
+    assert max(big.values()) >= 5
+
+
+def test_interleave_skips_sessions_while_offline():
+    from noisycompany import benchmark, study
+    household = [study.Event(benchmark.START.timestamp() + 3600 * 20, "news.com")]
+    quiet = benchmark.simulate_noise({"interleave_with_user": True}, 1, 2, household=household)
+    plain = benchmark.simulate_noise({}, 1, 2, household=household)
+    assert len(quiet) < len(plain)
