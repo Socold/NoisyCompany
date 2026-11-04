@@ -203,7 +203,8 @@ def cmd_collective(args: argparse.Namespace) -> int:
         if not args.code:
             print("usage: noisycompany collective join <code|file>", file=sys.stderr)
             return 2
-        code = Path(args.code).read_text().strip() if Path(args.code).is_file() else args.code
+        code = args.code if args.code.startswith(collective.PREFIX) \
+            else Path(args.code).read_text().strip()
         group = collective.join(code, state)
         print(f"joined {group['name']!r}: {len(group['personas'])} personas, "
               f"{group['active_count']} active, rotation {group['rotate_days']} d")

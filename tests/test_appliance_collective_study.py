@@ -111,6 +111,9 @@ def test_collective_cli(tmp_path, capsys):
                  "--state-dir", s]) == 0
     code = capsys.readouterr().out.strip()
     assert main(["collective", "join", code, "--state-dir", s]) == 0
+    share = tmp_path / "code.txt"
+    share.write_text(code + "\n")
+    assert main(["collective", "join", str(share), "--state-dir", s]) == 0
     assert main(["collective", "--state-dir", s]) == 0
     assert "Voisins" in capsys.readouterr().out
     assert main(["collective", "leave", "--state-dir", s]) == 0
