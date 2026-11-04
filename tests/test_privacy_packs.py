@@ -133,3 +133,10 @@ def test_cli_packs_check_and_privacy(tmp_path, capsys):
     assert main(["privacy", "--json", "--state-dir", str(tmp_path)]) == 0
     out = capsys.readouterr().out
     assert '"score"' in out
+
+
+def test_cli_packs_check_builtin_personas_without_meta():
+    from importlib import resources
+    base = resources.files("noisycompany.data")
+    files = [str(base.joinpath(n)) for n in ("personas.toml", "personas_fr.toml")]
+    assert main(["packs", "check", *files, "--no-meta"]) == 0

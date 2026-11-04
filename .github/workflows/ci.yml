@@ -23,4 +23,4 @@ jobs:
       - run: pytest -q
       - run: noisycompany estimate
       - name: validate persona packs
-        run: noisycompany packs check src/noisycompany/data/packs/*.toml && noisycompany packs check --no-meta src/noisycompany/data/personas*.toml
+        run: noisycompany packs check src/noisycompany/data/packs/*.toml && noisycompany packs check src/noisycompany/data/personas*.toml --no-meta
