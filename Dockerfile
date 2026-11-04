@@ -1,11 +1,11 @@
 # Small, non-root, read-only friendly image. No runtime dependency beyond CPython.
-FROM python:3.13-alpine AS build
+FROM python:3.15-alpine AS build
 WORKDIR /src
 COPY pyproject.toml README.md LICENSE ./
 COPY src ./src
 RUN pip install --no-cache-dir --prefix=/install .
 
-FROM python:3.13-alpine
+FROM python:3.15-alpine
 COPY --from=build /install /usr/local
 RUN adduser -D -H -u 10001 noisycompany
 USER 10001
