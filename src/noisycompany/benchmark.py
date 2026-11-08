@@ -57,6 +57,9 @@ CONFIGS = {
     "+ household_masking": {"weekly_rhythm": True, "dns_coherence": True,
                             "page_load_bursts": True, "browser_dns": True,
                             "household_masking": True},
+    "+ real_third_parties": {"weekly_rhythm": True, "dns_coherence": True,
+                             "page_load_bursts": True, "browser_dns": True,
+                             "real_third_parties": True},
 }
 
 

@@ -59,6 +59,10 @@ de 2 à 10 min et requête HTTPS de type 65 avec A/AAAA) et masquage du foyer
 (`household_masking` : un foyer virtuel de 2 à 5 membres avec leurs loisirs et leurs
 horaires, parfois en même temps, renouvelé tous les 30 à 90 jours, avec une activité
 minimale aux heures actives pour ne trahir ni le nombre de personnes ni les absences).
+Vrais domaines tiers (`real_third_parties`) : pour chaque site des personas, les domaines
+qu'un vrai navigateur contacte à l'ouverture (CDN, polices, lecteurs, API ; traqueurs
+retirés), relevés par un Chromium sans interface et rejoués en DNS seulement, dans
+l'ordre et le rythme mesurés. Instantané rafraîchi chaque mois.
 
 Boîtiers : add-on Home Assistant, docker-compose, installateur Raspberry Pi, service
 OpenWrt, image multi-architecture et `noisycompany health`. Bruit collectif : des foyers

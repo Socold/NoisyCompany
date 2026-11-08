@@ -43,6 +43,8 @@ It is a ground-up rewrite of the idea behind [1tayH/noisy](https://github.com/1t
   days, so it does not tell how many people live here or when the home is empty.
 - **Browser-like DNS** (`browser_dns`): per-host cache and HTTPS-record queries, as
   current browsers do.
+- **Real page loads** (`real_third_parties`): each persona site's real third-party hosts,
+  recorded by a headless browser and replayed in DNS only, with their real timing.
 - **Appliances**: Home Assistant add-on, docker-compose, Raspberry Pi installer, OpenWrt
   service, multi-arch image, `noisycompany health`.
 - **Collective noise**: households share a short code and rotate the same decoys.

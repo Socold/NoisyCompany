@@ -7,17 +7,24 @@ seed) and runs in each release workflow, whose summary shows the table.
 
 ## Latest results
 
-| Configuration (v2.1.0 + 3.2, 14 simulated days, seed 7) | ROC AUC | Noise events | Most telling features |
+| Configuration (v2.2.0, 14 simulated days, seed 7) | ROC AUC | Noise events | Most telling features |
 |---|---|---|---|
-| baseline (eco) | 1.00 | 2755 | unique_hosts, www_ratio, events |
-| + weekly_rhythm | 1.00 | 2484 | unique_hosts, www_ratio, events |
-| + dns_coherence | 1.00 | 2842 | unique_hosts, unique_ratio, events |
-| + third_party_bursts | 0.98 | 4122 | unique_hosts, www_ratio, events |
-| all 2.2 realism switches | 0.98 | 3638 | unique_hosts, events, gap_std |
-| + page_load_bursts | 0.95 | 4136 | unique_hosts, events, www_ratio |
-| + interleave_with_user | 0.95 | 4105 | unique_hosts, events, gap_std |
-| + browser_dns | 0.94 | 3756 | events, unique_hosts, www_ratio |
-| + household_masking | 0.94 | 3978 | events, unique_hosts, www_ratio |
+| baseline (eco) | 1.00 | 2768 | unique_hosts, www_ratio, events |
+| + weekly_rhythm | 1.00 | 2443 | unique_hosts, www_ratio, events |
+| + dns_coherence | 1.00 | 2657 | unique_hosts, unique_ratio, events |
+| + third_party_bursts | 0.98 | 3916 | www_ratio, unique_hosts, events |
+| all 2.2 realism switches | 0.98 | 3534 | unique_hosts, events, gap_std |
+| + page_load_bursts | 0.95 | 3887 | unique_hosts, events, gap_std |
+| + interleave_with_user | 0.94 | 4169 | unique_hosts, events, www_ratio |
+| + browser_dns | 0.94 | 3752 | events, unique_hosts, unique_ratio |
+| + household_masking | 0.94 | 3659 | events, unique_hosts, www_ratio |
+| + real_third_parties | 0.97 | 3870 | www_ratio, unique_hosts, gap_std |
+
+`real_third_parties` scores worse here (0.96-0.97, runs vary by a hundredth) and that says more about the synthetic
+household than about the noise: its page loads use made-up `cdn.` / `static.` hosts
+without `www.`, while the recorded loads contain real names such as `www.google.com` or
+`www.gstatic.com`, so `www_ratio` separates them. Only `noisycompany study` on a real
+trace can tell whether real page loads blend better; the switch stays off by default.
 
 `household_masking` is not meant to lower this score: it changes what an observer can
 infer about the household (head-count, empty-home periods), which this benchmark does
