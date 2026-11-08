@@ -156,7 +156,7 @@ LAN. State files are private (0700/0600). Details: [PRIVACY.md](docs/PRIVACY.md)
 Images from 2.1 on carry a signed build provenance. Check it before running:
 
 ```bash
-gh attestation verify oci://ghcr.io/socold/noisycompany:v2.1.0 -R Socold/NoisyCompany
+gh attestation verify oci://ghcr.io/socold/noisycompany:v2.2.0 -R Socold/NoisyCompany
 ```
 
 ## Responsible use

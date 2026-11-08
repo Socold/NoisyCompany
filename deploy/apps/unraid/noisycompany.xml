@@ -2,7 +2,7 @@
 <!-- Unraid: copy to /boot/config/plugins/dockerMan/templates-user/ then Docker > Add Container. -->
 <Container version="2">
   <Name>NoisyCompany</Name>
-  <Repository>ghcr.io/socold/noisycompany:v2.1.0</Repository>
+  <Repository>ghcr.io/socold/noisycompany:v2.2.0</Repository>
   <Registry>https://github.com/Socold/NoisyCompany/pkgs/container/noisycompany</Registry>
   <Network>host</Network>
   <Privileged>false</Privileged>
