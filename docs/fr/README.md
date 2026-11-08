@@ -54,6 +54,11 @@ Depuis la 3.1 : rythme propre à chaque persona (jardinage le week-end matin), r
 de la taille d'un vrai chargement de page (`page_load_bursts`), sessions mêlées à votre
 navigation (`interleave_with_user`), messages du CLI en français si `LANG=fr`, et
 `noisycompany study --pcap` pour mesurer l'empreinte TLS.
+Depuis la 2.2.0 : DNS qui se comporte comme un navigateur (`browser_dns` : cache par nom
+de 2 à 10 min et requête HTTPS de type 65 avec A/AAAA) et masquage du foyer
+(`household_masking` : un foyer virtuel de 2 à 5 membres avec leurs loisirs et leurs
+horaires, parfois en même temps, renouvelé tous les 30 à 90 jours, avec une activité
+minimale aux heures actives pour ne trahir ni le nombre de personnes ni les absences).
 
 Boîtiers : add-on Home Assistant, docker-compose, installateur Raspberry Pi, service
 OpenWrt, image multi-architecture et `noisycompany health`. Bruit collectif : des foyers

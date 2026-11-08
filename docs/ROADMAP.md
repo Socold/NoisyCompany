@@ -33,9 +33,13 @@ Defaults can also be set in the `[features]` table of the config file.
 | `request_trees` | 3.0 | Fetches up to 3 same-origin CSS/JS per page, once per URL (like a cache), robots.txt checked, half the page cap each | ~+60 % |
 | `appliance_packages` | 2.4 | Home Assistant add-on (`deploy/homeassistant/`), `docker-compose.yml` (host network, read-only, no capability), Raspberry Pi installer (`deploy/raspberrypi/install.sh`, eco preset, user service with linger), OpenWrt procd service (`deploy/openwrt/`, state in RAM), multi-arch image on GHCR at each `v*` tag. The switch writes a heartbeat used by `noisycompany health` and the Docker HEALTHCHECK | none |
 | `collective_noise` | 3.0 | `noisycompany collective create\|join\|leave\|show`: a short share code (`nc1:...`, ~320 chars) carries a shared salt and a list of **already reviewed** personas, with a SHA-256 digest. Members rotate the same decoys at the same time. No server; a code cannot add domains, so a malicious member cannot steer your traffic to their server | none |
+| `page_load_bursts` | 3.1 | Third-party bursts the size of a real page load: 5-25 hosts (`burst_hosts`) within about a second, embedded hosts first, then hosts the persona already read | DNS only |
+| `interleave_with_user` | 3.1 | Sessions start mostly while the local traffic counter shows you online (`interleave_active_kbps`), rarely otherwise (`interleave_idle_share`) | none |
+| `browser_dns` | 3.2 | Lookups behave like a browser's: per-host cache (2-10 min TTL), HTTPS record (type 65) asked next to A/AAAA | ~160 B per new host, fewer repeats |
+| `household_masking` | 3.2 | Virtual household of `household_members` (2-5) drawn from the salt: own hobbies, own hours (chronotype shift), sometimes online together, redrawn every `household_reshuffle_days` (30-90). Activity floor `household_floor` (0.35) during active hours hides empty-home periods. Overrides `interleave_with_user` | none (same daily cap) |
 | `separability_study` | research | `noisycompany study --noise labelled.jsonl --human trace.csv`: windows + logistic regression (pure Python), k-fold ROC AUC and the most telling features. See [STUDY.md](STUDY.md) | none |
 
-All items above are implemented (v2.0.0).
+All items above are implemented (v2.0.0 to v2.2.0).
 
 ## Shipped in 2.1.0
 
@@ -59,7 +63,7 @@ All items above are implemented (v2.0.0).
 
 Each will get its own switch, off by default, like the items above.
 
-### Done in 3.2
+### Done in 3.2 (released as 2.2.0)
 
 - `browser_dns`: lookup cache with per-host TTL, HTTPS-record (type 65) queries.
 - `household_masking`: virtual household (2-5 members, own hours and hobbies, overlap),

@@ -4,6 +4,7 @@
                  +-------------------- noisycompany run -------------------+
 config.toml ---> | config  ->  Engine (scheduler, budget, pacing, gates)   |
 features.json -> | features    |-- personas / packs / collective (who)   |
+                 |             |-- household (virtual members, hours)    |
                  |             |-- dns / doh            (DNS noise)      |
                  |             |-- web.Fetcher          (HTTP noise)     |
                  |             |     url_allowed: scheme, scope, public IP|
@@ -32,7 +33,8 @@ companion/ (Firefox MV3): lib.js (pure logic) + background.js (alarms, idle, fet
 | `rhythm.py` | Weekday / weekend / holiday / season activity factor (`weekly_rhythm`) |
 | `packs.py` | Reviewed packs, business profiles, validator (sensitive topics, https, scope) |
 | `collective.py` | Share codes (`nc1:`), digest, reviewed personas only |
-| `dns.py` / `doh.py` | System-resolver lookups / RFC 8484 DoH |
+| `dns.py` / `doh.py` | System-resolver lookups, browser-like cache and HTTPS-record queries (`browser_dns`) / RFC 8484 DoH |
+| `household.py` | Virtual household (`household_masking`): members, chronotypes, persona owners, activity floor |
 | `web.py` | Polite fetcher: robots.txt, per-host delay, size caps, public-IP and scope checks, request trees |
 | `netwatch.py` / `metered.py` | Back-off on user traffic / metered links |
 | `impact.py` | Bandwidth and energy estimate |

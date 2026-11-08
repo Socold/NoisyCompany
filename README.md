@@ -36,7 +36,13 @@ It is a ground-up rewrite of the idea behind [1tayH/noisy](https://github.com/1t
   local dashboard): persona drift, French persona pack, metered-link guard, DNS over
   HTTPS, Prometheus metrics, labelled ground-truth log for SOC testing, household privacy
   report, reviewed persona packs, business traffic profiles for SOC labs, realistic
-  request trees, and more planned.
+  request trees, page-load bursts, browser-like DNS, household masking. Full list in
+  [docs/ROADMAP.md](docs/ROADMAP.md).
+- **Household masking** (`household_masking`): the noise comes from a virtual household
+  of 2-5 members (own hobbies and hours, sometimes online together), redrawn every 30-90
+  days, so it does not tell how many people live here or when the home is empty.
+- **Browser-like DNS** (`browser_dns`): per-host cache and HTTPS-record queries, as
+  current browsers do.
 - **Appliances**: Home Assistant add-on, docker-compose, Raspberry Pi installer, OpenWrt
   service, multi-arch image, `noisycompany health`.
 - **Collective noise**: households share a short code and rotate the same decoys.
