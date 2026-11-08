@@ -51,7 +51,7 @@ It is a ground-up rewrite of the idea behind [1tayH/noisy](https://github.com/1t
 ## Quick start
 
 ```bash
-pipx install git+https://github.com/Socold/NoisyCompany   # or: pip install .
+pipx install noisycompany   # or: pip install noisycompany
 noisycompany estimate                # what will it cost?
 noisycompany run --dry-run --once    # what would it do? (no network)
 noisycompany run                     # go
