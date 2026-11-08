@@ -37,7 +37,7 @@ Defaults can also be set in the `[features]` table of the config file.
 
 All items above are implemented (v2.0.0).
 
-## Shipped after 2.0.1 (on `main`, next release)
+## Shipped in 2.1.0
 
 - **2.1 hardening** (always on, no switch): sockets pinned to the vetted public IP,
   seeded fuzz tests in CI (+ atheris harness), Home Assistant add-on as uid 10001,

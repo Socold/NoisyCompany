@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased (2.1, 2.2, 2.3, 2.4, 3.x)
+## 2.1.0 (2026-11-08)
+
+First release on PyPI (`pip install noisycompany`). Bundles 2.1, 2.2, 2.3, 2.4 and 3.x.
 
 Carried-over items (3.1):
 
