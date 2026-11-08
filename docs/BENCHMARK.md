@@ -7,15 +7,22 @@ seed) and runs in each release workflow, whose summary shows the table.
 
 ## Latest results
 
-| Configuration (v2.0.1, 14 simulated days, seed 7) | ROC AUC | Noise events | Most telling features |
+| Configuration (v2.1.0 + 3.2, 14 simulated days, seed 7) | ROC AUC | Noise events | Most telling features |
 |---|---|---|---|
-| baseline (eco) | 1.00 | 2877 | unique_hosts, www_ratio, events |
-| + weekly_rhythm | 1.00 | 2540 | www_ratio, unique_hosts, events |
-| + dns_coherence | 1.00 | 2690 | unique_hosts, unique_ratio, events |
-| + third_party_bursts | 0.98 | 4056 | unique_hosts, www_ratio, events |
-| all 2.2 realism switches | 0.97 | 3771 | unique_hosts, events, gap_std |
-| + page_load_bursts | 0.95 | 4135 | unique_hosts, events, gap_std |
-| + interleave_with_user | 0.95 | 4088 | unique_hosts, events, www_ratio |
+| baseline (eco) | 1.00 | 2755 | unique_hosts, www_ratio, events |
+| + weekly_rhythm | 1.00 | 2484 | unique_hosts, www_ratio, events |
+| + dns_coherence | 1.00 | 2842 | unique_hosts, unique_ratio, events |
+| + third_party_bursts | 0.98 | 4122 | unique_hosts, www_ratio, events |
+| all 2.2 realism switches | 0.98 | 3638 | unique_hosts, events, gap_std |
+| + page_load_bursts | 0.95 | 4136 | unique_hosts, events, www_ratio |
+| + interleave_with_user | 0.95 | 4105 | unique_hosts, events, gap_std |
+| + browser_dns | 0.94 | 3756 | events, unique_hosts, www_ratio |
+| + household_masking | 0.94 | 3978 | events, unique_hosts, www_ratio |
+
+`household_masking` is not meant to lower this score: it changes what an observer can
+infer about the household (head-count, empty-home periods), which this benchmark does
+not measure. The HTTPS-record queries of `browser_dns` are not modelled either (the
+synthetic trace has no query types).
 
 Since 3.1 the synthetic pages embed 5-25 third-party hosts, like the household's, instead
 of 4; the first rows moved by a few hundredths for that reason only.

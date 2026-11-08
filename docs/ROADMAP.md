@@ -59,6 +59,22 @@ All items above are implemented (v2.0.0).
 
 Each will get its own switch, off by default, like the items above.
 
+### Done in 3.2
+
+- `browser_dns`: lookup cache with per-host TTL, HTTPS-record (type 65) queries.
+- `household_masking`: virtual household (2-5 members, own hours and hobbies, overlap),
+  activity floor during active hours.
+
+### Next for realism
+
+- Real third-party host sets per persona site (public HTTP Archive data, refreshed per
+  release) instead of the hosts seen on the page only.
+- HTTPS noise with a browser TLS fingerprint: left to the companion by default, optional
+  `browser-tls` extra (curl-impersonate) for headless installs.
+- Follow the channel the household uses: DoH when it uses encrypted DNS (privacy report
+  already detects it), SNI-only connections then.
+- A head-count probe in the benchmark, to measure `household_masking`.
+
 ### Done in 3.1 (carried over)
 
 - Per-persona rhythm (`rhythm` windows in personas, with `weekly_rhythm`).

@@ -52,6 +52,11 @@ CONFIGS = {
                            "page_load_bursts": True},
     "+ interleave_with_user": {"weekly_rhythm": True, "dns_coherence": True,
                                "page_load_bursts": True, "interleave_with_user": True},
+    "+ browser_dns": {"weekly_rhythm": True, "dns_coherence": True,
+                      "page_load_bursts": True, "browser_dns": True},
+    "+ household_masking": {"weekly_rhythm": True, "dns_coherence": True,
+                            "page_load_bursts": True, "browser_dns": True,
+                            "household_masking": True},
 }
 
 

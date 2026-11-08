@@ -92,6 +92,8 @@ weekly_rhythm = false
 third_party_bursts = false
 page_load_bursts = false
 interleave_with_user = false
+browser_dns = false
+household_masking = false
 browser_companion = false
 
 [features.options]
@@ -117,3 +119,10 @@ burst_hosts = [5, 25]
 interleave_active_kbps = 40
 # interleave_with_user: chance to still start a session while you are offline.
 interleave_idle_share = 0.15
+# household_masking: size of the virtual household (min, max members).
+household_members = [2, 5]
+# household_masking: the household is redrawn after this many days (min, max).
+household_reshuffle_days = [30, 90]
+# household_masking: minimum activity during active hours (0-1), hides empty-home periods.
+household_floor = 0.35
+

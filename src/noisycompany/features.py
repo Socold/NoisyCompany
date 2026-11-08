@@ -96,6 +96,16 @@ FEATURES: tuple[Feature, ...] = (
             "Start sessions mostly while you are online (local traffic counter), rarely "
             "when the network is quiet, so noise and real traffic share the same hours.",
             "3.1", True),
+    Feature("browser_dns", "Browser-like DNS",
+            "Lookups behave like a browser's: a per-host cache (2-10 min TTL) instead of "
+            "repeated queries, and an HTTPS record (type 65) asked next to A/AAAA, as "
+            "current browsers do. About +160 B per new host.",
+            "3.2", True),
+    Feature("household_masking", "Household masking",
+            "Hide how many people live here and when the home is empty: a virtual "
+            "household of 2-5 members (own hobbies, own hours, sometimes at the same "
+            "time), redrawn every 30-90 days, with steady activity during active hours.",
+            "3.2", True),
     Feature("separability_study", "Separability study",
             "`noisycompany study`: classifier (ROC AUC) between the labelled log and a real "
             "DNS trace you export (Pi-hole...). Tells which features give the noise away.",

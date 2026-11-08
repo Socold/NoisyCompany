@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased (3.2)
+
+- `browser_dns`: per-host lookup cache (2-10 min TTL) and an HTTPS record (type 65)
+  query next to A/AAAA, as current browsers do. Benchmark 0.95 -> 0.94.
+- `household_masking`: a virtual household of 2-5 members drawn from the local salt
+  (own hobbies, own hours, sometimes online together), redrawn every 30-90 days, with a
+  floor of activity during active hours so the head-count and empty-home periods do
+  not show. Overrides `interleave_with_user`, which would reveal presence.
+- Docker image: `/state` belongs to the unprivileged user, so a new named volume works
+  on first start (it failed with "Permission denied").
+
 ## 2.1.0 (2026-11-08)
 
 First release on PyPI (`pip install noisycompany`). Bundles 2.1, 2.2, 2.3, 2.4 and 3.x.

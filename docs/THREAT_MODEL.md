@@ -23,6 +23,11 @@ is you**. Who can tell decides everything.
 - **Cheap categorisation**: hostname classifiers now see several plausible, stable
   interests that are not yours.
 
+- **Household inference** (with `household_masking`): how many people live here and
+  when the home is empty. The noise comes from a virtual household of 2-5 members with
+  their own hobbies and hours, redrawn every 30-90 days, and keeps a floor of activity
+  during active hours. It blurs the count; it cannot hide your real devices' own chatter.
+
 ## What NoisyCompany does not protect against
 
 - **Targeted ads driven by browser tracking** (cookies, pixels, fingerprinting, logged-in

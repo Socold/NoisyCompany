@@ -45,3 +45,75 @@ def resolve(host: str, timeout: float = 4.0) -> bool:
         return False
     finally:
         socket.setdefaulttimeout(previous)
+
+
+# ------------------------------------------------------------ browser-like DNS (browser_dns)
+# Current browsers ask for an HTTPS record (type 65, RFC 9460) next to A/AAAA for every
+# site they open. getaddrinfo() never does, which makes daemon lookups easy to tell apart.
+HTTPS_RR_BYTES_ESTIMATE = 160
+QTYPE_HTTPS = 65
+
+
+def system_nameserver(path: str = "/etc/resolv.conf") -> str | None:
+    """First nameserver of resolv.conf (the system stub, e.g. 127.0.0.53), or None."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                parts = line.split()
+                if len(parts) >= 2 and parts[0] == "nameserver":
+                    return parts[1].split("%")[0]
+    except OSError:
+        pass
+    return None
+
+
+def build_query(host: str, qtype: int, txid: int) -> bytes:
+    """Minimal DNS query packet (recursion desired, one question, EDNS0 like a stub)."""
+    labels = host.rstrip(".").encode("idna").split(b".")
+    if not labels or any(not 0 < len(label) < 64 for label in labels):
+        raise ValueError(f"bad hostname {host!r}")
+    qname = b"".join(bytes([len(label)]) + label for label in labels) + b"\0"
+    header = txid.to_bytes(2, "big") + b"\x01\x00" + b"\x00\x01\x00\x00\x00\x00\x00\x01"
+    opt = b"\x00" + b"\x00\x29" + (1232).to_bytes(2, "big") + b"\x00\x00\x00\x00" + b"\x00\x00"
+    return header + qname + qtype.to_bytes(2, "big") + b"\x00\x01" + opt
+
+
+def query_https_rr(host: str, server: str | None, rng: random.Random,
+                   timeout: float = 3.0, port: int = 53) -> bool:
+    """Send one HTTPS-record query to the system resolver. True if it answered."""
+    if not server:
+        return False
+    txid = rng.getrandbits(16)
+    try:
+        packet = build_query(host, QTYPE_HTTPS, txid)
+        family = socket.AF_INET6 if ":" in server else socket.AF_INET
+        with socket.socket(family, socket.SOCK_DGRAM) as sock:
+            sock.settimeout(timeout)
+            sock.sendto(packet, (server, port))
+            reply, _ = sock.recvfrom(4096)
+        return len(reply) >= 12 and reply[:2] == txid.to_bytes(2, "big")
+    except (OSError, ValueError, UnicodeError) as exc:
+        log.debug("dns https %s failed: %s", host, exc)
+        return False
+
+
+class LookupCache:
+    """Browser/OS cache: a host looked up recently is not asked again before its TTL.
+
+    Re-resolving the same name every few seconds is something no browser does.
+    TTLs are drawn per host (2-10 min), the range most CDNs and sites use.
+    """
+
+    def __init__(self, ttl_s: tuple[float, float] = (120, 600), max_entries: int = 512) -> None:
+        self.ttl_s = ttl_s
+        self.max_entries = max_entries
+        self._until: dict[str, float] = {}
+
+    def fresh(self, host: str, now: float) -> bool:
+        return self._until.get(host, 0.0) > now
+
+    def store(self, host: str, now: float, rng: random.Random) -> None:
+        if len(self._until) >= self.max_entries:
+            for h in [h for h, t in self._until.items() if t <= now] or list(self._until)[:64]:
+                self._until.pop(h, None)
+        self._until[host] = now + rng.uniform(*self.ttl_s)

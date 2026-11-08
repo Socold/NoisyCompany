@@ -17,6 +17,7 @@ from noisycompany import collective, dns, doh, packs, privacy, rhythm
 from noisycompany.budget import Budget
 from noisycompany.config import PRESETS, TimeRange, load_locale_personas
 from noisycompany.features import FeatureSet
+from noisycompany.household import VirtualHousehold
 from noisycompany.metered import MeteredProbe
 from noisycompany.netwatch import NetWatch
 from noisycompany.personas import PersonaRotator
@@ -120,6 +121,13 @@ class Engine:
         self.labelled_path = Path(log_path) if log_path else None
         # Hosts each persona read or saw links to (feature dns_coherence), bounded.
         self.seen_hosts: dict[str, list[str]] = {}
+        # browser_dns: per-host cache and the system stub for HTTPS-record queries.
+        self.dns_cache = dns.LookupCache()
+        self.nameserver = dns.system_nameserver()
+        # household_masking: virtual members derived from the local (or shared) salt.
+        self.household = VirtualHousehold(
+            self.rotator._salt, tuple(self.options.get("household_members", [2, 5])),
+            tuple(self.options.get("household_reshuffle_days", [30, 90])))
 
     # ---------------------------------------------------------------- features
     def drift_days(self) -> float | None:
@@ -326,8 +334,10 @@ class Engine:
                 host = self.rng.choice(pool)
             else:
                 host = dns.candidate_hosts(domains, self.rng)
-            self.budget.record_action()
-            ok, cost, kind = self.lookup(host)
+            result = self.cached_lookup(host)
+            if result is None:
+                continue
+            ok, cost, kind = result
             self._spend(cost)
             self.label(kind, host, ok, cost, persona)
             if ok:
@@ -346,6 +356,16 @@ class Engine:
                 pool.append(host)
         del pool[:-50]
 
+    def cached_lookup(self, host: str) -> tuple[bool, int, str] | None:
+        """Count and run a lookup; None when browser_dns finds the host still cached."""
+        if self.features.enabled("browser_dns"):
+            now = self._now().timestamp()
+            if self.dns_cache.fresh(host, now):
+                return None
+            self.dns_cache.store(host, now, self.rng)
+        self.budget.record_action()
+        return self.lookup(host)
+
     def lookup(self, host: str) -> tuple[bool, int, str]:
         """One DNS noise lookup (system resolver or DoH). Returns (ok, cost, kind)."""
         use_doh = self.features.enabled("doh_sink")
@@ -357,6 +377,9 @@ class Engine:
                              self.cfg["http"]["user_agent"], rng=self.rng)
         else:
             ok = dns.resolve(host)
+            if self.features.enabled("browser_dns"):
+                dns.query_https_rr(host, self.nameserver, self.rng)
+                cost += dns.HTTPS_RR_BYTES_ESTIMATE
         return ok, cost, "doh" if use_doh else "dns"
 
     def third_party_burst(self, html: str, url: str, persona: str) -> None:
@@ -378,8 +401,10 @@ class Engine:
         for host in hosts[:limit]:
             if not self.budget.can_act(doh.DOH_BYTES_ESTIMATE):
                 return
-            self.budget.record_action()
-            ok, cost, kind = self.lookup(host)
+            result = self.cached_lookup(host)
+            if result is None:
+                continue
+            ok, cost, kind = result
             self._spend(cost)
             self.label(kind + "-third-party", host, ok, cost, persona)
             if not self._sleep(self.rng.uniform(*gap)):
@@ -461,7 +486,7 @@ class Engine:
             self._spend(spent)
             self.label("subresource", asset, spent > REQUEST_OVERHEAD, spent, persona)
 
-    def run_session(self) -> None:
+    def run_session(self, member=None) -> None:
         rotator = self.rotator
         if (self.locale_rotator and self.features.enabled("locale_packs")
                 and not self.shared_persona_set()
@@ -471,6 +496,15 @@ class Engine:
         if self.features.enabled("weekly_rhythm"):
             now = self._now()
             affinity = lambda p: rhythm.persona_affinity(p.get("rhythm"), now)  # noqa: E731
+        if member is not None:
+            # household_masking: this member's own hobbies first.
+            now = self._now()
+            names = {id(p): n for n, p in rotator.personas.items()}
+            base = affinity
+
+            def affinity(p, base=base, now=now):  # noqa: F811
+                w = base(p) if base else 1.0
+                return w * self.household.affinity(member, names[id(p)], now)
         name, persona = rotator.pick(self.rng, self.drift_days(), affinity)
         dns_cfg, http_cfg = self.cfg["dns"], self.cfg["http"]
         weights = [dns_cfg["weight"] if dns_cfg["enabled"] else 0.0,
@@ -490,9 +524,18 @@ class Engine:
         gap = self.cfg["schedule"]["mean_session_gap_s"]
         try:
             while not self.stop.is_set():
-                mean = rhythm.session_gap(gap, self._now()) \
-                    if self.features.enabled("weekly_rhythm") else gap
+                masking = self.features.enabled("household_masking")
+                if masking:
+                    # Several virtual members, each with its own hours, and a floor of
+                    # activity so that an empty home does not show.
+                    floor = float(self.options.get("household_floor", 0.35))
+                    mean = gap / self.household.factor(self._now(), floor)
+                else:
+                    mean = rhythm.session_gap(gap, self._now()) \
+                        if self.features.enabled("weekly_rhythm") else gap
+                # Following your traffic would reveal when you are home: masking wins.
                 interleave = (self.features.enabled("interleave_with_user") and not once
+                              and not masking
                               and self.netwatch.enabled)  # no counter = no signal to follow
                 if interleave:
                     mean *= 0.4  # more wake-ups, most of them skipped while you are offline
@@ -505,7 +548,16 @@ class Engine:
                     continue
                 if not once and not self.wait_for_slot():
                     break
-                self.run_session()
+                if masking:
+                    now = self._now()
+                    first = self.household.pick_member(self.rng, now)
+                    self.run_session(first)
+                    # Now and then two members are online at the same time.
+                    if self.rng.random() < 0.2 and len(self.household.members(now)) > 1:
+                        other = [m for m in self.household.members(now) if m != first]
+                        self.run_session(self.rng.choice(other))
+                else:
+                    self.run_session()
                 self.heartbeat()
                 self.save_stats()
                 if once:

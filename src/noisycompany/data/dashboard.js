@@ -39,6 +39,8 @@ const FR_FEATURES = {
   weekly_rhythm: ["Rythme de la semaine", "Plus actif le soir, matins plus tardifs le week-end et les jours fériés, plus calme l'été. Ne change jamais le plafond quotidien."],
   page_load_bursts: ["Rafales de chargement de page", "Rafales tierces de la taille d'un vrai chargement : 5 à 25 domaines en une seconde environ (domaines intégrés d'abord, puis ceux déjà lus par la persona). DNS seulement."],
   interleave_with_user: ["Mêlé à votre navigation", "Lance les sessions surtout quand vous êtes en ligne (compteur de trafic local), rarement quand le réseau est calme : bruit et vrai trafic partagent les mêmes heures."],
+  browser_dns: ["DNS comme un navigateur", "Cache par nom (2 à 10 min) au lieu de requêtes répétées, et un enregistrement HTTPS (type 65) demandé avec A/AAAA, comme les navigateurs récents. Environ +160 o par nouveau nom."],
+  household_masking: ["Masquer la taille du foyer", "Cache le nombre de personnes et les absences : un foyer virtuel de 2 à 5 membres (leurs loisirs, leurs horaires, parfois en même temps), retiré tous les 30 à 90 jours, avec une activité régulière aux heures actives."],
   third_party_bursts: ["Rafales de domaines tiers", "Après une page, résout (DNS seulement) quelques domaines tiers qu'elle charge. Publicité et traqueurs exclus. ~300 o chacun."],
   separability_study: ["Étude de détectabilité", "`noisycompany study` : mesure (AUC) si un observateur sépare le bruit de votre vrai trafic (Pi-hole, AdGuard...)."],
 };
