@@ -3,7 +3,7 @@
 # and your ISP see decoy queries mixed with the household's real ones.
 services:
   noisycompany:
-    image: ghcr.io/socold/noisycompany:v2.1.0
+    image: ghcr.io/socold/noisycompany:v2.2.0
     network_mode: host
     read_only: true
     cap_drop: [ALL]

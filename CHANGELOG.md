@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (3.2)
+## 2.2.0 (2026-11-08)
 
 - `browser_dns`: per-host lookup cache (2-10 min TTL) and an HTTPS record (type 65)
   query next to A/AAAA, as current browsers do. Benchmark 0.95 -> 0.94.
