@@ -17,6 +17,7 @@ from noisycompany import (
     collective,
     companion,
     config,
+    health,
     impact,
     packs,
     pcapstudy,
@@ -170,21 +171,8 @@ def cmd_companion(args: argparse.Namespace) -> int:
 
 
 def cmd_health(args: argparse.Namespace) -> int:
-    """Exit 0 when healthy. Used by Docker HEALTHCHECK and appliance supervisors."""
-    cfg = config.load(args.config, args.preset)
-    state = _state_dir(args.state_dir)
-    if not FeatureSet(cfg, state).enabled("appliance_packages"):
-        print(_("health file disabled (switch appliance_packages off)"))
-        return 0
-    try:
-        age = time.time() - (state / "health").stat().st_mtime
-    except OSError:
-        print(_("no health file yet"), file=sys.stderr)
-        return 1
-    ok = age <= args.max_age
-    msg = "healthy: last heartbeat {s:.0f} s ago" if ok else "stale: last heartbeat {s:.0f} s ago"
-    print(_(msg).format(s=age))
-    return 0 if ok else 1
+    """Exit 0 when healthy. Same check as the light `python -m noisycompany.health`."""
+    return health.check(args.config, args.preset, args.state_dir, args.max_age)
 
 
 def cmd_collective(args: argparse.Namespace) -> int:
