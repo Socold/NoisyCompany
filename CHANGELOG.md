@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.2.1 (2026-11-14)
 
 - Docker HEALTHCHECK no longer times out under the `cpus: 0.1` cap of the compose
   file: it runs the light `python -m noisycompany.health` (half the startup of the

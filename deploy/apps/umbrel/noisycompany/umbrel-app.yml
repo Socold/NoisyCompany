@@ -2,7 +2,7 @@ manifestVersion: 1
 id: noisycompany
 category: networking
 name: NoisyCompany
-version: "2.2.0"
+version: "2.2.1"
 tagline: Light network noise with coherent decoy personas
 description: >-
   Adds rare, plausible DNS and web activity from your Umbrel so that what your ISP or
