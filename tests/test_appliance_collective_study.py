@@ -191,3 +191,15 @@ def test_collective_expiry_rotation_and_qr(tmp_path, capsys):
     bad.pop("digest")
     with pytest.raises(ConfigError):
         collective.validate(bad)
+
+
+def test_light_health_module(tmp_path):
+    from noisycompany import health
+    args = ["--state-dir", str(tmp_path)]
+    assert health.main(args) == 0
+    assert main(["features", "on", "appliance_packages", "--state-dir", str(tmp_path)]) == 0
+    assert health.main(args) == 1
+    engine(tmp_path).heartbeat()
+    assert health.main(args) == 0
+    assert health.main([*args, "--max-age", "-1"]) == 1
+    assert health.main(["--bogus"]) == 2

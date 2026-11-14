@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Docker HEALTHCHECK no longer times out under the `cpus: 0.1` cap of the compose
+  file: it runs the light `python -m noisycompany.health` (half the startup of the
+  full CLI) with a 60 s timeout instead of 10 s. The container was reported
+  `unhealthy` while the noise ran fine.
+
 ## 2.2.0 (2026-11-08)
 
 - `browser_dns`: per-host lookup cache (2-10 min TTL) and an HTTPS record (type 65)
