@@ -37,6 +37,7 @@ Defaults can also be set in the `[features]` table of the config file.
 | `interleave_with_user` | 3.1 | Sessions start mostly while the local traffic counter shows you online (`interleave_active_kbps`), rarely otherwise (`interleave_idle_share`) | none |
 | `browser_dns` | 3.2 | Lookups behave like a browser's: per-host cache (2-10 min TTL), HTTPS record (type 65) asked next to A/AAAA | ~160 B per new host, fewer repeats |
 | `household_masking` | 3.2 | Virtual household of `household_members` (2-5) drawn from the salt: own hobbies, own hours (chronotype shift), sometimes online together, redrawn every `household_reshuffle_days` (30-90). Activity floor `household_floor` (0.35) during active hours hides empty-home periods. Overrides `interleave_with_user` | none (same daily cap) |
+| `real_third_parties` | 3.3 | Replays, DNS only, the hosts a real browser contacted when opening each persona site (`data/third_parties.json`: headless Chromium, trackers removed, refreshed monthly), in the recorded order and spacing; also after 60 % of DNS-only site lookups | DNS only, ~300 B per host |
 | `separability_study` | research | `noisycompany study --noise labelled.jsonl --human trace.csv`: windows + logistic regression (pure Python), k-fold ROC AUC and the most telling features. See [STUDY.md](STUDY.md) | none |
 
 All items above are implemented (v2.0.0 to v2.2.0).
@@ -63,6 +64,11 @@ All items above are implemented (v2.0.0 to v2.2.0).
 
 Each will get its own switch, off by default, like the items above.
 
+### Done in 3.3
+
+- `real_third_parties`: recorded page loads per persona site, same method as HTTP
+  Archive's crawl at our scale (HTTP Archive's raw tables are only on BigQuery).
+
 ### Done in 3.2 (released as 2.2.0)
 
 - `browser_dns`: lookup cache with per-host TTL, HTTPS-record (type 65) queries.
@@ -71,8 +77,6 @@ Each will get its own switch, off by default, like the items above.
 
 ### Next for realism
 
-- Real third-party host sets per persona site (public HTTP Archive data, refreshed per
-  release) instead of the hosts seen on the page only.
 - HTTPS noise with a browser TLS fingerprint: left to the companion by default, optional
   `browser-tls` extra (curl-impersonate) for headless installs.
 - Follow the channel the household uses: DoH when it uses encrypted DNS (privacy report

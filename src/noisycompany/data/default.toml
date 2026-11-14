@@ -94,6 +94,7 @@ page_load_bursts = false
 interleave_with_user = false
 browser_dns = false
 household_masking = false
+real_third_parties = false
 browser_companion = false
 
 [features.options]

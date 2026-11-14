@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased (3.3)
+
+- `real_third_parties`: replays, DNS only, the hosts a real browser contacted when
+  opening each persona site (recorded by headless Chromium, trackers removed), in the
+  recorded order and spacing. Snapshot `data/third_parties.json`, refreshed by the
+  monthly `third-parties` workflow (`tools/third_party_snapshot.py`).
+
 ## 2.2.1 (2026-11-14)
 
 - Docker HEALTHCHECK no longer times out under the `cpus: 0.1` cap of the compose

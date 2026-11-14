@@ -34,6 +34,7 @@ companion/ (Firefox MV3): lib.js (pure logic) + background.js (alarms, idle, fet
 | `packs.py` | Reviewed packs, business profiles, validator (sensitive topics, https, scope) |
 | `collective.py` | Share codes (`nc1:`), digest, reviewed personas only |
 | `dns.py` / `doh.py` | System-resolver lookups, browser-like cache and HTTPS-record queries (`browser_dns`) / RFC 8484 DoH |
+| `thirdparty.py` | Recorded page loads per persona site (`real_third_parties`), from `data/third_parties.json` (built by `tools/third_party_snapshot.py`) |
 | `household.py` | Virtual household (`household_masking`): members, chronotypes, persona owners, activity floor |
 | `web.py` | Polite fetcher: robots.txt, per-host delay, size caps, public-IP and scope checks, request trees |
 | `netwatch.py` / `metered.py` | Back-off on user traffic / metered links |

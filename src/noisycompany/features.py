@@ -106,6 +106,11 @@ FEATURES: tuple[Feature, ...] = (
             "household of 2-5 members (own hobbies, own hours, sometimes at the same "
             "time), redrawn every 30-90 days, with steady activity during active hours.",
             "3.2", True),
+    Feature("real_third_parties", "Real third-party hosts",
+            "Replay, DNS only, the hosts a real browser contacted when opening each persona "
+            "site (CDNs, fonts, players, APIs; trackers removed), in the recorded order and "
+            "spacing. Snapshot shipped with each release, refreshed monthly.",
+            "3.3", True),
     Feature("separability_study", "Separability study",
             "`noisycompany study`: classifier (ROC AUC) between the labelled log and a real "
             "DNS trace you export (Pi-hole...). Tells which features give the noise away.",

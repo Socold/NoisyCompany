@@ -13,7 +13,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from noisycompany import collective, dns, doh, packs, privacy, rhythm
+from noisycompany import collective, dns, doh, packs, privacy, rhythm, thirdparty
 from noisycompany.budget import Budget
 from noisycompany.config import PRESETS, TimeRange, load_locale_personas
 from noisycompany.features import FeatureSet
@@ -345,6 +345,9 @@ class Engine:
             else:
                 self.stats.dns_fail += 1
             log.debug("dns %s %s", host, "ok" if ok else "fail")
+            # A looked-up site is usually opened: replay its recorded page load.
+            if ok and self.rng.random() < 0.6:
+                self.real_page_load(host, persona)
             if not self._sleep(self.rng.uniform(0.3, 3.0)):
                 return
 
@@ -382,8 +385,36 @@ class Engine:
                 cost += dns.HTTPS_RR_BYTES_ESTIMATE
         return ok, cost, "doh" if use_doh else "dns"
 
+    def real_page_load(self, page_host: str, persona: str) -> bool:
+        """Replay a recorded browser page load of this host (feature real_third_parties).
+
+        DNS only, in the recorded order and spacing. False when no record exists.
+        """
+        if not self.features.enabled("real_third_parties"):
+            return False
+        plan = thirdparty.page_load(page_host, self.rng)
+        if not plan:
+            return False
+        blocked = self.cfg["safety"]["blocked_fragments"]
+        for host, wait in plan:
+            if is_blocked(host, blocked):
+                continue
+            if not self._sleep(wait):
+                return True
+            if not self.budget.can_act(doh.DOH_BYTES_ESTIMATE):
+                return True
+            result = self.cached_lookup(host)
+            if result is None:
+                continue
+            ok, cost, kind = result
+            self._spend(cost)
+            self.label(kind + "-third-party", host, ok, cost, persona)
+        return True
+
     def third_party_burst(self, html: str, url: str, persona: str) -> None:
         """Resolve a few embedded third-party hosts (feature third_party_bursts)."""
+        if self.real_page_load((urllib.parse.urlsplit(url).hostname or "").lower(), persona):
+            return
         limit = int(self.options.get("third_party_max", 4))
         blocked = self.cfg["safety"]["blocked_fragments"]
         hosts = [h for h in third_party_hosts(html, url) if not is_blocked(h, blocked)]

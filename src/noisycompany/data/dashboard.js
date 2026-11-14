@@ -41,6 +41,7 @@ const FR_FEATURES = {
   interleave_with_user: ["Mêlé à votre navigation", "Lance les sessions surtout quand vous êtes en ligne (compteur de trafic local), rarement quand le réseau est calme : bruit et vrai trafic partagent les mêmes heures."],
   browser_dns: ["DNS comme un navigateur", "Cache par nom (2 à 10 min) au lieu de requêtes répétées, et un enregistrement HTTPS (type 65) demandé avec A/AAAA, comme les navigateurs récents. Environ +160 o par nouveau nom."],
   household_masking: ["Masquer la taille du foyer", "Cache le nombre de personnes et les absences : un foyer virtuel de 2 à 5 membres (leurs loisirs, leurs horaires, parfois en même temps), retiré tous les 30 à 90 jours, avec une activité régulière aux heures actives."],
+  real_third_parties: ["Vrais domaines tiers", "Rejoue, en DNS seulement, les domaines qu'un vrai navigateur contacte en ouvrant chaque site des personas (CDN, polices, lecteurs, API ; traqueurs retirés), dans l'ordre et le rythme mesurés. Instantané livré avec chaque version, rafraîchi chaque mois."],
   third_party_bursts: ["Rafales de domaines tiers", "Après une page, résout (DNS seulement) quelques domaines tiers qu'elle charge. Publicité et traqueurs exclus. ~300 o chacun."],
   separability_study: ["Étude de détectabilité", "`noisycompany study` : mesure (AUC) si un observateur sépare le bruit de votre vrai trafic (Pi-hole, AdGuard...)."],
 };
